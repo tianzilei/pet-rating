@@ -1,0 +1,28 @@
+body {
+    background-color: darkgrey;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+
+container {
+    
+    text-decoration-color: #4EB1BA;
+    margin-left: auto;
+    margin-right: auto;
+    
+}
+
+#header{
+    background-color: darkslategrey;
+    color: white;
+    text-align: center;
+    
+}
+
+#nav{
+    
+}
+
+#main{
+    
+}

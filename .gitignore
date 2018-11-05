@@ -1,0 +1,10 @@
+__pycache__/
+/migrations
+/venv
+app.db
+cmd.txt
+DB_inserts.txt
+dumb.sql
+scrap_script.py
+*.pyc
+

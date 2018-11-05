@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="container mt-5 display-4 text-left"><br>Experiment info:</h1>
+<br>
+
+
+{% for exp in experiment_info %}
+
+<table class="table">
+  <tbody>
+    <tr>
+      <td>Name:</td>
+      <td>{{ exp.name }}</td>
+    </tr>
+    <tr>
+      <td>ID:</td>
+      <td>{{ exp.idexperiment }}</td>
+    </tr>
+    <tr>
+      <td>Language:</td>
+      <td>{{ exp.language }}</td>
+    </tr>
+    <tr>
+      <td>Status:</td>
+      <td>{{ exp.status }}</td>
+    </tr>
+    <tr>
+      <td>Instructions:</td>
+      <td>{{ exp.instruction }}</td>
+    </tr>
+    <tr>
+      <td>Number of started ratings:</td>
+      <td>{{ started_ratings }}</td>
+    </tr>
+    <tr>
+      <td>Number of finished ratings:</td>
+      <td>??</td>
+    </tr>
+    <tr>
+    <td><a class="btn btn-primary btn-info" href="{{ url_for('download_csv', exp_id=exp.idexperiment) }}" role="button">Export results (csv)</a></td>
+    <td></td>
+    </tr>
+  </tbody>
+</table>
+
+{% endfor %}
+
+<h1 class="container mt-5 display-4 text-left"><br>Rating task values:</h1>
+<br>
+
+
+<table class="table">
+  <thead>
+    <tr>
+     <th scope="col" nowrap>Page ID/Question:</td>
+     {% for page in pages_and_questions %}
+     
+            {% for p in pages_and_questions[page] %}
+             <th scope="col" nowrap>{{ p[0]}} / {{ p[1]}}  </th>
+            {% endfor %}
+
+     {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for participant in participants_and_answers %}    
+    <tr>
+        <td>{{ participant }}</td>
+        {% for answer in participants_and_answers[participant] %}
+            <td align="center">{{ answer[3] }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+<h1 class="container mt-5 display-4 text-left"><br>Background question answers:</h1>
+<br>
+
+
+<table class="table">
+  <thead>
+    <tr>
+     <th scope="col" nowrap>Question:</th>
+     
+     {% for bg in bg_questions %}
+     <th scope="col" nowrap>{{ bg.background_question }}</th>
+     {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in bg_answers_for_participants %}    
+    <tr>
+        <td>{{ p }}</td>
+        {% for bg_answer in bg_answers_for_participants[p] %}
+            <td align="center">{{ bg_answer }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+
+
+
+
+{% endblock %}

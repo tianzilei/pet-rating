@@ -1,0 +1,89 @@
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+    <title>Mega-fMRI Stimulus Rating Tool</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom styles for this template -->
+    <link href="sticky-footer-navbar.css" rel="stylesheet">
+  </head>
+  <body>
+    <header>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+  <div class="col navbar-brand">
+      <img src="/static/img/madam-300x250.jpg" alt="Logo" style="width:70px;">
+        {% if pages %}  
+            <a class="navbar-brand pl-5 font-weight-light">Participant ID: <span class="text-success font-weight-bold">{{ session['user']}}</span></a>
+        {% else %}
+            <a class="navbar-brand pl-3 text-success font-weight-light" href="{{ url_for('index') }}" class="nav-link">MEGA-fMRI Stimulus Rating Tool</a>
+        {% endif %}
+    </div>
+    <div class="col-6 navbar-nav">
+        {% if pages %}    
+            <div class="progress-bar bg-success progress-bar-striped" role="progressbar" style="width: {{ progress_bar_percentage }}%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">Task progress: {{   progress_bar_percentage }}%</div>
+        {% endif %}        
+    </div>
+            <div class="col text-success text-right">
+                  {% block navbar %}
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <a class="text">{{ message }}</a>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                  {% endblock %}
+                  {% if current_user.is_authenticated %}
+                  <a class="nav-item" href="{{ url_for('researcher_info') }}" class="nav-link">Data preparation info |</a>
+                  <a class="nav-item" href="{{ url_for('create_experiment') }}" class="nav-link">Create experiment |</a>
+                  {% endif %}
+                {% if current_user.is_anonymous %}
+                <a class="nav-item" href="{{ url_for('login') }}" class="nav-link">Researcher login</a>
+                {% else %}
+                <a class="nav-item" href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+                {% endif %}
+            </div>
+            
+            
+            
+            
+</nav>
+</header>
+      
+<main role="main" class="container">
+          {% block content %}{% endblock %}
+</main>
+    <footer class="footer">
+      <div class="container">
+          <br>
+        <span class="text-muted">Human Emotion Systems Laboratory | <a href="http://emotion.utu.fi">emotion.utu.fi</a></span>
+      </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="../../assets/js/vendor/popper.min.js"></script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+  </body>
+</html>
+
+
+        
+
