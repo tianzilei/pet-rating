@@ -49,16 +49,21 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 
-
-
-
-
-
 @app.route('/')
 @app.route('/index')
 def index():
 
     experiments = experiment.query.all()
+    
+    if session:
+        
+        flash("")
+    
+    else:
+        
+        flash("set lang")
+        session['language'] = "All"
+    
     return render_template('index.html', title='Home', experiments=experiments)
 
 
@@ -67,6 +72,29 @@ def consent():
     exp_id = request.args.get('exp_id', None)
     experiments = experiment.query.all()
     return render_template('consent.html', exp_id=exp_id, experiments=experiments)
+
+
+@app.route('/set_language')
+def set_language():
+    
+    session['language'] = request.args.get('language', None)
+    
+    
+    
+    
+    return redirect(url_for('index'))
+
+@app.route('/remove_language')
+def remove_language():
+    
+    
+    experiments = experiment.query.all()
+    
+    
+    return render_template('index.html', title='Home', experiments=experiments)
+
+
+
 
 
 @app.route('/session')

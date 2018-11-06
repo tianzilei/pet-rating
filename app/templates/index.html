@@ -2,17 +2,22 @@
 {% block content %}
   
         
-      <h1 class="container mt-5 display-4 text-center"><br>{{ _('Welcome') }}</h1>
+      <h1 class="container mt-5 display-4 text-center"><br>{{ _('Welcome to Onni') }}</h1>
         <br>
-      <p class="lead">This is the Human Emotion Systems laboratorys stimulus rating tool. If you have previously started a rating task you can continue that task on this page. If you are a researcher you can create new rating tasks by <a href="{{ url_for('login') }}">logging in.</a>
-      Or you can start a new rating task and start rating by selecting a rating task from the database list below.</p>
+        <br>
+      <p class="lead text-center">This is the Human Emotion Systems laboratorys stimulus rating tool. If you have previously started a rating task you can continue that task on this page. If you are a researcher you can create new rating tasks by <a href="{{ url_for('login') }}">logging in.</a>
+      Or you can start a new rating task and start rating by selecting a task from the database list below.
+      <br>
+      <br>
+      You can choose the language suitable for you from the language menu in the upper right corner
+      </p>
         <div class="row">
             <div class="col mt-5">
                 <h3>List of experiments in database:</h3>
                     {% block attributes %}
                     {% for exp in experiments %}
                         
-                    {% if exp.status == 'Public' %}
+                    {% if exp.status == 'Public' and session['language'] == exp.language %}
                     
                      <ul class="list-group mb-4">
                          <li class="list-group-item active"><span class="font-weight-bold">Name:</span> {{ exp.name }} </li>
@@ -39,14 +44,50 @@
                             <a class="btn btn-outline-info" href="{{ url_for('view_experiment', exp_id=exp.idexperiment) }}" role="button">View / Edit</a>
                             
                             {% endif %}
-                      
+                       
                         
                      </ul>
                     <br>
                     <br>
                     {% endif %}
                     
-                    {% if (exp.status == 'Hidden') and (current_user.is_authenticated)  %}
+                    
+                    {% if exp.status == 'Public' and session['language'] == "All" %}
+                    
+                     <ul class="list-group mb-4">
+                         <li class="list-group-item active"><span class="font-weight-bold">Name:</span> {{ exp.name }} </li>
+                         <li class="list-group-item"><span class="font-weight-bold">Instruction:</span> {{ exp.instruction }}</li>
+                        {% if current_user.is_authenticated %}
+                        <li class="list-group-item"><span class="font-weight-bold">ID number:</span> {{ exp.idexperiment }} </li>
+                        <li class="list-group-item"><span class="font-weight-bold">Language:</span> {{ exp.language }}</li>
+                        <li class="list-group-item"><span class="font-weight-bold">Status:</span> {{ exp.status }}</li>
+                        {% endif %}
+                        <li class="list-group-item">
+                        <button class="btn btn-outline-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Begin task
+                        </button>
+                          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" href="{{ url_for('consent', exp_id=exp.idexperiment) }}">As a new participant</a>
+                            <a class="dropdown-item" href="{{ url_for('begin_with_id', exp_id=exp.idexperiment) }}">I have received an ID to use for this task</a>
+                          </div>
+                        <a class="btn btn-outline-success" href="{{ url_for('continue_task', exp_id=exp.idexperiment) }}" role="button">Continue task</a>
+                        
+                            {% if current_user.is_authenticated %}
+                            
+                            
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment_statistics', exp_id=exp.idexperiment) }}" role="button">Statistics</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('view_experiment', exp_id=exp.idexperiment) }}" role="button">View / Edit</a>
+                            
+                            {% endif %}
+                       
+                        
+                     </ul>
+                    <br>
+                    <br>
+                    {% endif %}
+                    
+                    
+                    {% if (exp.status == 'Hidden') and (current_user.is_authenticated) and session['language'] == exp.language  %}
                     <br>
                     <h3>Unpublished experiment:</h3>
                      <ul class="list-group mb-4">
@@ -80,7 +121,38 @@
                     {% endif %}
 
 
-
+                    {% if (exp.status == 'Hidden') and (current_user.is_authenticated) and session['language'] == "All"  %}
+                    <br>
+                    <h3>Unpublished experiment:</h3>
+                     <ul class="list-group mb-4">
+                        <li class="list-group-item list-group-item-dark"><span class="font-weight-bold">Name:</span> {{ exp.name }} </li>
+                        <li class="list-group-item"><span class="font-weight-bold">Instruction:</span> {{ exp.instruction }}</li>
+                        {% if current_user.is_authenticated %}
+                        <li class="list-group-item"><span class="font-weight-bold">ID number:</span> {{ exp.idexperiment }} </li>
+                        <li class="list-group-item"><span class="font-weight-bold">Language:</span> {{ exp.language }}</li>
+                        <li class="list-group-item"><span class="font-weight-bold">Status:</span> {{ exp.status }}</li>
+                        {% endif %}
+                        <li class="list-group-item">
+                        <button class="btn btn-outline-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Begin task
+                        </button>
+                          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" href="{{ url_for('consent', exp_id=exp.idexperiment) }}">As a new participant</a>
+                            <a class="dropdown-item" href="{{ url_for('begin_with_id', exp_id=exp.idexperiment) }}">I have received an ID to use for this task</a>
+                          </div>
+                        <a class="btn btn-outline-success" href="{{ url_for('continue_task', exp_id=exp.idexperiment) }}" role="button">Continue task</a>
+                            {% if current_user.is_authenticated %}
+                            
+                            
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment_statistics', exp_id=exp.idexperiment) }}" role="button">Statistics</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('view_experiment', exp_id=exp.idexperiment) }}" role="button">View / Edit</a>
+                            
+                            
+                            {% endif %}
+                        </li>
+                     </ul>
+                    
+                    {% endif %}
                      
                     {% endfor %}
                     {% endblock %}

@@ -29,7 +29,11 @@
         {% if pages %}  
             <a class="navbar-brand pl-5 font-weight-light">Participant ID: <span class="text-success font-weight-bold">{{ session['user']}}</span></a>
         {% else %}
-            <a class="navbar-brand pl-3 text-success font-weight-light" href="{{ url_for('index') }}" class="nav-link">MEGA-fMRI Stimulus Rating Tool</a>
+        
+            
+            <a class="navbar-brand pl-3 text-success font-weight-light" href="{{ url_for('index') }}" class="nav-link">Onni</a>
+            
+            
         {% endif %}
     </div>
     <div class="col-6 navbar-nav">
@@ -48,11 +52,47 @@
                     {% endwith %}
                   {% endblock %}
                   {% if current_user.is_authenticated %}
-                  <a class="nav-item" href="{{ url_for('researcher_info') }}" class="nav-link">Data preparation info |</a>
-                  <a class="nav-item" href="{{ url_for('create_experiment') }}" class="nav-link">Create experiment |</a>
+                  <a class="nav-item" href="{{ url_for('researcher_info') }}" class="nav-link">Info |</a>
+
+
+
+        <a class="nav-item dropdown">
+        <a class="nav-item dropdown-toggle text-align-right" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Language 
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Finnish') }}">Finnish</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='English') }}">English</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Persian') }}">Persian</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Greek') }}">Greek</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Italian') }}">Italian</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Chinese') }}">Chinese</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='All') }}">Show all languages</a>
+        </div>
+
+         <a class="nav-item" href="{{ url_for('create_experiment') }}" class="nav-link">| Create experiment |</a>
+
                   {% endif %}
                 {% if current_user.is_anonymous %}
-                <a class="nav-item" href="{{ url_for('login') }}" class="nav-link">Researcher login</a>
+                <a class="nav-item" href="{{ url_for('login') }}" class="nav-link">Researcher login |</a>
+                
+        <a class="nav-item dropdown">
+        <a class="nav-item dropdown-toggle text-align-right" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Language
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Finnish') }}">Finnish</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='English') }}">English</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Persian') }}">Persian</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Greek') }}">Greek</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Italian') }}">Italian</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Chinese') }}">Chinese</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='All') }}">Show all languages</a>
+        </div>
+                
+                
                 {% else %}
                 <a class="nav-item" href="{{ url_for('logout') }}" class="nav-link">Logout</a>
                 {% endif %}
