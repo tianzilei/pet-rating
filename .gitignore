@@ -1,8 +1,10 @@
 __pycache__/
 /venv
+/logs
 cmd.txt
 DB_inserts.txt
 dumb.sql
 scrap_script.py
 *.pyc
+*.db
 
