@@ -1146,7 +1146,7 @@ def remove_experiment():
             
                 if remove_pages[a].type == 'text':
                     
-                    db.session.delete(remove_page[a])
+                    db.session.delete(remove_pages[a])
                     db.session.commit()
                     
                 else:
