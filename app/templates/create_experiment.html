@@ -11,15 +11,15 @@
     <div class="col-12">
       <form  action="" method="post" role="form">
         <div class="form-group">
-          <label for="name">Experiment name:</label>
-          <input required type="text" class="form-control" id="name" name="name" placeholder="Name?">
+          <label for="name">Your name:</label>
+          <input required type="text" class="form-control" id="creator_name" name="creator_name" placeholder="Creator name?">
             <br>
-          <label for="instruction">Instructions:</label>
-          <input required type="text" class="form-control" id="instruction" name="instruction" placeholder="Instructions?">
-	    <br>
+          <label for="name">Name of the experiment:</label>
+          <input required type="text" class="form-control" id="name" name="name" placeholder="Experiment name?">
+            <br>
 
   <div class="form-group">
-  <label for="language">Language:</label>
+  <label for="language">Select a language for the experiment:</label>
   <select class="form-control" id="language" name="language">
   <option disabled selected value></option>
   <option value="Afrikanns">Afrikanns</option>
@@ -95,8 +95,35 @@
   <option value="Welsh">Welsh</option>
   <option value="Xhosa">Xhosa</option>
   </select>
-  </div>
-	</div>
+
+<br>
+  <p>Instructions for the experiment come in three forms:
+  <br> (1) A single sentence instruction that is shown during the rating task above the sliders.
+  <br> (2) A short general description of the task that is shown on the experiment listing on Onni's front page and on the informed consent page. 
+  <br> (3) a longer detailed explanation of the instructions that is shown to the participant after the consent and before the rating task begins. 
+  <br> Please input all three types of instructions below:
+  </p>
+
+          <label for="single_sentence_instruction">(1) Single sentence:</label>
+          <input required type="text" class="form-control" id="single_sentence_instruction" name="single_sentence_instruction" placeholder="Input here" required>
+      	    <br>
+        <label for="short_instruction">(2) Short description:</label>
+          <textarea class="form-control" rows="5" id="short_instruction" name="short_instruction" placeholder="Input here" required></textarea>
+            <br>
+
+
+        <label for="instruction">(3) Longer version:</label>
+          <textarea class="form-control" rows="15" id="instruction" name="instruction" placeholder="Input here" required></textarea>
+            <br>
+
+
+        <label for="instruction">Please input consent form text</label>
+          <textarea class="form-control" rows="15" id="consent_text" name="consent_text" placeholder="Input here" required></textarea>
+            <br>
+
+
+      </div>
+    	</div>
         <br>													   
           <button type="submit" class="btn btn-primary">Submit</button>
       </form>

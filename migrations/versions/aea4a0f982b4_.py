@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 75ace1b8b1e0
+Revision ID: aea4a0f982b4
 Revises: 
-Create Date: 2018-11-04 18:40:37.722652
+Create Date: 2018-11-28 17:07:11.577139
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '75ace1b8b1e0'
+revision = 'aea4a0f982b4'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -27,16 +27,29 @@ def upgrade():
     op.create_table('experiment',
     sa.Column('idexperiment', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=120), nullable=True),
-    sa.Column('instruction', sa.String(length=120), nullable=True),
+    sa.Column('instruction', sa.Text(), nullable=True),
     sa.Column('directoryname', sa.String(length=120), nullable=True),
     sa.Column('language', sa.String(length=120), nullable=True),
     sa.Column('status', sa.String(length=120), nullable=True),
     sa.Column('randomization', sa.String(length=120), nullable=True),
+    sa.Column('short_instruction', sa.Text(), nullable=True),
+    sa.Column('single_sentence_instruction', sa.Text(), nullable=True),
+    sa.Column('is_archived', sa.String(length=120), nullable=True),
+    sa.Column('creator_name', sa.String(length=120), nullable=True),
+    sa.Column('research_notification_filename', sa.String(length=120), nullable=True),
+    sa.Column('creation_time', sa.DateTime(), nullable=True),
+    sa.Column('stimulus_size', sa.String(length=120), nullable=True),
+    sa.Column('consent_text', sa.Text(), nullable=True),
+    sa.Column('use_forced_id', sa.String(length=120), nullable=True),
     sa.PrimaryKeyConstraint('idexperiment')
     )
+    op.create_index(op.f('ix_experiment_consent_text'), 'experiment', ['consent_text'], unique=False)
+    op.create_index(op.f('ix_experiment_creation_time'), 'experiment', ['creation_time'], unique=False)
     op.create_index(op.f('ix_experiment_directoryname'), 'experiment', ['directoryname'], unique=True)
     op.create_index(op.f('ix_experiment_instruction'), 'experiment', ['instruction'], unique=False)
     op.create_index(op.f('ix_experiment_name'), 'experiment', ['name'], unique=False)
+    op.create_index(op.f('ix_experiment_short_instruction'), 'experiment', ['short_instruction'], unique=False)
+    op.create_index(op.f('ix_experiment_single_sentence_instruction'), 'experiment', ['single_sentence_instruction'], unique=False)
     op.create_table('trial_randomization',
     sa.Column('idtrial_randomization', sa.Integer(), nullable=False),
     sa.Column('page_idpage', sa.Integer(), nullable=True),
@@ -60,15 +73,26 @@ def upgrade():
     sa.Column('session', sa.String(length=120), nullable=True),
     sa.Column('agreement', sa.String(length=120), nullable=True),
     sa.Column('answer_counter', sa.Integer(), nullable=True),
+    sa.Column('registration_time', sa.DateTime(), nullable=True),
+    sa.Column('last_answer_time', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['experiment_idexperiment'], ['experiment.idexperiment'], ),
     sa.PrimaryKeyConstraint('idanswer_set')
     )
+    op.create_index(op.f('ix_answer_set_last_answer_time'), 'answer_set', ['last_answer_time'], unique=False)
+    op.create_index(op.f('ix_answer_set_registration_time'), 'answer_set', ['registration_time'], unique=False)
     op.create_table('background_question_option',
     sa.Column('idbackground_question_option', sa.Integer(), nullable=False),
     sa.Column('background_question_idbackground_question', sa.Integer(), nullable=True),
     sa.Column('option', sa.String(length=120), nullable=True),
     sa.ForeignKeyConstraint(['background_question_idbackground_question'], ['background_question.idbackground_question'], ),
     sa.PrimaryKeyConstraint('idbackground_question_option')
+    )
+    op.create_table('forced_id',
+    sa.Column('idforced_id', sa.Integer(), nullable=False),
+    sa.Column('experiment_idexperiment', sa.Integer(), nullable=True),
+    sa.Column('pregenerated_id', sa.String(length=120), nullable=True),
+    sa.ForeignKeyConstraint(['experiment_idexperiment'], ['experiment.idexperiment'], ),
+    sa.PrimaryKeyConstraint('idforced_id')
     )
     op.create_table('page',
     sa.Column('idpage', sa.Integer(), nullable=False),
@@ -123,15 +147,22 @@ def downgrade():
     op.drop_index(op.f('ix_page_text'), table_name='page')
     op.drop_index(op.f('ix_page_media'), table_name='page')
     op.drop_table('page')
+    op.drop_table('forced_id')
     op.drop_table('background_question_option')
+    op.drop_index(op.f('ix_answer_set_registration_time'), table_name='answer_set')
+    op.drop_index(op.f('ix_answer_set_last_answer_time'), table_name='answer_set')
     op.drop_table('answer_set')
     op.drop_index(op.f('ix_user_username'), table_name='user')
     op.drop_index(op.f('ix_user_email'), table_name='user')
     op.drop_table('user')
     op.drop_table('trial_randomization')
+    op.drop_index(op.f('ix_experiment_single_sentence_instruction'), table_name='experiment')
+    op.drop_index(op.f('ix_experiment_short_instruction'), table_name='experiment')
     op.drop_index(op.f('ix_experiment_name'), table_name='experiment')
     op.drop_index(op.f('ix_experiment_instruction'), table_name='experiment')
     op.drop_index(op.f('ix_experiment_directoryname'), table_name='experiment')
+    op.drop_index(op.f('ix_experiment_creation_time'), table_name='experiment')
+    op.drop_index(op.f('ix_experiment_consent_text'), table_name='experiment')
     op.drop_table('experiment')
     op.drop_table('background_question')
     # ### end Alembic commands ###

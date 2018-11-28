@@ -5,8 +5,10 @@ from wtforms_sqlalchemy.fields import QuerySelectField
 from flask_bootstrap import Bootstrap
 from app.models import background_question
 from wtforms import Form, TextField, TextAreaField, SubmitField, FieldList, FormField
-from wtforms import Form, BooleanField, StringField, PasswordField, validators, RadioField
+from wtforms import Form, BooleanField, StringField, PasswordField, validators, RadioField, IntegerField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
+from flask_babel import _
+from flask_babel import lazy_gettext as _l
 
 
 class LoginForm(FlaskForm):
@@ -31,13 +33,12 @@ class TaskForm(Form):
 class ContinueTaskForm(FlaskForm):
     
     participant_id = StringField('participant_id', validators=[DataRequired()])
-    submit = SubmitField('Continue rating')
-
+    submit = SubmitField( _l('Continue rating') )
 
 class StartWithIdForm(FlaskForm):
     
     participant_id = StringField('participant_id', validators=[DataRequired()])
-    submit = SubmitField('Start rating')
+    submit = SubmitField( _l('Start rating') )
  
 
 class Questions(FlaskForm):
@@ -80,7 +81,11 @@ class TestForm2(Form):
 class CreateExperimentForm(Form):
 
     name = StringField('Name', [validators.DataRequired()])
-    instruction = StringField('Instruction', [validators.DataRequired()])
+    creator_name = StringField('Creator_name', [validators.DataRequired()])     
+    single_sentence_instruction = StringField('Single_sentence_instruction', [validators.DataRequired()])
+    short_instruction = TextAreaField('Short_instruction', [validators.DataRequired()])
+    instruction = TextAreaField('Instruction', [validators.DataRequired()])
+    consent_text = TextAreaField('Instruction', [validators.DataRequired()])
     language = StringField('Language', [validators.DataRequired()])
     submit = SubmitField('Send')
 
@@ -88,10 +93,14 @@ class CreateExperimentForm(Form):
 class EditExperimentForm(Form):
 
     name = StringField('Name', [validators.DataRequired()])
-    instruction = StringField('Instruction', [validators.DataRequired()])
+    creator_name = StringField('Creator_name', [validators.DataRequired()])
+    instruction = TextAreaField('Instruction', [validators.DataRequired()])
+    consent_text = TextAreaField('Instruction', [validators.DataRequired()])
+    short_instruction = TextAreaField('Short_instruction', [validators.DataRequired()])
+    single_sentence_instruction = StringField('Single_sentece_instruction', [validators.DataRequired()])
     language = SelectField('Language', choices=[
             ('Afrikanns', 'Afrikanns'), ('Albanian', 'Albanian'), ('Arabic', 'Arabic'), ('Armenian', 'Armenian'), ('Basque', 'Basque'), ('Bengali', 'Bengali'), ('Bulgarian', 'Bulgarian'),
-            ('Catalan', 'Catalan'), ('Cambodian', 'Cambodian'), ('Chinese (Mandarin)', 'Chinese (Mandarin)'), ('Croation', 'Croation'), ('Czech', 'Czech'), ('Danish', 'Danish'),
+            ('Catalan', 'Catalan'), ('Cambodian', 'Cambodian'), ('Chinese', 'Chinese'), ('Croation', 'Croation'), ('Czech', 'Czech'), ('Danish', 'Danish'),
             ('Dutch', 'Dutch'), ('English', 'English'), ('Estonian', 'Estonian'), ('Fiji', 'Fiji'), ('Finnish', 'Finnish'), ('French', 'French'), ('Georgian', 'Georgian'),
             ('German', 'German'), ('Greek', 'Greek'), ('Gujarati', 'Gujarati'), ('Hebrew', 'Hebrew'), ('Hindi', 'Hindi'), ('Hungarian', 'Hungarian'), ('Icelandic', 'Icelandic'),
             ('Indonesian', 'Indonesian'), ('Irish', 'Irish'), ('Italian', 'Italian'), ('Japanese', 'Japanese'), ('Javanese', 'Javanese'), ('Korean', 'Korean'), ('Latin', 'Latin'),
@@ -101,6 +110,9 @@ class EditExperimentForm(Form):
             ('Slovenian', 'Slovenian'), ('Spanish', 'Spanish'), ('Swahili', 'Swahili'), ('Swedish ', 'Swedish '), ('Tamil', 'Tamil'), ('Tatar', 'Tatar'), ('Telugu', 'Telugu'),
             ('Thai', 'Thai'), ('Tibetan', 'Tibetan'), ('Tonga', 'Tonga'), ('Turkish', 'Turkish'), ('Ukranian', 'Ukranian'), ('Urdu', 'Urdu'), ('Uzbek', 'Uzbek'), ('Vietnamese', 'Vietnamese'),
             ('Welsh', 'Welsh'), ('Xhosa', 'Xhosa')])
+    stimulus_size = SelectField('Stimulus_size', choices=[
+            ('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'), ('6', '6'), ('7', '7'), ('8', '8'), ('9', '9'), ('10', '10'), ('11', '11'), ('12', '12')])
+            
     submit = SubmitField('Send')
 
 
@@ -137,6 +149,13 @@ class UploadStimuliForm(Form):
     media = TextAreaField('Media filename')
     file = FileField('Upload file')
     submit = SubmitField('Send')
+
+
+class UploadResearchBulletinForm(Form):
+    
+    file = FileField('Upload file')
+    submit = SubmitField('Send')
+
     
 
 class EditPageForm(Form):
@@ -151,4 +170,10 @@ class EditPageForm(Form):
 class RemoveExperimentForm(Form):
     remove = TextAreaField('Remove')
     submit = SubmitField('Send')
+
+class GenerateIdForm(Form): 
+
+    number = IntegerField('number', [validators.DataRequired()])
+    string = StringField('string', [validators.DataRequired()])
+    submit = SubmitField('Submit')
 

@@ -1,17 +1,18 @@
-# Translations template for PROJECT.
+# Italian translations for PROJECT.
 # Copyright (C) 2018 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-11-28 14:59+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2018-11-27 16:38+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: it\n"
+"Language-Team: it <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -217,4 +218,53 @@ msgstr ""
 #: app/templates/test_page.html:7
 msgid "File Not Found"
 msgstr ""
+
+#~ msgid "ID number:"
+#~ msgstr ""
+
+#~ msgid "Language:"
+#~ msgstr ""
+
+#~ msgid "Status:"
+#~ msgstr ""
+
+#~ msgid "Welcome to Onni"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This is the Human Emotion Systems "
+#~ "laboratorys stimulus rating tool. If you"
+#~ " have previously started a rating "
+#~ "task you can continue that task on"
+#~ " this page. If you are a "
+#~ "researcher you can create new rating "
+#~ "tasks by logging in. Or you can"
+#~ " start a new rating task and "
+#~ "start rating by selecting a task "
+#~ "from the database list below."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You can choose the language suitable "
+#~ "for you from the language menu in"
+#~ " the upper right corner"
+#~ msgstr ""
+
+#~ msgid "List of experiments in database:"
+#~ msgstr ""
+
+#~ msgid "Name:"
+#~ msgstr ""
+
+#~ msgid "Instruction:"
+#~ msgstr ""
+
+#~ msgid "Participation ID is required for this task."
+#~ msgstr ""
+
+#~ msgid "Begin task"
+#~ msgstr ""
+
+#~ msgid "Continue task"
+#~ msgstr ""
 

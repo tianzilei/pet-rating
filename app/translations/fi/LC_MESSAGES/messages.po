@@ -1,17 +1,18 @@
-# Translations template for PROJECT.
+# Finnish translations for PROJECT.
 # Copyright (C) 2018 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-11-28 14:59+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2018-11-27 16:38+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: fi\n"
+"Language-Team: fi <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,81 +20,83 @@ msgstr ""
 
 #: app/forms.py:36
 msgid "Continue rating"
-msgstr ""
+msgstr "Jatka tehtävää"
 
 #: app/forms.py:41
 msgid "Start rating"
-msgstr ""
+msgstr "Aloita"
 
 #: app/routes.py:359
 msgid "ID already in use"
-msgstr ""
+msgstr "Kyseinen ID on jo käytössä"
 
 #: app/routes.py:368
 msgid "No such ID set for this experiment"
-msgstr ""
+msgstr "Kyseistä ID:tä ei löydy"
 
 #: app/templates/base.html:43
 msgid "Task progress:"
-msgstr ""
+msgstr "Kokeesta tehty:"
 
 #: app/templates/begin_with_id.html:8
 msgid "Please insert your ID-code below:"
-msgstr ""
+msgstr "Syötä koehenkilötunnuksesi:"
 
 #: app/templates/begin_with_id.html:12 app/templates/consent.html:29
 #: app/templates/instructions.html:14 app/templates/quit_task.html:4
 #: app/templates/quit_task.html:7
 msgid "Notice!"
-msgstr ""
+msgstr "Huom!"
 
 #: app/templates/begin_with_id.html:13
 msgid ""
 "Participation in this experiment requires a login with a predetermined ID"
 " code. Please input ID below."
 msgstr ""
+"Tähän kokeeseen osallistumiseen vaaditaan ID-tunnus. Syötä ID-tunnuksesi "
+"alla olevaan kenttään."
 
 #: app/templates/consent.html:11
 msgid "Consent for participation:"
-msgstr ""
+msgstr "Suostumus osallistumiseksi:"
 
 #: app/templates/consent.html:14
 msgid "Research bulletin can be read"
-msgstr ""
+msgstr "Tutkimustiedote on luettavissa"
 
 #: app/templates/consent.html:14
 msgid "here."
-msgstr ""
+msgstr "täällä"
 
 #: app/templates/consent.html:20
 msgid "Agree"
-msgstr ""
+msgstr "Suostun"
 
 #: app/templates/consent.html:21
 msgid "Disagree"
-msgstr ""
+msgstr "En suostu"
 
 #: app/templates/consent.html:32
 msgid ""
 "In order to participate for the study you need to agree with the terms "
 "presented."
-msgstr ""
+msgstr "Osallistuaksesi kokeeseen sinun on hyväksyttävä esitetyt ehdot."
 
 #: app/templates/consent.html:35
 msgid "Close Notice"
-msgstr ""
+msgstr "Sulje"
 
 #: app/templates/consent.html:36 app/templates/task_completed.html:15
 msgid "Return Home"
-msgstr ""
+msgstr "Palaa etusivulle"
 
 #: app/templates/continue_task.html:9
 msgid "Please insert your participant ID:"
-msgstr ""
+msgstr "Syötä ID-tunnuksesi:"
 
 #: app/templates/index.html:6
 msgid "Welcome to Onni"
-msgstr ""
+msgstr "Tervetuloa"
 
 #: app/templates/index.html:9
 msgid ""
@@ -103,52 +106,57 @@ msgid ""
 "logging in. Or you can start a new rating task and start rating by "
 "selecting a task from the database list below."
 msgstr ""
+"Tämä on Human Emotion Systems Laboratoryn arviointityökalu. Jos olet "
+"aiemmin aloittanut arviointitehtävän voit jatkaa tehtävää tällä sivulla. "
+"Jos olet tutkija voit luoda uuden arviointitehtävän kirjautumalla sisään."
+" Tai voit aloittaa uuden arvointitehtävän ja aloittaa arvioinnin "
+"valitsemalla arviointitehtävän alla olevasta listasta."
 
 #: app/templates/index.html:13
 msgid ""
 "You can choose the language suitable for you from the language menu in "
 "the upper right corner"
-msgstr ""
+msgstr "Voit valita kielen oikeassa yläkulmassa olevasta language-valikosta"
 
 #: app/templates/index.html:18
 msgid "List of experiments in database:"
-msgstr ""
+msgstr "Tietokannassa olevat kokeet:"
 
 #: app/templates/index.html:25 app/templates/index.html:61
 msgid "Name:"
-msgstr ""
+msgstr "Nimi:"
 
 #: app/templates/index.html:26 app/templates/index.html:62
 msgid "Instruction:"
-msgstr ""
+msgstr "Ohjeet:"
 
 #: app/templates/index.html:34 app/templates/index.html:69
 msgid "Participation ID is required for this task."
-msgstr ""
+msgstr "Tähän kokeeseen osallistumiseen vaaditaan ID-tunnus."
 
 #: app/templates/index.html:40 app/templates/index.html:75
 msgid "Begin task"
-msgstr ""
+msgstr "Aloita"
 
 #: app/templates/index.html:41 app/templates/index.html:76
 msgid "Continue task"
-msgstr ""
+msgstr "Jatka"
 
 #: app/templates/index.html:45 app/templates/index.html:80
 msgid "AdminRun"
-msgstr ""
+msgstr "AdminRun"
 
 #: app/templates/index.html:46 app/templates/index.html:81
 msgid "Statistics"
-msgstr ""
+msgstr "Statistics"
 
 #: app/templates/index.html:47 app/templates/index.html:82
 msgid "View / Edit"
-msgstr ""
+msgstr "View / Edit"
 
 #: app/templates/instructions.html:4
 msgid "Instructions:"
-msgstr ""
+msgstr "Ohjeet:"
 
 #: app/templates/instructions.html:15
 msgid ""
@@ -160,61 +168,114 @@ msgstr ""
 
 #: app/templates/instructions.html:18 app/templates/quit_task.html:11
 msgid "Your participant ID is:"
-msgstr ""
+msgstr "ID-numerosi on:"
 
 #: app/templates/instructions.html:21
 msgid "Ready to start"
-msgstr ""
+msgstr "Olen valmis aloittamaan"
 
 #: app/templates/quit_task.html:8
 msgid ""
 "Please write down your participant ID so you can return and finish the "
 "rating task later!"
 msgstr ""
+"Kirjoita ID-numerosi ylös jotta voit palata jatkamaan arviointitehtävää "
+"tarvittaessa myöhemmin!"
 
 #: app/templates/quit_task.html:14
 msgid "Quit!"
-msgstr ""
+msgstr "Lopeta!"
 
 #: app/templates/register.html:6
 msgid "This is the registration page."
-msgstr ""
+msgstr "Rekisteröityminen"
 
 #: app/templates/register.html:7
 msgid "Please fill in these background questions before starting the rating task:"
-msgstr ""
+msgstr "Ennen tehtävän aloittamista, vastaa näihin taustakysymyksiin:"
 
 #: app/templates/register.html:14
 msgid "Please select"
-msgstr ""
+msgstr "Valitse"
 
 #: app/templates/register.html:22
 msgid "Submit"
-msgstr ""
+msgstr "Jatka"
 
 #: app/templates/task.html:127
 msgid "Quit task"
-msgstr ""
+msgstr "Lopeta"
 
 #: app/templates/task.html:128
 msgid "Next page"
-msgstr ""
+msgstr "Seuraava"
 
 #: app/templates/task.html:132
 msgid ""
 "You can zoom in/out the page view by pressing ctrl+/ctrl- (Windows) or "
 "⌘+/⌘- (Mac)"
 msgstr ""
+"Voit zoomata sivunäkymää isommaksi/pienemmäksi painamalla ctrl+/ctrl- "
+"(Windows) tai ⌘+/⌘- (Mac)"
 
 #: app/templates/task_completed.html:7
 msgid "Task completed!"
-msgstr ""
+msgstr "Tehtävä on valmis!"
 
 #: app/templates/task_completed.html:11
 msgid "You have completed the rating task. Thank you for your participation."
-msgstr ""
+msgstr "Olet suorittanut tämän arviointitehtävän. Kiitos osallistumisestasi."
 
 #: app/templates/test_page.html:7
 msgid "File Not Found"
 msgstr ""
+
+#~ msgid "Welcome to Onni"
+#~ msgstr "Tervetuloa"
+
+#~ msgid ""
+#~ "This is the Human Emotion Systems "
+#~ "laboratorys stimulus rating tool. If you"
+#~ " have previously started a rating "
+#~ "task you can continue that task on"
+#~ " this page. If you are a "
+#~ "researcher you can create new rating "
+#~ "tasks by logging in. Or you can"
+#~ " start a new rating task and "
+#~ "start rating by selecting a task "
+#~ "from the database list below."
+#~ msgstr ""
+#~ "Tämä on Human Emotion Systems "
+#~ "Laboratoryn arviointityökalu.Jos olet aiemmin "
+#~ "aloittanut arviointitehtävän voit jatkaa "
+#~ "tehtävää tällä sivulla. Jos olet tutkija"
+#~ " voit luoda uuden arviointitehtävän "
+#~ "kirjautumalla sisään. Tai voit aloittaa "
+#~ "uuden arvointitehtävän ja aloittaa arvioinnin"
+#~ " valitsemalla arviointitehtävän alla olevasta "
+#~ "listasta."
+
+#~ msgid ""
+#~ "You can choose the language suitable "
+#~ "for you from the language menu in"
+#~ " the upper right corner"
+#~ msgstr "Voit vaihtaa kieltä oikeassa yläkulmassa olevasta valikosta."
+
+#~ msgid "List of experiments in database:"
+#~ msgstr "Tietokannassa olevat kokeet:"
+
+#~ msgid "Name:"
+#~ msgstr "Nimi:"
+
+#~ msgid "Instruction:"
+#~ msgstr "Ohjeet:"
+
+#~ msgid "Participation ID is required for this task."
+#~ msgstr "Tähän kokeeseen osallistumiseen tarvitaan koehenkilötunnus"
+
+#~ msgid "Begin task"
+#~ msgstr "Aloita"
+
+#~ msgid "Continue task"
+#~ msgstr "Jatka"
 

@@ -4,7 +4,7 @@ from app.models import background_question, experiment
 from app.models import background_question_answer
 from app.models import page, question
 from app.models import background_question_option
-from app.models import answer_set, answer
+from app.models import answer_set, answer, forced_id
 from flask import session
 from app.forms import LoginForm, RegisterForm
 from flask import flash, redirect
@@ -27,7 +27,7 @@ from flask_login import login_required
 from sqlalchemy import update
 from app.forms import StartWithIdForm
 import secrets
-from app.forms import CreateExperimentForm, CreateBackgroundQuestionForm, CreateQuestionForm, UploadStimuliForm, EditBackgroundQuestionForm, EditQuestionForm, EditExperimentForm
+from app.forms import CreateExperimentForm, CreateBackgroundQuestionForm, CreateQuestionForm, UploadStimuliForm, EditBackgroundQuestionForm, EditQuestionForm, EditExperimentForm, UploadResearchBulletinForm
 from app.forms import EditPageForm, RemoveExperimentForm
 import os
 import random
@@ -40,8 +40,11 @@ from flask import send_file
 from flask import make_response
 from flask_babel import Babel
 from app import babel
-
-
+from datetime import datetime
+from app.forms import GenerateIdForm
+import math
+from flask_babel import _
+from flask_babel import lazy_gettext as _l
 
 #Stimuli upload folder setting
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -61,8 +64,8 @@ def index():
     
     else:
         
-        flash("set lang")
-        session['language'] = "All"
+        #flash("sessio ei voimassa")
+        session['language'] = "English"
     
     return render_template('index.html', title='Home', experiments=experiments)
 
@@ -70,8 +73,21 @@ def index():
 @app.route('/consent')
 def consent():
     exp_id = request.args.get('exp_id', None)
-    experiments = experiment.query.all()
-    return render_template('consent.html', exp_id=exp_id, experiments=experiments)
+
+    experiment_info = experiment.query.filter_by(idexperiment=exp_id).first()
+    
+    
+    
+    
+
+    if experiment_info.use_forced_id == 'On':
+        
+        return redirect(url_for('begin_with_id', exp_id=exp_id))
+        
+
+
+
+    return render_template('consent.html', exp_id=exp_id, experiment_info=experiment_info)
 
 
 @app.route('/set_language')
@@ -79,10 +95,10 @@ def set_language():
     
     session['language'] = request.args.get('language', None)
     
+    lang = request.args.get('lang', None)
     
     
-    
-    return redirect(url_for('index'))
+    return redirect(url_for('index', lang=lang))
 
 @app.route('/remove_language')
 def remove_language():
@@ -131,7 +147,9 @@ def participant_session():
     
     
     #create answer set for the participant in the database
-    participant_answer_set = answer_set(experiment_idexperiment=session['exp_id'], session=session['user'], agreement = session['agree'], answer_counter = '0')
+    the_time = datetime.now()
+    the_time = the_time.replace(microsecond=0)
+    participant_answer_set = answer_set(experiment_idexperiment=session['exp_id'], session=session['user'], agreement = session['agree'], answer_counter = '0', registration_time=the_time, last_answer_time=the_time)
     db.session.add(participant_answer_set)
     db.session.commit()
     
@@ -333,6 +351,46 @@ def begin_with_id():
     
     exp_id = request.args.get('exp_id', None)
     form = StartWithIdForm()
+    experiment_info = experiment.query.filter_by(idexperiment=exp_id).first()
+
+    if form.validate_on_submit():
+        
+        variable = form.participant_id.data
+        
+        #check if participant ID is found from db with this particular ID. If a match is found inform about error
+        participant = answer_set.query.filter(and_(answer_set.session==variable, answer_set.experiment_idexperiment==exp_id)).first()
+        is_id_valid = forced_id.query.filter(and_(forced_id.pregenerated_id==variable, forced_id.experiment_idexperiment==exp_id)).first()
+        
+        if participant is not None:
+            flash(_('ID already in use'))
+            return redirect(url_for('begin_with_id', exp_id=exp_id))        
+        
+        #if there was not a participant already in DB:
+        if participant is None:
+    
+            if is_id_valid is None:
+
+                                
+                flash(_('No such ID set for this experiment'))
+                return redirect(url_for('begin_with_id', exp_id=exp_id))        
+
+            else:
+                
+                #save the participant ID in session list for now, this is deleted after the session has been started in participant_session-view
+                session['begin_with_id'] = form.participant_id.data
+                return render_template('consent.html', exp_id=exp_id, experiment_info=experiment_info)
+        
+    return render_template('begin_with_id.html', exp_id=exp_id, form=form)
+
+
+@app.route('/admin_dryrun', methods=['GET', 'POST'])
+@login_required
+def admin_dryrun():
+    
+    
+    exp_id = request.args.get('exp_id', None)
+    form = StartWithIdForm()
+    experiment_info = experiment.query.filter_by(idexperiment=exp_id).first()
 
     if form.validate_on_submit():
         
@@ -340,16 +398,17 @@ def begin_with_id():
         participant = answer_set.query.filter(and_(answer_set.session==form.participant_id.data, answer_set.experiment_idexperiment==exp_id)).first()
         if participant is not None:
             flash('ID already in use')
-            return redirect(url_for('begin_with_id', exp_id=exp_id))        
+            return redirect(url_for('admin_dryrun', exp_id=exp_id))        
         
         #if there was not a participant already in DB:
         if participant is None:
             #save the participant ID in session list for now, this is deleted after the session has been started in participant_session-view
             session['begin_with_id'] = form.participant_id.data
-            return render_template('consent.html', exp_id=exp_id)
+            return render_template('consent.html', exp_id=exp_id, experiment_info=experiment_info)
 
         
-    return render_template('begin_with_id.html', exp_id=exp_id, form=form)
+    return render_template('admin_dryrun.html', exp_id=exp_id, form=form)
+
 
 
 @app.route('/create_task')
@@ -368,6 +427,15 @@ def instructions():
 @app.route('/task/<int:page_num>', methods=['GET', 'POST'])
 def task(page_num):
 
+    
+    experiment_info = experiment.query.filter_by(idexperiment=session['exp_id']).first()
+    rating_instruction = experiment_info.single_sentence_instruction
+    stimulus_size = experiment_info.stimulus_size
+    
+    #for text stimuli the size needs to be calculated since the template element utilises h1-h6 tags.
+    #A value of stimulus size 12 gives h1 and value of 1 gives h6
+    stimulus_size_text = 7-math.ceil((int(stimulus_size)/2))
+    
     pages = page.query.filter_by(experiment_idexperiment=session['exp_id']).paginate(per_page=1, page=page_num, error_out=True)
     progress_bar_percentage = round((pages.page/pages.pages)*100)
 
@@ -424,11 +492,15 @@ def task(page_num):
         
 
 
-        if check_answer is None:            
+        if check_answer is None:
+            
+            the_time = datetime.now()
+            the_time = the_time.replace(microsecond=0)
             
             update_answer_counter = answer_set.query.filter_by(idanswer_set=session['answer_set']).first()
             update_answer_counter.answer_counter = int(update_answer_counter.answer_counter) + 1 
-            
+            update_answer_counter.last_answer_time = the_time
+        
             #flash("vastauksia:")
             #flash(update_answer_counter.answer_counter)
             db.session.commit()
@@ -471,7 +543,7 @@ def task(page_num):
         return redirect ( url_for('task_completed'))
 
     
-    return render_template('task.html', pages=pages, progress_bar_percentage=progress_bar_percentage, form=form, randomized_stimulus=randomized_stimulus)
+    return render_template('task.html', pages=pages, progress_bar_percentage=progress_bar_percentage, form=form, randomized_stimulus=randomized_stimulus, rating_instruction=rating_instruction, stimulus_size=stimulus_size, stimulus_size_text=stimulus_size_text)
 
 
 
@@ -491,7 +563,7 @@ def quit_task():
 @app.route('/researcher_login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        flash("allready logged in")
+        #flash("allready logged in")
         return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
@@ -523,6 +595,98 @@ def experiment_statistics():
     experiment_info = experiment.query.filter_by(idexperiment = exp_id).all()
     participants = answer_set.query.filter_by(experiment_idexperiment= exp_id).all()
     
+    
+    #Rating task headers
+    question_headers = question.query.filter_by(experiment_idexperiment=exp_id).all()
+    stimulus_headers = page.query.filter_by(experiment_idexperiment=exp_id).all()
+    
+
+
+
+
+    pages = page.query.filter_by(experiment_idexperiment=exp_id).all()
+    questions = question.query.filter_by(experiment_idexperiment=exp_id).all()
+    pages_and_questions = {}
+
+    for p in pages:
+        
+        questions_list = [(p.idpage, a.idquestion) for a in questions]
+        pages_and_questions[p.idpage] = questions_list 
+
+
+
+        
+    #List of answers per participant in format question Stimulus ID/Question ID
+    #those are in answer table as page_idpage and question_idquestion respectively
+    
+    
+    
+    """
+    pages = page.query.filter_by(experiment_idexperiment=exp_id).all()
+    
+    participants_and_answers = {}
+    
+    #participants on kaikki expin osallistujat
+    for participant in participants:
+ 
+            
+        #kaikki yhden khn vastaukset ko experimentille koska answer_setin id matchaa answereiden kanssa
+             
+    
+        flash(participant.session)
+        for p in pages:
+        
+            answers = answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()
+            #kaikki yhden participantin vastaukset pagelle
+            answers_for_page = answer.query.filter(and_(answer.answer_set_idanswer_set==participant.idanswer_set, answer.page_idpage==p.idpage)).all()
+            
+            
+            for ans in answers:
+            
+                
+                
+                if ans.page_idpage == p.idpage:
+                
+                    #flash(ans.page_idpage)
+                    flash("X")
+                    
+                    
+                    
+                    
+                else:
+                    
+                    flash("NA")
+            
+            #pages on kaikki experimentin paget
+          
+                      
+            
+            for a in answers:
+
+                if p.idpage == a.page_idpage:
+                    flash("match")
+                
+                else:
+                    flash("no match")
+                 flash("participant:")
+                flash(participant.session)
+                flash("stimulus:")
+                flash(a.page_idpage)
+                flash("Kysymys")
+                flash(a.question_idquestion)
+                flash("vastaus:")
+                flash(a.answer)
+            
+                
+                
+                
+            #answers_list = (a.idanswer, a.question_idquestion, a.answer_set_idanswer_set, a.answer, a.page_idpage)
+
+            #participants_and_answers[participant.session] = answers_list 
+
+    
+            """
+    
     participants_and_answers = {}
     
     for participant in participants:
@@ -530,34 +694,29 @@ def experiment_statistics():
         answers = answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
         answers_list = [(a.idanswer, a.question_idquestion, a.answer_set_idanswer_set, a.answer, a.page_idpage) for a in answers]    
         participants_and_answers[participant.session] = answers_list 
+    
+    
 
-
-
-    pages = page.query.filter_by(experiment_idexperiment=exp_id).all()
-    pages_and_questions = {}
-
-    for p in pages:
-        
-        questions = question.query.filter_by(experiment_idexperiment=exp_id).all()
-        questions_list = [(p.idpage, a.question) for a in questions]
-        pages_and_questions[p.idpage] = questions_list 
-        
+    #Background question answers
         
     bg_questions = background_question.query.filter_by(experiment_idexperiment=exp_id).all()
     bg_answers_for_participants = {}
-    
+
     for participant in participants:
         
         bg_answers = background_question_answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all() 
         bg_answers_list = [(a.answer) for a in bg_answers] 
         bg_answers_for_participants[participant.session] = bg_answers_list 
      
-    
+
+    #started and finished ratings counters    
     started_ratings = answer_set.query.filter_by(experiment_idexperiment=exp_id).count()
+    experiment_page_count = page.query.filter_by(experiment_idexperiment=exp_id).count()
+    finished_ratings = answer_set.query.filter(and_(answer_set.answer_counter==experiment_page_count, answer_set.experiment_idexperiment==exp_id)).count()
     
     
     
-    return render_template('experiment_statistics.html', experiment_info=experiment_info, participants_and_answers=participants_and_answers, pages_and_questions=pages_and_questions, bg_questions=bg_questions, bg_answers_for_participants=bg_answers_for_participants, started_ratings=started_ratings)
+    return render_template('experiment_statistics.html', experiment_info=experiment_info, participants_and_answers=participants_and_answers, pages_and_questions=pages_and_questions, bg_questions=bg_questions, bg_answers_for_participants=bg_answers_for_participants, started_ratings=started_ratings, finished_ratings=finished_ratings, question_headers=question_headers, stimulus_headers=stimulus_headers)
 
 
 
@@ -572,7 +731,11 @@ def create_experiment():
 
     if request.method == 'POST' and form.validate():
         
-        new_exp = experiment(name=request.form['name'], instruction=request.form['instruction'], language=request.form['language'], status='Hidden', randomization='Off')
+        
+        the_time = datetime.now()
+        the_time = the_time.replace(microsecond=0)
+        
+        new_exp = experiment(name=request.form['name'], instruction=request.form['instruction'], language=request.form['language'], status='Hidden', randomization='Off', single_sentence_instruction=request.form['single_sentence_instruction'], short_instruction=request.form['short_instruction'], creator_name=request.form['creator_name'], is_archived='False', creation_time=the_time, stimulus_size='7', consent_text=request.form['consent_text'], use_forced_id='Off')
         db.session.add(new_exp)
         db.session.commit()        
         
@@ -671,27 +834,33 @@ def create_experiment_questions():
 
             list = str_list[a].split(';')
                      
-            #If there are the right amount of values for the slider input values
-            if len(list) == 3:
+            #If there are the wrong amount of values for any of the the slider input values
+            #redirect back to the form
+            if len(list) != 3:
                 
-                #flash("Question:")
-                #flash(list[0])
-                #flash("Left:")
-                #flash(list[1])
-                #flash("Right:")
-                #flash(list[2])
 
-                add_question = question(experiment_idexperiment=exp_id, question=list[0], left=list[1], right=list[2])
-                db.session.add(add_question)
-                db.session.commit()
-           
-                    
-                #If slider has too many or too litlle parameters give an error and redirect back to input form
-            else:
                 flash("Error Each slider must have 3 parameters separated by ; Some slider has:")
                 flash(len(list))
                     
                 return redirect(url_for('create_experiment_questions', exp_id=exp_id))
+
+        #If all the slider inputs were of length 3 items
+        #we can input them to db
+        for a in range(len(str_list)): 
+
+            list = str_list[a].split(';')
+       
+            #flash("Question:")
+            #flash(list[0])
+            #flash("Left:")
+            #flash(list[1])
+            #flash("Right:")
+            #flash(list[2])
+
+            add_question = question(experiment_idexperiment=exp_id, question=list[0], left=list[1], right=list[2])
+            db.session.add(add_question)
+            db.session.commit()
+                    
         
         return redirect(url_for('create_experiment_upload_stimuli', exp_id=exp_id))    
 
@@ -788,7 +957,7 @@ def view_experiment():
     
     #crap:3lines
     exp_id = request.args.get('exp_id', None)
-    media = page.query.filter_by(experiment_idexperiment=exp_id).paginate(per_page=20, page=1, error_out=True)
+    media = page.query.filter_by(experiment_idexperiment=exp_id).all()
     mtype = page.query.filter_by(experiment_idexperiment=exp_id).first()
     
     #experiment info    
@@ -950,41 +1119,53 @@ def edit_question():
 def add_bg_question():
     
     exp_id = request.args.get('exp_id', None)
-    form = CreateBackgroundQuestionForm(request.form)
+    exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
+
+    if exp_status.status == 'Public':
     
-    if request.method == 'POST' and form.validate():
-        
-        str = form.bg_questions_and_options.data
+        flash("Experiment is public. Cannot modify structure.")
 
-        #Split the form data into a list that separates questions followed by the corresponding options
-        str_list = str.split('/n')
+        return redirect(url_for('view_experiment', exp_id=exp_id))
+        
+    else:
 
-        #Iterate through the questions and options list
-        for a in range(len(str_list)):
         
-            #Split the list cells further into questions and options
-            list = str_list[a].split(';')
         
-            #Input the first item of the list as a question in db and the items followed by that as options for that question
-            for x in range(len(list)):
+        form = CreateBackgroundQuestionForm(request.form)
+        
+        if request.method == 'POST' and form.validate():
             
-                if x == 0:
-                    #flash("Kysymys")
-                    #flash(list[x])
-                    add_bgquestion = background_question(background_question=list[x], experiment_idexperiment=exp_id)
-                    db.session.add(add_bgquestion)
-                    db.session.commit()
-
-                else:
-                    #flash("optio")
-                    #flash(list[x])
-                    add_bgq_option = background_question_option(background_question_idbackground_question=add_bgquestion.idbackground_question, option=list[x])
-                    db.session.add(add_bgq_option)
-                    db.session.commit()
-        
-        return redirect(url_for('view_experiment', exp_id=exp_id))    
-
-    return render_template('add_bg_question.html', form=form)
+            str = form.bg_questions_and_options.data
+    
+            #Split the form data into a list that separates questions followed by the corresponding options
+            str_list = str.split('/n')
+    
+            #Iterate through the questions and options list
+            for a in range(len(str_list)):
+            
+                #Split the list cells further into questions and options
+                list = str_list[a].split(';')
+            
+                #Input the first item of the list as a question in db and the items followed by that as options for that question
+                for x in range(len(list)):
+                
+                    if x == 0:
+                        #flash("Kysymys")
+                        #flash(list[x])
+                        add_bgquestion = background_question(background_question=list[x], experiment_idexperiment=exp_id)
+                        db.session.add(add_bgquestion)
+                        db.session.commit()
+    
+                    else:
+                        #flash("optio")
+                        #flash(list[x])
+                        add_bgq_option = background_question_option(background_question_idbackground_question=add_bgquestion.idbackground_question, option=list[x])
+                        db.session.add(add_bgq_option)
+                        db.session.commit()
+            
+            return redirect(url_for('view_experiment', exp_id=exp_id))    
+    
+        return render_template('add_bg_question.html', form=form)
 
 
 
@@ -993,41 +1174,51 @@ def add_bg_question():
 def add_questions():
     
     exp_id = request.args.get('exp_id', None)
-    form = CreateQuestionForm(request.form)
+    exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
+
+    if exp_status.status == 'Public':
     
-    if request.method == 'POST' and form.validate():
+        flash("Experiment is public. Cannot modify structure.")
 
-        str = form.questions_and_options.data
-        str_list = str.split('/n')
-
-        for a in range(len(str_list)): 
-
-            list = str_list[a].split(';')
-                     
-            #If there are the right amount of values for the slider input values
-            if len(list) == 3:
-                
-                #flash("Question:")
-                #flash(list[0])
-                #flash("Left:")
-                #flash(list[1])
-                #flash("Right:")
-                #flash(list[2])
-
-                add_question = question(experiment_idexperiment=exp_id, question=list[0], left=list[1], right=list[2])
-                db.session.add(add_question)
-                db.session.commit()
-                    
-                #If slider has too many or too litlle parameters give an error and redirect back to input form
-            else:
-                flash("Error Each slider must have 3 parameters separated by ; Some slider has:")
-                flash(len(list))
-                    
-                return redirect(url_for('create_experiment_questions', exp_id=exp_id))
+        return redirect(url_for('view_experiment', exp_id=exp_id))
         
-        return redirect(url_for('view_experiment', exp_id=exp_id))    
-
-    return render_template('add_questions.html', form=form)
+    else:
+    
+        form = CreateQuestionForm(request.form)
+        
+        if request.method == 'POST' and form.validate():
+    
+            str = form.questions_and_options.data
+            str_list = str.split('/n')
+    
+            for a in range(len(str_list)): 
+    
+                list = str_list[a].split(';')
+                         
+                #If there are the right amount of values for the slider input values
+                if len(list) == 3:
+                    
+                    #flash("Question:")
+                    #flash(list[0])
+                    #flash("Left:")
+                    #flash(list[1])
+                    #flash("Right:")
+                    #flash(list[2])
+    
+                    add_question = question(experiment_idexperiment=exp_id, question=list[0], left=list[1], right=list[2])
+                    db.session.add(add_question)
+                    db.session.commit()
+                        
+                    #If slider has too many or too litlle parameters give an error and redirect back to input form
+                else:
+                    flash("Error Each slider must have 3 parameters separated by ; Some slider has:")
+                    flash(len(list))
+                        
+                    return redirect(url_for('create_experiment_questions', exp_id=exp_id))
+            
+            return redirect(url_for('view_experiment', exp_id=exp_id))    
+    
+        return render_template('add_questions.html', form=form)
 
 
 
@@ -1039,22 +1230,35 @@ def add_questions():
 def remove_bg_question():
 
     exp_id = request.args.get('exp_id', None)
-    remove_id = request.args.get('idbackground_question', None)
-    
-    remove_options = background_question_option.query.filter_by(background_question_idbackground_question=remove_id).all()
-    
-    for a in range(len(remove_options)): 
-        
-        #flash(remove_options[a].idbackground_question_option)
-    
-        db.session.delete(remove_options[a])
-        db.session.commit()
 
-        
-    remove_question = background_question.query.filter_by(idbackground_question=remove_id).first()
+
+    exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
+
+    if exp_status.status == 'Public':
     
-    db.session.delete(remove_question)
-    db.session.commit()
+        flash("Experiment is public. Cannot modify structure.")
+
+        return redirect(url_for('view_experiment', exp_id=exp_id))
+        
+    else:
+        
+    
+        remove_id = request.args.get('idbackground_question', None)
+        
+        remove_options = background_question_option.query.filter_by(background_question_idbackground_question=remove_id).all()
+        
+        for a in range(len(remove_options)): 
+            
+            #flash(remove_options[a].idbackground_question_option)
+        
+            db.session.delete(remove_options[a])
+            db.session.commit()
+    
+            
+        remove_question = background_question.query.filter_by(idbackground_question=remove_id).first()
+        
+        db.session.delete(remove_question)
+        db.session.commit()
   
     return redirect(url_for('view_experiment', exp_id=exp_id))
 
@@ -1066,12 +1270,22 @@ def remove_bg_question():
 def remove_question():
 
     exp_id = request.args.get('exp_id', None)
-    remove_id = request.args.get('idquestion', None)
-        
-    remove_question = question.query.filter_by(idquestion=remove_id).first()
+    exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
+
+    if exp_status.status == 'Public':
     
-    db.session.delete(remove_question)
-    db.session.commit()
+        flash("Experiment is public. Cannot modify structure.")
+
+        return redirect(url_for('view_experiment', exp_id=exp_id))
+        
+    else:
+
+
+        remove_id = request.args.get('idquestion', None)
+        remove_question = question.query.filter_by(idquestion=remove_id).first()
+        
+        db.session.delete(remove_question)
+        db.session.commit()
   
     return redirect(url_for('view_experiment', exp_id=exp_id))
 
@@ -1081,121 +1295,153 @@ def remove_question():
 def remove_experiment():
 
     exp_id = request.args.get('exp_id', None)
+    exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
+
+    if exp_status.status == 'Public':
     
-    form = RemoveExperimentForm(request.form)
+        flash("Experiment is public. Cannot modify structure.")
+
+        return redirect(url_for('view_experiment', exp_id=exp_id))
+        
+    else:
+
     
-    if request.method == 'POST' and form.validate():
-
-        if form.remove.data == 'DELETE':
-
-            
-            #This removes all experiment data from the database!
-            
-            
-            #Tables
-            
-            #background_question_option & background_question & background question answers:
-            remove_background_question = background_question.query.filter_by(experiment_idexperiment=exp_id).all()
-            
-            #cycle through all bg questions and delete their options
-            for a in range(len(remove_background_question)):
-            
-                remove_background_question_option = background_question_option.query.filter_by(background_question_idbackground_question=remove_background_question[a].idbackground_question).all() 
-            
-                for b in range(len(remove_background_question_option)):
+    
+        form = RemoveExperimentForm(request.form)
+        
+        if request.method == 'POST' and form.validate():
+    
+            if form.remove.data == 'DELETE':
+    
+                
+                #This removes all experiment data from the database!
+                
+                
+                #Remove research bulletin if it exists
+                empty_filevariable = experiment.query.filter_by(idexperiment=exp_id).first()
+    
+                if empty_filevariable.research_notification_filename is not None:
+    
+                    target = os.path.join(APP_ROOT, empty_filevariable.research_notification_filename)
                     
-                    db.session.delete(remove_background_question_option[b])
+                    if os.path.exists(target):                   
+                        os.remove(target)
+                
+                
+ 
+                
+                #Tables
+                
+                
+                remove_forced_id = forced_id.query.filter_by(experiment_idexperiment=exp_id).all()
+                
+                for b in range(len(remove_forced_id)):
+                    db.session.delete(remove_forced_id[b])
                     db.session.commit()
-            
-            
-            #Remove all background questions and all answers given to each bg question
-            for a in range(len(remove_background_question)):
-                
-                remove_background_question_answers = background_question_answer.query.filter_by(background_question_idbackground_question=remove_background_question[a].idbackground_question).all()
-                
-                for b in range(len(remove_background_question_answers)):
-                    
-                    db.session.delete(remove_background_question_answers[b])
-                    db.session.commit()
-                
-                db.session.delete(remove_background_question[a])
-                db.session.commit()
-                
 
-           
-            #Remove all questions and answers 
-            remove_question = question.query.filter_by(experiment_idexperiment=exp_id).all()
-           
-            for a in range(len(remove_question)):
                 
-                remove_question_answers = answer.query.filter_by(question_idquestion=remove_question[a].idquestion).all()
+                #background_question_option & background_question & background question answers:
+                remove_background_question = background_question.query.filter_by(experiment_idexperiment=exp_id).all()
                 
-                for b in range(len(remove_question_answers)):
+                #cycle through all bg questions and delete their options
+                for a in range(len(remove_background_question)):
+                
+                    remove_background_question_option = background_question_option.query.filter_by(background_question_idbackground_question=remove_background_question[a].idbackground_question).all() 
+                
+                    for b in range(len(remove_background_question_option)):
+                        
+                        db.session.delete(remove_background_question_option[b])
+                        db.session.commit()
+                
+                
+                #Remove all background questions and all answers given to each bg question
+                for a in range(len(remove_background_question)):
                     
-                    db.session.delete(remove_question_answers[b])
+                    remove_background_question_answers = background_question_answer.query.filter_by(background_question_idbackground_question=remove_background_question[a].idbackground_question).all()
+                    
+                    for b in range(len(remove_background_question_answers)):
+                        
+                        db.session.delete(remove_background_question_answers[b])
+                        db.session.commit()
+                    
+                    db.session.delete(remove_background_question[a])
                     db.session.commit()
-                
-                db.session.delete(remove_question[a])
-                db.session.commit()
-           
-           
-            #Remove all pages and datafiles
-            remove_pages = page.query.filter_by(experiment_idexperiment=exp_id).all()
-            
-            for a in range(len(remove_pages)):
-            
-                if remove_pages[a].type == 'text':
                     
+    
+               
+                #Remove all questions and answers 
+                remove_question = question.query.filter_by(experiment_idexperiment=exp_id).all()
+               
+                for a in range(len(remove_question)):
+                    
+                    remove_question_answers = answer.query.filter_by(question_idquestion=remove_question[a].idquestion).all()
+                    
+                    for b in range(len(remove_question_answers)):
+                        
+                        db.session.delete(remove_question_answers[b])
+                        db.session.commit()
+                    
+                    db.session.delete(remove_question[a])
+                    db.session.commit()
+               
+               
+                #Remove all pages and datafiles
+                remove_pages = page.query.filter_by(experiment_idexperiment=exp_id).all()
+                
+                for a in range(len(remove_pages)):
+                
+                    if remove_pages[a].type == 'text':
+                        
+                        db.session.delete(remove_pages[a])
+                        db.session.commit()
+                        
+                    else:
+                        
+                        target = os.path.join(APP_ROOT, remove_pages[a].media)
+    
+                        if os.path.exists(target):                   
+                            os.remove(target)
+        
+                    #Now that the files are removed we can delete the page
                     db.session.delete(remove_pages[a])
                     db.session.commit()
                     
-                else:
                     
-                    target = os.path.join(APP_ROOT, remove_pages[a].media)
-
-                    if os.path.exists(target):                   
-                        os.remove(target)
-    
-                #Now that the files are removed we can delete the page
-                db.session.delete(remove_pages[a])
-                db.session.commit()
+                #Remove all answer_sets and trial_randomization orders
+                remove_answer_set = answer_set.query.filter_by(experiment_idexperiment=exp_id).all()
                 
-                
-            #Remove all answer_sets and trial_randomization orders
-            remove_answer_set = answer_set.query.filter_by(experiment_idexperiment=exp_id).all()
-            
-            for a in range(len(remove_answer_set)):
-                
-                remove_trial_randomizations = trial_randomization.query.filter_by(answer_set_idanswer_set=remove_answer_set[a].idanswer_set).all()
-                
-                for b in range(len(remove_trial_randomizations)):
+                for a in range(len(remove_answer_set)):
                     
-                    db.session.delete(remove_trial_randomizations[b])
+                    remove_trial_randomizations = trial_randomization.query.filter_by(answer_set_idanswer_set=remove_answer_set[a].idanswer_set).all()
+                    
+                    for b in range(len(remove_trial_randomizations)):
+                        
+                        db.session.delete(remove_trial_randomizations[b])
+                        db.session.commit()
+                    
+                    db.session.delete(remove_answer_set[a])
                     db.session.commit()
-                
-                db.session.delete(remove_answer_set[a])
-                db.session.commit()
-
-            
-            #Remove experiment table
-            remove_experiment = experiment.query.filter_by(idexperiment=exp_id).first()
-            db.session.delete(remove_experiment)
-            db.session.commit()
-            
-            
-            flash("Experiment was removed from database!")
-            
-            return redirect(url_for('index'))
-            
-        else:
-            
-            flash("Experiment was not removed!")
-            
-            return redirect(url_for('view_experiment', exp_id=exp_id))
-            
-
     
-    return render_template('remove_experiment.html', form=form, exp_id=exp_id)
+                
+                #Remove experiment table
+                remove_experiment = experiment.query.filter_by(idexperiment=exp_id).first()
+                db.session.delete(remove_experiment)
+                db.session.commit()
+                
+                
+                flash("Experiment was removed from database!")
+                
+                return redirect(url_for('index'))
+                
+            else:
+                
+                flash("Experiment was not removed!")
+                
+                return redirect(url_for('view_experiment', exp_id=exp_id))
+                
+    
+        
+        return render_template('remove_experiment.html', form=form, exp_id=exp_id)
 
 
 
@@ -1204,48 +1450,59 @@ def remove_experiment():
 def remove_page():
 
     exp_id = request.args.get('exp_id', None)
-    remove_id = request.args.get('idpage', None)
-    remove_page = page.query.filter_by(idpage=remove_id).first()
-    experiment_pages = page.query.filter_by(experiment_idexperiment=exp_id).all()
+    exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
+
+    if exp_status.status == 'Public':
     
-    #if stimulustype is text, the stimulus itself is text on the database, other stimulus types are real files
-    #on the server and need to be deleted    
-    if remove_page.type != 'text':
+        flash("Experiment is public. Cannot modify structure.")
+
+        return redirect(url_for('view_experiment', exp_id=exp_id))
         
-        #helper variable
-        do_not_delete_file = 'False'
+    else:
+
+    
+        remove_id = request.args.get('idpage', None)
+        remove_page = page.query.filter_by(idpage=remove_id).first()
+        experiment_pages = page.query.filter_by(experiment_idexperiment=exp_id).all()
+        
+        #if stimulustype is text, the stimulus itself is text on the database, other stimulus types are real files
+        #on the server and need to be deleted    
+        if remove_page.type != 'text':
             
-        #if the file to be deleted is in duplicate use of another page then we won't delete the file
-        for a in range(len(experiment_pages)):
-
-            #flash("in da for")
+            #helper variable
+            do_not_delete_file = 'False'
                 
-            if experiment_pages[a].media == remove_page.media and experiment_pages[a].idpage != remove_page.idpage:
-
-                #flash("in da if")
-                do_not_delete_file = 'True'
-
-        #If no other page is using the file then lets remove it
-        if do_not_delete_file == 'False':
-            #remove old file            
-            target = os.path.join(APP_ROOT, remove_page.media)
-            #flash("Remove:")
-            #flash(target)
-            os.remove(target)
+            #if the file to be deleted is in duplicate use of another page then we won't delete the file
+            for a in range(len(experiment_pages)):
     
-        db.session.delete(remove_page)
-        db.session.commit()
-  
-        return redirect(url_for('view_experiment', exp_id=exp_id))
+                #flash("in da for")
+                    
+                if experiment_pages[a].media == remove_page.media and experiment_pages[a].idpage != remove_page.idpage:
     
-    if remove_page.type == 'text':
+                    #flash("in da if")
+                    do_not_delete_file = 'True'
+    
+            #If no other page is using the file then lets remove it
+            if do_not_delete_file == 'False':
+                #remove old file            
+                target = os.path.join(APP_ROOT, remove_page.media)
+                #flash("Remove:")
+                #flash(target)
+                os.remove(target)
         
-        db.session.delete(remove_page)
-        db.session.commit()
+            db.session.delete(remove_page)
+            db.session.commit()
+      
+            return redirect(url_for('view_experiment', exp_id=exp_id))
+        
+        if remove_page.type == 'text':
+            
+            db.session.delete(remove_page)
+            db.session.commit()
+            
+            return redirect(url_for('view_experiment', exp_id=exp_id))
         
         return redirect(url_for('view_experiment', exp_id=exp_id))
-    
-    return redirect(url_for('view_experiment', exp_id=exp_id))
 
 
 @app.route('/publish_experiment')
@@ -1314,6 +1571,96 @@ def disable_randomization():
     db.session.commit()
   
     return redirect(url_for('view_experiment', exp_id=exp_id))
+
+
+@app.route('/enable_forced_id')
+@login_required
+def enable_forced_id():
+
+    exp_id = request.args.get('exp_id', None)
+        
+    enable_forced_id = experiment.query.filter_by(idexperiment = exp_id).first()
+    
+    enable_forced_id.use_forced_id = 'On'
+    
+    flash("Enabled forced ID login")
+    
+    db.session.commit()
+  
+    return redirect(url_for('view_experiment', exp_id=exp_id))
+
+
+@app.route('/disable_forced_id')
+@login_required
+def disable_forced_id():
+
+    exp_id = request.args.get('exp_id', None)
+        
+    disable_forced_id = experiment.query.filter_by(idexperiment = exp_id).first()
+    
+    disable_forced_id.use_forced_id = 'Off'
+    
+    flash("Disabled forced ID login")
+    
+    db.session.commit()
+  
+    return redirect(url_for('view_experiment', exp_id=exp_id))
+
+
+@app.route('/view_forced_id_list', methods=['GET', 'POST'])
+@login_required
+def view_forced_id_list():
+
+    exp_id = request.args.get('exp_id', None)
+    
+    id_list = forced_id.query.filter_by(experiment_idexperiment=exp_id).all()
+    
+    
+    form = GenerateIdForm(request.form)
+        
+    if request.method == 'POST' and form.validate():
+
+        
+        for i in range(int(request.form['number'])): 
+        
+            random_id = str(request.form['string']) + str(secrets.token_hex(3))
+            check_answer_set = answer_set.query.filter_by(session=random_id).first()
+            check_forced_id = forced_id.query.filter_by(pregenerated_id=random_id).first()
+            
+            
+            #here we check if the generated id is found from given answers from the whole database in answer_set table
+            #or from forced_id table. If so another id is generated instead to avoid a duplicate
+            if check_answer_set is not None or check_forced_id is not None:
+            
+                #flash("ID already existed; generated a new one")
+                random_id = secrets.token_hex(3)
+                check_answer_set = answer_set.query.filter_by(session=random_id).first()
+                check_forced_id = forced_id.query.filter_by(pregenerated_id=random_id).first()   
+                
+            input_id = forced_id(experiment_idexperiment=exp_id, pregenerated_id=random_id)
+            db.session.add(input_id)
+            db.session.commit()
+        
+
+        
+
+        return redirect(url_for('view_forced_id_list', exp_id=exp_id))
+    
+    
+    
+    
+    
+    
+  
+    return render_template('view_forced_id_list.html', exp_id=exp_id, id_list=id_list)
+
+
+
+
+
+
+
+
 
 
 @app.route('/edit_stimuli', methods=['GET', 'POST'])
@@ -1395,79 +1742,194 @@ def edit_stimuli():
 def add_stimuli():
 
     exp_id = request.args.get('exp_id', None)
-    stimulus_type = request.args.get('stimulus_type', None)
-       
-    form = UploadStimuliForm(request.form)
-
-    if request.method == 'POST':
     
+    
+    exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
+
+    
+    if exp_status.status == 'Public':
+    
+        flash("Experiment is public. Cannot modify structure.")
+
+        return redirect(url_for('view_experiment', exp_id=exp_id))
         
-        if stimulus_type == 'text':
+    else:
+
+
+        #If there are no pages set for the experiment lets reroute user to create experiment stimuli upload instead
+    
+        is_there_any_stimuli = page.query.filter_by(experiment_idexperiment = exp_id).first()
+    
+        if is_there_any_stimuli is None:
         
-            #flash("db insert text")
+            return redirect(url_for('create_experiment_upload_stimuli', exp_id=exp_id))
+
+        
+        
+        stimulus_type = request.args.get('stimulus_type', None)
+           
+        form = UploadStimuliForm(request.form)
+    
+        if request.method == 'POST':
+        
             
-            string = form.text.data
-            str_list = string.split('/n')
-
-            for a in range(len(str_list)):
-
-                #flash("lisättiin:")
-                #flash(str_list[a])
-                add_text_stimulus = page(experiment_idexperiment=exp_id, type='text', text=str_list[a], media='none')
-                db.session.add(add_text_stimulus)
-                db.session.commit()
-
-                #flash("Succes!")
-                
-            return redirect(url_for('view_experiment', exp_id=exp_id))  
-                
-                
-        
-        else:
-
-            #Upload stimuli into /static/experiment_stimuli/exp_id folder
-            #Create the pages for the stimuli by inserting experiment_id, stimulus type, text and names of the stimulus files (as a path to the folder)
-            path = 'static/experiment_stimuli/' + str(exp_id)
-        
-            target = os.path.join(APP_ROOT, path)
-            #flash(target)
+            if stimulus_type == 'text':
             
-            if not os.path.isdir(target):
-                os.mkdir(target)
-                #flash("make dir")
-        
-        
-            #This returns a list of filenames: request.files.getlist("file")
-        
-            for file in request.files.getlist("file"):
+                #flash("db insert text")
+                
+                string = form.text.data
+                str_list = string.split('/n')
+    
+                for a in range(len(str_list)):
+    
+                    #flash("lisättiin:")
+                    #flash(str_list[a])
+                    add_text_stimulus = page(experiment_idexperiment=exp_id, type='text', text=str_list[a], media='none')
+                    db.session.add(add_text_stimulus)
+                    db.session.commit()
+    
+                    #flash("Succes!")
+                    
+                return redirect(url_for('view_experiment', exp_id=exp_id))  
+                    
+                    
             
-                #save files in the correct folder
-                #flash(file.filename)
-                filename = file.filename
-                destination = "/".join([target, filename])
-                #flash("destination")
-                #flash(destination)
-                file.save(destination)
+            else:
+    
+                #Upload stimuli into /static/experiment_stimuli/exp_id folder
+                #Create the pages for the stimuli by inserting experiment_id, stimulus type, text and names of the stimulus files (as a path to the folder)
+                path = 'static/experiment_stimuli/' + str(exp_id)
+            
+                target = os.path.join(APP_ROOT, path)
+                #flash(target)
                 
-                #add pages to the db
-                db_path = path +  str('/') + str(filename)
+                if not os.path.isdir(target):
+                    os.mkdir(target)
+                    #flash("make dir")
+            
+            
+                #This returns a list of filenames: request.files.getlist("file")
+            
+                for file in request.files.getlist("file"):
                 
-                #flash("db path")
-                #flash(db_path)
-                
-                new_page = page(experiment_idexperiment=exp_id, type=form.type.data, media=db_path)
-                
-                db.session.add(new_page)
-                db.session.commit()
-                
-                #flash("Succes!")
+                    #save files in the correct folder
+                    #flash(file.filename)
+                    filename = file.filename
+                    destination = "/".join([target, filename])
+                    #flash("destination")
+                    #flash(destination)
+                    file.save(destination)
+                    
+                    #add pages to the db
+                    db_path = path +  str('/') + str(filename)
+                    
+                    #flash("db path")
+                    #flash(db_path)
+                    
+                    new_page = page(experiment_idexperiment=exp_id, type=form.type.data, media=db_path)
+                    
+                    db.session.add(new_page)
+                    db.session.commit()
+                    
+                    #flash("Succes!")
+                    
+                return redirect(url_for('view_experiment', exp_id=exp_id))
                 
             return redirect(url_for('view_experiment', exp_id=exp_id))
             
-        return redirect(url_for('view_experiment', exp_id=exp_id))
+      
+        return render_template('add_stimuli.html', form=form, stimulus_type=stimulus_type)
+
+
+
+@app.route('/upload_research_notification', methods=['GET', 'POST'])
+@login_required
+def upload_research_notification():
+    
+    exp_id = request.args.get('exp_id', None)
+    
+    form = UploadResearchBulletinForm(request.form)
+    
+    if request.method == 'POST':
+
+        path = 'static/experiment_stimuli/' + str(exp_id)
+            
+        target = os.path.join(APP_ROOT, path)
+        #flash(target)
+                
+        if not os.path.isdir(target):
+            os.mkdir(target)
+            #flash("make dir")
+            
+            
+        #This returns a list of filenames: request.files.getlist("file")
+    
+        for file in request.files.getlist("file"):
         
-  
-    return render_template('add_stimuli.html', form=form, stimulus_type=stimulus_type)
+            #save files in the correct folder
+            #flash(file.filename)
+            filename = file.filename
+            destination = "/".join([target, filename])
+            #flash("destination")
+            #flash(destination)
+            file.save(destination)
+            
+            #add pages to the db
+            db_path = path +  str('/') + str(filename)
+            
+            #flash("db path")
+            #flash(db_path)
+            
+            
+            bulletin = experiment.query.filter_by(idexperiment=exp_id).first()
+            
+            bulletin.research_notification_filename = db_path
+            db.session.commit()
+            
+            #flash("Succes!")
+            
+        return redirect(url_for('view_experiment', exp_id=exp_id))
+
+    
+    return render_template('upload_research_notification.html', exp_id=exp_id, form=form)
+
+
+@app.route('/remove_research_notification')
+@login_required
+def remove_research_notification():
+    
+    exp_id = request.args.get('exp_id', None)
+    
+    empty_filevariable = experiment.query.filter_by(idexperiment=exp_id).first()
+    
+    target = os.path.join(APP_ROOT, empty_filevariable.research_notification_filename)
+    
+    if os.path.exists(target):                   
+        os.remove(target)
+ 
+    
+    empty_filevariable.research_notification_filename = None
+    
+    db.session.commit()
+    
+    return redirect(url_for('view_experiment', exp_id=exp_id))
+
+
+
+@app.route('/view_research_notification')
+@login_required
+def view_research_notification():
+    
+    exp_id = request.args.get('exp_id', None)
+    image = experiment.query.filter_by(idexperiment=exp_id).first()
+    
+    research_notification_filename = image.research_notification_filename
+    
+    return render_template('view_research_notification.html', research_notification_filename=research_notification_filename)
+
+
+
+
 
 
 @app.route('/download_csv')
@@ -1496,4 +1958,19 @@ def researcher_info():
 
   
     return render_template('researcher_info.html')
+
+
+
+
+
+#TEST PAGE
+    
+@app.route('/test_page')
+def test_page():
+
+    flash('Please log in to access this page.')
+    
+    session.clear()
+  
+    return render_template('test_page.html')
 

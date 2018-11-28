@@ -35,7 +35,7 @@
     </tr>
     <tr>
       <td>Number of finished ratings:</td>
-      <td>??</td>
+      <td>{{ finished_ratings }}</td>
     </tr>
     <tr>
     <td><a class="btn btn-primary btn-info" href="{{ url_for('download_csv', exp_id=exp.idexperiment) }}" role="button">Export results (csv)</a></td>
@@ -46,18 +46,90 @@
 
 {% endfor %}
 
-<h1 class="container mt-5 display-4 text-left"><br>Rating task values:</h1>
+
+
+<h1 class="container mt-5 display-4 text-left"><br>Rating task question headers:</h1>
+<br>
+<table class="table">
+  <thead>
+    <tr>
+    <th scope="col" nowrap>Question ID:</td>
+    <th scope="col" nowrap>Question:</th>
+    <th scope="col" nowrap>Left scale</th>
+    <th scope="col" nowrap>Right scale</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for q in question_headers %}    
+    <tr>
+    <td>{{ q.idquestion }}</td>
+    <td>{{ q.question }}</td>
+    <td>{{ q.left }}</td>
+    <td>{{ q.right }}</td>
+    </tr>
+    {% endfor %}    
+  </tbody>
+</table>
+
+<h1 class="container mt-5 display-4 text-left"><br>Rating task stimulus headers:</h1>
+<br>
+<table class="table">
+  <thead>
+    <tr>
+    <th scope="col" nowrap>Stimulus ID:</td>
+    <th scope="col" nowrap>Stimulus:</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in stimulus_headers %}    
+    <tr>
+    <td>{{ s.idpage }}</td>
+    {% if s.type == 'text' %}
+    <td>{{ s.text }}</td>
+    {% else %}
+    <td>{{ s.media }}</td>
+    {% endif %}
+
+    </tr>
+    {% endfor %}    
+  </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h1 class="container mt-5 display-4 text-left"><br>Rating task values: (Stimulus ID/Question ID)</h1>
 <br>
 
 
 <table class="table">
   <thead>
+      
     <tr>
-     <th scope="col" nowrap>Page ID/Question:</td>
+     <th scope="col" nowrap>Participant ID:</th>
      {% for page in pages_and_questions %}
      
             {% for p in pages_and_questions[page] %}
-             <th scope="col" nowrap>{{ p[0]}} / {{ p[1]}}  </th>
+             <th scope="col" nowrap>{{ p[0]}}/{{ p[1]}}</th>
             {% endfor %}
 
      {% endfor %}
@@ -68,7 +140,7 @@
     <tr>
         <td>{{ participant }}</td>
         {% for answer in participants_and_answers[participant] %}
-            <td align="center">{{ answer[3] }}</td>
+            <td>{{ answer[3] }}</td>
         {% endfor %}
     </tr>
     {% endfor %}

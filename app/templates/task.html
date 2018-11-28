@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
-<br>
+
 <br>    
 
 {% if session['randomization']=='Off' %}
@@ -10,15 +10,15 @@
     {% if session['type']=='text' %}
         <div class="container text-center mt-5 pt-5">
             {% for page in pages.items %}
-            <h3 class="text-center mt-5"><br>{{ page.text }}</h3>
+            <h{{ stimulus_size_text }} class="text-center mt-5"><br>{{ page.text }}</h{{ stimulus_size_text }}>
             {% endfor %}
         </div>
-           <br><br><br><br><br>
+           <br><br>
     {% endif %}
     
     
     {% if session['type']=='picture' %}
-        <div class="container stimulus col-9 mt-5 pt-5">
+        <div class="container stimulus col-{{stimulus_size}} mt-5 pt-5">
             {% for page in pages.items %}
                 <img src="/{{ page.media }}" class="img-fluid">
             {% endfor %}
@@ -27,7 +27,7 @@
     
     
     {% if session['type']=='video' %}
-        <div class="col-9 container stimulus mt-5 pt-5">
+        <div class="col-{{stimulus_size}} container stimulus mt-5 pt-5">
             {% for page in pages.items %}
                 <div class="embed-responsive embed-responsive-16by9">
                     <iframe class="embed-responsive-item" src="/{{ page.media }}" allowfullscreen></iframe>
@@ -38,7 +38,7 @@
 
 
     {% if session['type']=='audio' %}
-        <div class="col-4 container stimulus mt-5 pt-5">
+        <div class="col-{{stimulus_size}} container stimulus mt-5 pt-5">
             {% for page in pages.items %}
                 <div class="embed-responsive embed-responsive-16by9">
                     <iframe class="embed-responsive-item" src="/{{ page.media }}" allowfullscreen></iframe>
@@ -55,15 +55,15 @@
     {% if session['type']=='text' %}
         <div class="container text-center mt-5 pt-5">
             {% for page in pages.items %}
-            <h3 class="text-center mt-5"><br>{{ randomized_stimulus.text }}</h3>
+            <h{{ stimulus_size_text }} class="text-center mt-5"><br>{{ randomized_stimulus.text }}</h{{ stimulus_size_text }}>
             {% endfor %}
         </div>
-           <br><br><br><br><br>
+           <br><br>
     {% endif %}
     
     
     {% if session['type']=='picture' %}
-        <div class="container stimulus col-9 mt-5 pt-5">
+        <div class="container stimulus col-{{stimulus_size}} mt-5 pt-5">
             {% for page in pages.items %}
                 <img src="/{{ randomized_stimulus.media }}" class="img-fluid">
             {% endfor %}
@@ -72,7 +72,7 @@
     
     
     {% if session['type']=='video' %}
-        <div class="col-9 container stimulus mt-5 pt-5">
+        <div class="col-{{stimulus_size}} container stimulus mt-5 pt-5">
             {% for page in pages.items %}
                 <div class="embed-responsive embed-responsive-16by9">
                     <iframe class="embed-responsive-item" src="/{{ randomized_stimulus.media }}" allowfullscreen></iframe>
@@ -83,7 +83,7 @@
 
 
     {% if session['type']=='audio' %}
-        <div class="col-4 container stimulus mt-5 pt-5">
+        <div class="col-{{stimulus_size}} container stimulus mt-5 pt-5">
             {% for page in pages.items %}
                 <div class="embed-responsive embed-responsive-16by9">
                     <iframe class="embed-responsive-item" src="/{{ randomized_stimulus.media }}" allowfullscreen></iframe>
@@ -96,39 +96,40 @@
 {% endif %}
 
 
-
-
-
-
-
-
     
     <br>
  
- <h4 class="text-center">Rate the above stimulus based on these categories</h4>
+ 
+ 
+ 
+ <h4 class="text-center">{{ rating_instruction }}</h4>
 
   <form class="form-group mt-5" action="" method="post">
     {% for category in form.categories1 %}
         {% for scale in form.categories1[category] %}
-            <div class="row form-group">
-                <div class="col-2 text-center">
-                    <p>{{ scale[0] }}</p> 
-                </div>
-                <div class="col text-center">
+            <div class="row form-group mt-0 mb-0">
+                <h6 class="col-3 text-right mt-0 mb-0">
+                    {{ scale[0] }} 
+                </h6>
+                <h6 class="col text-center mt-0 mb-0">
                     <label for="customRange">{{ category[1] }}</label>
                     <input type="range" class="custom-range" id="customRange" name={{ category[0] }}>
                     
-                </div>
-                <div class="col-2 text-center">
-                <p>{{ scale[1] }}</p> 
-                </div>
+                </h6>
+                <h6 class="col-3 text-left mt-0 mb-0">
+                {{ scale[1] }}
+                </h6>
             </div>
          {% endfor %}   
     {% endfor %}
         <div class="form-row text-center">
             <div class="col-12">
-                <a class="btn btn-primary" href={{ url_for('quit_task') }} role="button">Quit task</a>
-                <button type="submit" class="btn btn-primary">Next page</button>
+                <a class="btn btn-primary" href={{ url_for('quit_task') }} role="button">{{ _('Quit task') }}</a>
+                <button type="submit" class="btn btn-primary">{{ _('Next page') }}</button>
+            </div>
+            <div class="col-12">
+                     <br>
+                    <p>{{ _('You can zoom in/out the page view by pressing ctrl+/ctrl- (Windows) or ⌘+/⌘- (Mac)') }} </p>
             </div>
         </div>    
   </form>  

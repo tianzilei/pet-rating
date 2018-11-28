@@ -2,7 +2,7 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 <!doctype html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -12,22 +12,24 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
-    <title>Mega-fMRI Stimulus Rating Tool</title>
+    <title>Onni</title>
 
     <!-- Bootstrap core CSS -->
     <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Custom styles for this template -->
-    <link href="sticky-footer-navbar.css" rel="stylesheet">
+    
+    <link href="/static/css/slider.css" rel="stylesheet">
+    
   </head>
   <body>
     <header>
 <!-- Navigation -->
-<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+<nav class="navbar navbar-expand navbar-dark bg-dark fixed-top">
   <div class="col navbar-brand">
       <img src="/static/img/madam-300x250.jpg" alt="Logo" style="width:70px;">
         {% if pages %}  
-            <a class="navbar-brand pl-5 font-weight-light">Participant ID: <span class="text-success font-weight-bold">{{ session['user']}}</span></a>
+            <a class="navbar-brand pl-5 font-weight-light"><span class="text-success font-weight-bold">{{ session['user']}}</span></a>
         {% else %}
         
             
@@ -36,9 +38,9 @@
             
         {% endif %}
     </div>
-    <div class="col-6 navbar-nav">
+    <div class="navbar-nav w-50">
         {% if pages %}    
-            <div class="progress-bar bg-success progress-bar-striped" role="progressbar" style="width: {{ progress_bar_percentage }}%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">Task progress: {{   progress_bar_percentage }}%</div>
+            <div class="progress-bar bg-success progress-bar-striped" role="progressbar" style="width: {{ progress_bar_percentage }}%" aria-valuemin="0" aria-valuemax="100">{{ _('Task progress:') }} {{   progress_bar_percentage }}%</div>
         {% endif %}        
     </div>
             <div class="col text-success text-right">
@@ -52,7 +54,6 @@
                     {% endwith %}
                   {% endblock %}
                   {% if current_user.is_authenticated %}
-                  <a class="nav-item" href="{{ url_for('researcher_info') }}" class="nav-link">Info |</a>
 
 
 
@@ -62,16 +63,17 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           
-          <a class="dropdown-item" href="{{ url_for('set_language', language='Finnish') }}">Finnish</a>
-          <a class="dropdown-item" href="{{ url_for('set_language', language='English') }}">English</a>
-          <a class="dropdown-item" href="{{ url_for('set_language', language='Persian') }}">Persian</a>
-          <a class="dropdown-item" href="{{ url_for('set_language', language='Greek') }}">Greek</a>
-          <a class="dropdown-item" href="{{ url_for('set_language', language='Italian') }}">Italian</a>
-          <a class="dropdown-item" href="{{ url_for('set_language', language='Chinese') }}">Chinese</a>
-          <a class="dropdown-item" href="{{ url_for('set_language', language='All') }}">Show all languages</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Finnish', lang='fi') }}">Finnish</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='English', lang='en') }}">English</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Persian', lang='fa') }}">Persian</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Greek',   lang='el') }}">Greek</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Italian', lang='it') }}">Italian</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Chinese', lang='zh') }}">Chinese</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='All') }}">Show all experiments</a>
         </div>
-
-         <a class="nav-item" href="{{ url_for('create_experiment') }}" class="nav-link">| Create experiment |</a>
+         <a class="nav-item" href="{{ url_for('researcher_info') }}" class="nav-link">| Info |</a>
+         <a class="nav-item" href="{{ url_for('create_experiment') }}" class="nav-link">Create |</a>
+         <a class="nav-item" href="" class="nav-link">Archives |</a>
 
                   {% endif %}
                 {% if current_user.is_anonymous %}
@@ -83,13 +85,13 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           
-          <a class="dropdown-item" href="{{ url_for('set_language', language='Finnish') }}">Finnish</a>
-          <a class="dropdown-item" href="{{ url_for('set_language', language='English') }}">English</a>
-          <a class="dropdown-item" href="{{ url_for('set_language', language='Persian') }}">Persian</a>
-          <a class="dropdown-item" href="{{ url_for('set_language', language='Greek') }}">Greek</a>
-          <a class="dropdown-item" href="{{ url_for('set_language', language='Italian') }}">Italian</a>
-          <a class="dropdown-item" href="{{ url_for('set_language', language='Chinese') }}">Chinese</a>
-          <a class="dropdown-item" href="{{ url_for('set_language', language='All') }}">Show all languages</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Finnish', lang='fi') }}">Finnish</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='English', lang='en') }}">English</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Persian', lang='fa') }}">Persian</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Greek',   lang='el') }}">Greek</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Italian', lang='it') }}">Italian</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='Chinese', lang='zh') }}">Chinese</a>
+          <a class="dropdown-item" href="{{ url_for('set_language', language='All') }}">Show all experiments</a>
         </div>
                 
                 

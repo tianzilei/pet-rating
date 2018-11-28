@@ -4,7 +4,7 @@ from app.models import experiment
 from app.models import answer_set
 from app.models import background_question_answer
 from app.models import question, page, answer
-from app.models import user, trial_randomization
+from app.models import user, trial_randomization, forced_id
 
 
 
@@ -20,8 +20,10 @@ def make_shell_context():
             'page': page,
             'answer': answer,
             'user': user,
-            'trial_randomization': trial_randomization
+            'trial_randomization': trial_randomization,
+            'forced_id': forced_id
             }
+
 
 
 """
