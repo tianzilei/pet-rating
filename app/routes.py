@@ -76,6 +76,12 @@ def consent():
 
     experiment_info = experiment.query.filter_by(idexperiment=exp_id).first()
     
+    instruction_paragraphs = str(experiment_info.short_instruction)
+    instruction_paragraphs = instruction_paragraphs.split('<br>')
+    
+    consent_paragraphs = str(experiment_info.consent_text)
+    consent_paragraphs = consent_paragraphs.split('<br>')
+    
     
     
     
@@ -87,7 +93,7 @@ def consent():
 
 
 
-    return render_template('consent.html', exp_id=exp_id, experiment_info=experiment_info)
+    return render_template('consent.html', exp_id=exp_id, experiment_info=experiment_info, instruction_paragraphs=instruction_paragraphs, consent_paragraphs=consent_paragraphs)
 
 
 @app.route('/set_language')
@@ -420,8 +426,14 @@ def create_task():
 def instructions():
     
     participant_id = session['user']
-    instructions = experiment.query.filter_by(idexperiment = session['exp_id']).all()
-    return render_template('instructions.html', instructions=instructions, participant_id=participant_id)
+    instructions = experiment.query.filter_by(idexperiment = session['exp_id']).first()
+    
+    instruction_paragraphs = str(instructions.instruction)
+    instruction_paragraphs = instruction_paragraphs.split('<br>')
+
+    
+    
+    return render_template('instructions.html', instruction_paragraphs=instruction_paragraphs, participant_id=participant_id)
 
 
 @app.route('/task/<int:page_num>', methods=['GET', 'POST'])

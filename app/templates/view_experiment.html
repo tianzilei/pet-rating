@@ -114,14 +114,17 @@
     
     <tr>
       <td nowrap>Detailed instructions:</td>
-      <td>{{ exp.instruction }}</td>
+      
+      
+      <td class="text-justify">{{ exp.instruction }}</td>
+      
       <td nowrap>
      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('edit_experiment', exp_id=exp.idexperiment) }}" role="button">Edit properties</a>
     </td>
     </tr>
     <tr>
       <td nowrap>Short description:</td>
-      <td>{{ exp.short_instruction }}</td>
+      <td class="text-justify">{{ exp.short_instruction }}</td>
       <td nowrap></td>
     </tr>
 
@@ -133,7 +136,7 @@
 
     <tr>
       <td nowrap>Consent form text:</td>
-      <td>{{ exp.consent_text }}</td>
+      <td class="text-justify">{{ exp.consent_text }}</td>
       <td nowrap></td>
     </tr>
     <tr>

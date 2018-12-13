@@ -4,14 +4,13 @@
 <h1 class="container mt-5 display-4"><br>{{ _('Instructions:') }}</h1>
 
 
-{% block attributes %}
-    {% for ins in instructions %}
-        <div class="row lead"> {{ ins.instruction }} </div>    
-    {% endfor %}
-    {% endblock %}
+{% for para in instruction_paragraphs %}
+<p class="lead text-justify">{{ para }}</p>
+{% endfor %}
 
 <br>
 <h3 class="row display-5 text-danger">{{ _('Notice!') }}</h3>
+<br>
 <div class="row lead">{{ _('If you wish to quit a rating task before it is fully completed, you can return to finish the task later but you will need your participant ID-number in order to do that. Please save your participant ID before starting the rating task!') }}</div>
 
 <br>

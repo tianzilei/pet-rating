@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-11-28 14:59+0200\n"
+"POT-Creation-Date: 2018-12-13 13:13+0200\n"
 "PO-Revision-Date: 2018-11-27 16:38+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fi\n"
@@ -26,24 +26,24 @@ msgstr "Jatka tehtävää"
 msgid "Start rating"
 msgstr "Aloita"
 
-#: app/routes.py:359
+#: app/routes.py:371
 msgid "ID already in use"
 msgstr "Kyseinen ID on jo käytössä"
 
-#: app/routes.py:368
+#: app/routes.py:380
 msgid "No such ID set for this experiment"
 msgstr "Kyseistä ID:tä ei löydy"
 
-#: app/templates/base.html:43
+#: app/templates/base.html:35
 msgid "Task progress:"
-msgstr "Kokeesta tehty:"
+msgstr "Tehtävästä valmiina:"
 
 #: app/templates/begin_with_id.html:8
 msgid "Please insert your ID-code below:"
 msgstr "Syötä koehenkilötunnuksesi:"
 
-#: app/templates/begin_with_id.html:12 app/templates/consent.html:29
-#: app/templates/instructions.html:14 app/templates/quit_task.html:4
+#: app/templates/begin_with_id.html:12 app/templates/consent.html:38
+#: app/templates/instructions.html:12 app/templates/quit_task.html:4
 #: app/templates/quit_task.html:7
 msgid "Notice!"
 msgstr "Huom!"
@@ -56,37 +56,37 @@ msgstr ""
 "Tähän kokeeseen osallistumiseen vaaditaan ID-tunnus. Syötä ID-tunnuksesi "
 "alla olevaan kenttään."
 
-#: app/templates/consent.html:11
+#: app/templates/consent.html:17
 msgid "Consent for participation:"
 msgstr "Suostumus osallistumiseksi:"
 
-#: app/templates/consent.html:14
+#: app/templates/consent.html:20
 msgid "Research bulletin can be read"
 msgstr "Tutkimustiedote on luettavissa"
 
-#: app/templates/consent.html:14
+#: app/templates/consent.html:20
 msgid "here."
 msgstr "täällä"
 
-#: app/templates/consent.html:20
+#: app/templates/consent.html:29
 msgid "Agree"
 msgstr "Suostun"
 
-#: app/templates/consent.html:21
+#: app/templates/consent.html:30
 msgid "Disagree"
 msgstr "En suostu"
 
-#: app/templates/consent.html:32
+#: app/templates/consent.html:41
 msgid ""
 "In order to participate for the study you need to agree with the terms "
 "presented."
 msgstr "Osallistuaksesi kokeeseen sinun on hyväksyttävä esitetyt ehdot."
 
-#: app/templates/consent.html:35
+#: app/templates/consent.html:44
 msgid "Close Notice"
 msgstr "Sulje"
 
-#: app/templates/consent.html:36 app/templates/task_completed.html:15
+#: app/templates/consent.html:45 app/templates/task_completed.html:15
 msgid "Return Home"
 msgstr "Palaa etusivulle"
 
@@ -94,63 +94,59 @@ msgstr "Palaa etusivulle"
 msgid "Please insert your participant ID:"
 msgstr "Syötä ID-tunnuksesi:"
 
-#: app/templates/index.html:6
-msgid "Welcome to Onni"
-msgstr "Tervetuloa"
-
-#: app/templates/index.html:9
+#: app/templates/index.html:18
 msgid ""
-"This is the Human Emotion Systems laboratorys stimulus rating tool. If "
-"you have previously started a rating task you can continue that task on "
-"this page. If you are a researcher you can create new rating tasks by "
-"logging in. Or you can start a new rating task and start rating by "
-"selecting a task from the database list below."
-msgstr ""
-"Tämä on Human Emotion Systems Laboratoryn arviointityökalu. Jos olet "
-"aiemmin aloittanut arviointitehtävän voit jatkaa tehtävää tällä sivulla. "
-"Jos olet tutkija voit luoda uuden arviointitehtävän kirjautumalla sisään."
-" Tai voit aloittaa uuden arvointitehtävän ja aloittaa arvioinnin "
-"valitsemalla arviointitehtävän alla olevasta listasta."
+"Welcome to the Human Emotion Systems -laboratory`s Onni-net laboratory! "
+"The experiments that are currently underway are listed below -\n"
+"       you can participate for as many experiments you want."
+msgstr "Tervetuloa Human Emotion Systems –laboratorion Onni-nettilaboratorioon! Alla on listattuna tällä hetkellä käynnissä olevat kokeet – voit osallistua niin moneen kuin vain haluat."
 
-#: app/templates/index.html:13
+#: app/templates/index.html:20
+msgid ""
+"If you are participating for a study for the first time, click on the "
+"\"Begin task\" -button. If you are returning to continue \n"
+"      a previously started task, click on the \"Continue task\" button."
+msgstr "Jos osallistut kokeeseen ensimmäistä kertaa, klikkaa \"Aloita\" –painiketta. Jos taas palaat täyttämään kesken jäänyttä koetta, klikkaa \"Jatka\" –nappulaa.
+
+#: app/templates/index.html:23
 msgid ""
 "You can choose the language suitable for you from the language menu in "
-"the upper right corner"
-msgstr "Voit valita kielen oikeassa yläkulmassa olevasta language-valikosta"
+"the upper right corner."
+msgstr "Voit valita kielen oikeassa yläkulmassa olevasta language-valikosta."
 
-#: app/templates/index.html:18
-msgid "List of experiments in database:"
-msgstr "Tietokannassa olevat kokeet:"
+#: app/templates/index.html:29
+msgid "List of experiments:"
+msgstr ""
 
-#: app/templates/index.html:25 app/templates/index.html:61
+#: app/templates/index.html:36 app/templates/index.html:72
 msgid "Name:"
 msgstr "Nimi:"
 
-#: app/templates/index.html:26 app/templates/index.html:62
+#: app/templates/index.html:37 app/templates/index.html:73
 msgid "Instruction:"
 msgstr "Ohjeet:"
 
-#: app/templates/index.html:34 app/templates/index.html:69
+#: app/templates/index.html:45 app/templates/index.html:80
 msgid "Participation ID is required for this task."
 msgstr "Tähän kokeeseen osallistumiseen vaaditaan ID-tunnus."
 
-#: app/templates/index.html:40 app/templates/index.html:75
+#: app/templates/index.html:51 app/templates/index.html:86
 msgid "Begin task"
 msgstr "Aloita"
 
-#: app/templates/index.html:41 app/templates/index.html:76
+#: app/templates/index.html:52 app/templates/index.html:87
 msgid "Continue task"
 msgstr "Jatka"
 
-#: app/templates/index.html:45 app/templates/index.html:80
+#: app/templates/index.html:56 app/templates/index.html:91
 msgid "AdminRun"
 msgstr "AdminRun"
 
-#: app/templates/index.html:46 app/templates/index.html:81
+#: app/templates/index.html:57 app/templates/index.html:92
 msgid "Statistics"
 msgstr "Statistics"
 
-#: app/templates/index.html:47 app/templates/index.html:82
+#: app/templates/index.html:58 app/templates/index.html:93
 msgid "View / Edit"
 msgstr "View / Edit"
 
@@ -158,19 +154,19 @@ msgstr "View / Edit"
 msgid "Instructions:"
 msgstr "Ohjeet:"
 
-#: app/templates/instructions.html:15
+#: app/templates/instructions.html:14
 msgid ""
 "If you wish to quit a rating task before it is fully completed, you can "
 "return to finish the task later but you will need your participant ID-"
 "number in order to do that. Please save your participant ID before "
 "starting the rating task!"
-msgstr ""
+msgstr "Voit palata myöhemmin jatkamaan mahdollisesti kesken jäänyttä tehtävää, mutta tarvitset silloin osallistujatunnustasi. Ole hyvä ja talleta alla oleva ID-numerosi ennen kuin aloitat!"
 
-#: app/templates/instructions.html:18 app/templates/quit_task.html:11
+#: app/templates/instructions.html:17 app/templates/quit_task.html:11
 msgid "Your participant ID is:"
 msgstr "ID-numerosi on:"
 
-#: app/templates/instructions.html:21
+#: app/templates/instructions.html:20
 msgid "Ready to start"
 msgstr "Olen valmis aloittamaan"
 
@@ -246,8 +242,8 @@ msgstr ""
 #~ "from the database list below."
 #~ msgstr ""
 #~ "Tämä on Human Emotion Systems "
-#~ "Laboratoryn arviointityökalu.Jos olet aiemmin "
-#~ "aloittanut arviointitehtävän voit jatkaa "
+#~ "Laboratoryn arviointityökalu. Jos olet aiemmin"
+#~ " aloittanut arviointitehtävän voit jatkaa "
 #~ "tehtävää tällä sivulla. Jos olet tutkija"
 #~ " voit luoda uuden arviointitehtävän "
 #~ "kirjautumalla sisään. Tai voit aloittaa "
@@ -259,7 +255,7 @@ msgstr ""
 #~ "You can choose the language suitable "
 #~ "for you from the language menu in"
 #~ " the upper right corner"
-#~ msgstr "Voit vaihtaa kieltä oikeassa yläkulmassa olevasta valikosta."
+#~ msgstr "Voit valita kielen oikeassa yläkulmassa olevasta language-valikosta"
 
 #~ msgid "List of experiments in database:"
 #~ msgstr "Tietokannassa olevat kokeet:"

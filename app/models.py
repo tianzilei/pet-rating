@@ -123,7 +123,7 @@ class page (db.Model):
     idpage = db.Column(db.Integer, primary_key=True)
     experiment_idexperiment = db.Column(db.Integer, db.ForeignKey('experiment.idexperiment'))
     type = db.Column(db.String(120), index=True)
-    text = db.Column(db.String(120), index=True)
+    text = db.Column(db.Text)
     media = db.Column(db.String(120), index=True)
     """
     def __repr__(self):

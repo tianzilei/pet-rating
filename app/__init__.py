@@ -8,7 +8,7 @@ from flask_babel import Babel
 from flask import request
 from flask import session
 from flask import flash
-
+import pymysql
 
 app = Flask(__name__)
 #app.config['BABEL_DEFAULT_LOCALE'] = 'fin'

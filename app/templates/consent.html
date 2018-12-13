@@ -5,7 +5,13 @@
       
 <h1 class="container mt-5 display-4"><br> {{ experiment_info.name }}</h1>
 <br>
-<p class="lead">{{ experiment_info.short_instruction }}</p>
+
+
+{% for para in instruction_paragraphs %}
+<p class="lead text-justify">{{ para }}</p>
+{% endfor %}
+
+
 <br>
 
 <h3>{{ _('Consent for participation:') }}</h3>
@@ -14,7 +20,10 @@
 <h5> {{ _('Research bulletin can be read') }}  <a href="{{ url_for('view_research_notification', exp_id=experiment_info.idexperiment) }}">{{ _('here.') }}</a></h5>
 {% endif %}
 
-<p class="lead"> {{ experiment_info.consent_text }} </p>
+{% for para in consent_paragraphs %}
+<p class="lead text-justify">{{ para }}</p>
+{% endfor %}
+
 
 
  <a class="btn btn-primary" href="{{ url_for('participant_session', exp_id=exp_id, agree='true') }}" role="button">{{ _('Agree') }}</a>
@@ -38,6 +47,7 @@
               </div>
             </div>
           </div>
+
 
 
 {% endblock %}
