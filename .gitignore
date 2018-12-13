@@ -1,6 +1,7 @@
 __pycache__/
 /venv
 /logs
+/app/static/experiment_stimuli
 cmd.txt
 DB_inserts.txt
 dumb.sql
