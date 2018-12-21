@@ -358,6 +358,14 @@ def begin_with_id():
     exp_id = request.args.get('exp_id', None)
     form = StartWithIdForm()
     experiment_info = experiment.query.filter_by(idexperiment=exp_id).first()
+    
+    instruction_paragraphs = str(experiment_info.short_instruction)
+    instruction_paragraphs = instruction_paragraphs.split('<br>')
+    
+    consent_paragraphs = str(experiment_info.consent_text)
+    consent_paragraphs = consent_paragraphs.split('<br>')
+    
+    
 
     if form.validate_on_submit():
         
@@ -384,7 +392,7 @@ def begin_with_id():
                 
                 #save the participant ID in session list for now, this is deleted after the session has been started in participant_session-view
                 session['begin_with_id'] = form.participant_id.data
-                return render_template('consent.html', exp_id=exp_id, experiment_info=experiment_info)
+                return render_template('consent.html', exp_id=exp_id, experiment_info=experiment_info, instruction_paragraphs=instruction_paragraphs, consent_paragraphs=consent_paragraphs)
         
     return render_template('begin_with_id.html', exp_id=exp_id, form=form)
 
@@ -1133,7 +1141,7 @@ def add_bg_question():
     exp_id = request.args.get('exp_id', None)
     exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
 
-    if exp_status.status == 'Public':
+    if exp_status.status != 'Hidden':
     
         flash("Experiment is public. Cannot modify structure.")
 
@@ -1188,7 +1196,7 @@ def add_questions():
     exp_id = request.args.get('exp_id', None)
     exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
 
-    if exp_status.status == 'Public':
+    if exp_status.status != 'Hidden':
     
         flash("Experiment is public. Cannot modify structure.")
 
@@ -1246,7 +1254,7 @@ def remove_bg_question():
 
     exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
 
-    if exp_status.status == 'Public':
+    if exp_status.status != 'Hidden':
     
         flash("Experiment is public. Cannot modify structure.")
 
@@ -1284,7 +1292,7 @@ def remove_question():
     exp_id = request.args.get('exp_id', None)
     exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
 
-    if exp_status.status == 'Public':
+    if exp_status.status != 'Hidden':
     
         flash("Experiment is public. Cannot modify structure.")
 
@@ -1309,7 +1317,7 @@ def remove_experiment():
     exp_id = request.args.get('exp_id', None)
     exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
 
-    if exp_status.status == 'Public':
+    if exp_status.status != 'Hidden':
     
         flash("Experiment is public. Cannot modify structure.")
 
@@ -1464,7 +1472,7 @@ def remove_page():
     exp_id = request.args.get('exp_id', None)
     exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
 
-    if exp_status.status == 'Public':
+    if exp_status.status != 'Hidden':
     
         flash("Experiment is public. Cannot modify structure.")
 
@@ -1549,6 +1557,24 @@ def hide_experiment():
     db.session.commit()
   
     return redirect(url_for('view_experiment', exp_id=exp_id))
+
+
+@app.route('/private_experiment')
+@login_required
+def private_experiment():
+
+    exp_id = request.args.get('exp_id', None)
+        
+    private_experiment = experiment.query.filter_by(idexperiment = exp_id).first()
+    
+    private_experiment.status = 'Private'
+    
+    flash("Changed status to Private")
+    
+    db.session.commit()
+  
+    return redirect(url_for('view_experiment', exp_id=exp_id))
+
 
 
 @app.route('/enable_randomization')
@@ -1759,7 +1785,7 @@ def add_stimuli():
     exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
 
     
-    if exp_status.status == 'Public':
+    if exp_status.status != 'Hidden':
     
         flash("Experiment is public. Cannot modify structure.")
 

@@ -45,10 +45,12 @@
       <td>{{ exp.status }}</td>
       <td>
     {% if exp.status == 'Hidden' %}      
-      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('publish_experiment', exp_id=exp.idexperiment) }}" role="button">Publish</a></td>
+      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('publish_experiment', exp_id=exp.idexperiment) }}" role="button">Publish (visible)</a>
+      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('private_experiment', exp_id=exp.idexperiment) }}" role="button">Publish (private)</a>
+      </td>
     {% endif %}
-    {% if exp.status == 'Public' %}      
-      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('hide_experiment', exp_id=exp.idexperiment) }}" role="button">Hide experiment</a></td>
+    {% if exp.status != 'Hidden' %}      
+      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('hide_experiment', exp_id=exp.idexperiment) }}" role="button">Unpublish</a></td>
     {% endif %}
     </tr>
 
