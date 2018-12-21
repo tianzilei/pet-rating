@@ -17,7 +17,7 @@
 <h3>{{ _('Consent for participation:') }}</h3>
 
 {% if experiment_info.research_notification_filename  %}
-<h5> {{ _('Research bulletin can be read') }}  <a href="{{ url_for('view_research_notification', exp_id=experiment_info.idexperiment) }}">{{ _('here.') }}</a></h5>
+<h5> <a href="{{ url_for('view_research_notification', exp_id=experiment_info.idexperiment) }}">{{ _('Research bulletin can be read here') }} </a></h5>
 {% endif %}
 
 {% for para in consent_paragraphs %}

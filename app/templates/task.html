@@ -28,6 +28,10 @@
     
     {% if session['type']=='video' %}
         <div class="col-{{stimulus_size}} container stimulus mt-5 pt-5">
+        
+        
+        
+        
             {% for page in pages.items %}
                 <div class="embed-responsive embed-responsive-16by9">
                     <iframe class="embed-responsive-item" src="/{{ page.media }}" allowfullscreen></iframe>
@@ -38,7 +42,12 @@
 
 
     {% if session['type']=='audio' %}
+
         <div class="col-{{stimulus_size}} container stimulus mt-5 pt-5">
+
+
+
+
             {% for page in pages.items %}
                 <div class="embed-responsive embed-responsive-16by9">
                     <iframe class="embed-responsive-item" src="/{{ page.media }}" allowfullscreen></iframe>
@@ -73,6 +82,10 @@
     
     {% if session['type']=='video' %}
         <div class="col-{{stimulus_size}} container stimulus mt-5 pt-5">
+
+
+
+
             {% for page in pages.items %}
                 <div class="embed-responsive embed-responsive-16by9">
                     <iframe class="embed-responsive-item" src="/{{ randomized_stimulus.media }}" allowfullscreen></iframe>
@@ -84,6 +97,9 @@
 
     {% if session['type']=='audio' %}
         <div class="col-{{stimulus_size}} container stimulus mt-5 pt-5">
+
+
+
             {% for page in pages.items %}
                 <div class="embed-responsive embed-responsive-16by9">
                     <iframe class="embed-responsive-item" src="/{{ randomized_stimulus.media }}" allowfullscreen></iframe>

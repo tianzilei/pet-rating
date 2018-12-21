@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-12-13 13:13+0200\n"
+"POT-Creation-Date: 2018-12-21 11:49+0200\n"
 "PO-Revision-Date: 2018-11-27 16:38+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -28,15 +28,15 @@ msgstr "我准备开始了"
 
 #: app/routes.py:371
 msgid "ID already in use"
-msgstr ""
+msgstr "用户名已被使用"
 
 #: app/routes.py:380
 msgid "No such ID set for this experiment"
-msgstr ""
+msgstr "该实验中用户名不存在"
 
 #: app/templates/base.html:35
 msgid "Task progress:"
-msgstr ""
+msgstr "任务进行中"
 
 #: app/templates/begin_with_id.html:8
 msgid "Please insert your ID-code below:"
@@ -52,19 +52,15 @@ msgstr "注意！"
 msgid ""
 "Participation in this experiment requires a login with a predetermined ID"
 " code. Please input ID below."
-msgstr ""
+msgstr "参加本实验需要用已有的用户名登陆，请输入用户名"
 
 #: app/templates/consent.html:17
 msgid "Consent for participation:"
-msgstr ""
+msgstr "实验须知"
 
 #: app/templates/consent.html:20
-msgid "Research bulletin can be read"
-msgstr ""
-
-#: app/templates/consent.html:20
-msgid "here."
-msgstr ""
+msgid "Research bulletin can be read here"
+msgstr "实验条目可在下面读取"
 
 #: app/templates/consent.html:29
 msgid "Agree"
@@ -97,60 +93,60 @@ msgid ""
 "Welcome to the Human Emotion Systems -laboratory`s Onni-net laboratory! "
 "The experiments that are currently underway are listed below -\n"
 "       you can participate for as many experiments you want."
-msgstr ""
+msgstr "欢迎来到人类情感系统实验室。可以参加的实验项目被列在以下。 你可以随心所欲参加任何实验"
 
 #: app/templates/index.html:20
 msgid ""
 "If you are participating for a study for the first time, click on the "
 "\"Begin task\" -button. If you are returning to continue \n"
 "      a previously started task, click on the \"Continue task\" button."
-msgstr ""
+msgstr "如果你是第一次参与该实验，请按“开始任务”按钮。如果你继续上次的任务，请按“继续任务”按钮。"
 
 #: app/templates/index.html:23
 msgid ""
 "You can choose the language suitable for you from the language menu in "
 "the upper right corner."
-msgstr ""
+msgstr "你可以在屏幕右上角的语言菜单选择你习惯的语言"
 
 #: app/templates/index.html:29
 msgid "List of experiments:"
-msgstr ""
+msgstr "实验列表："
 
-#: app/templates/index.html:36 app/templates/index.html:72
+#: app/templates/index.html:36 app/templates/index.html:77
 msgid "Name:"
-msgstr ""
+msgstr "名字："
 
-#: app/templates/index.html:37 app/templates/index.html:73
+#: app/templates/index.html:37 app/templates/index.html:78
 msgid "Instruction:"
-msgstr ""
+msgstr "说明："
 
-#: app/templates/index.html:45 app/templates/index.html:80
+#: app/templates/index.html:50 app/templates/index.html:93
 msgid "Participation ID is required for this task."
-msgstr ""
+msgstr "本任务需要用户名。"
 
-#: app/templates/index.html:51 app/templates/index.html:86
+#: app/templates/index.html:56 app/templates/index.html:99
 msgid "Begin task"
 msgstr "开始任务"
 
-#: app/templates/index.html:52 app/templates/index.html:87
+#: app/templates/index.html:57 app/templates/index.html:100
 msgid "Continue task"
 msgstr "继续任务"
 
-#: app/templates/index.html:56 app/templates/index.html:91
+#: app/templates/index.html:61 app/templates/index.html:104
 msgid "AdminRun"
 msgstr ""
 
-#: app/templates/index.html:57 app/templates/index.html:92
+#: app/templates/index.html:62 app/templates/index.html:105
 msgid "Statistics"
 msgstr ""
 
-#: app/templates/index.html:58 app/templates/index.html:93
+#: app/templates/index.html:63 app/templates/index.html:106
 msgid "View / Edit"
 msgstr ""
 
 #: app/templates/instructions.html:4
 msgid "Instructions:"
-msgstr ""
+msgstr "说明："
 
 #: app/templates/instructions.html:14
 msgid ""
@@ -188,25 +184,25 @@ msgstr "请在开始评分前填写以下相关的问题:"
 
 #: app/templates/register.html:14
 msgid "Please select"
-msgstr ""
+msgstr "请选择。"
 
 #: app/templates/register.html:22
 msgid "Submit"
 msgstr "提交"
 
-#: app/templates/task.html:127
+#: app/templates/task.html:143
 msgid "Quit task"
 msgstr "退出任务"
 
-#: app/templates/task.html:128
+#: app/templates/task.html:144
 msgid "Next page"
 msgstr "下一页"
 
-#: app/templates/task.html:132
+#: app/templates/task.html:148
 msgid ""
 "You can zoom in/out the page view by pressing ctrl+/ctrl- (Windows) or "
 "⌘+/⌘- (Mac)"
-msgstr ""
+msgstr "可以按 ctrl+/ctrl- (Windows) 或 ⌘+/⌘- (Mac) 扩大或缩小页面"
 
 #: app/templates/task_completed.html:7
 msgid "Task completed!"
@@ -267,5 +263,11 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Continue task"
+#~ msgstr ""
+
+#~ msgid "Research bulletin can be read"
+#~ msgstr ""
+
+#~ msgid "here."
 #~ msgstr ""
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-12-13 13:13+0200\n"
+"POT-Creation-Date: 2018-12-21 11:49+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,11 +58,7 @@ msgid "Consent for participation:"
 msgstr ""
 
 #: app/templates/consent.html:20
-msgid "Research bulletin can be read"
-msgstr ""
-
-#: app/templates/consent.html:20
-msgid "here."
+msgid "Research bulletin can be read here"
 msgstr ""
 
 #: app/templates/consent.html:29
@@ -115,35 +111,35 @@ msgstr ""
 msgid "List of experiments:"
 msgstr ""
 
-#: app/templates/index.html:36 app/templates/index.html:72
+#: app/templates/index.html:36 app/templates/index.html:77
 msgid "Name:"
 msgstr ""
 
-#: app/templates/index.html:37 app/templates/index.html:73
+#: app/templates/index.html:37 app/templates/index.html:78
 msgid "Instruction:"
 msgstr ""
 
-#: app/templates/index.html:45 app/templates/index.html:80
+#: app/templates/index.html:50 app/templates/index.html:93
 msgid "Participation ID is required for this task."
 msgstr ""
 
-#: app/templates/index.html:51 app/templates/index.html:86
+#: app/templates/index.html:56 app/templates/index.html:99
 msgid "Begin task"
 msgstr ""
 
-#: app/templates/index.html:52 app/templates/index.html:87
+#: app/templates/index.html:57 app/templates/index.html:100
 msgid "Continue task"
 msgstr ""
 
-#: app/templates/index.html:56 app/templates/index.html:91
+#: app/templates/index.html:61 app/templates/index.html:104
 msgid "AdminRun"
 msgstr ""
 
-#: app/templates/index.html:57 app/templates/index.html:92
+#: app/templates/index.html:62 app/templates/index.html:105
 msgid "Statistics"
 msgstr ""
 
-#: app/templates/index.html:58 app/templates/index.html:93
+#: app/templates/index.html:63 app/templates/index.html:106
 msgid "View / Edit"
 msgstr ""
 
@@ -193,15 +189,15 @@ msgstr ""
 msgid "Submit"
 msgstr ""
 
-#: app/templates/task.html:127
+#: app/templates/task.html:143
 msgid "Quit task"
 msgstr ""
 
-#: app/templates/task.html:128
+#: app/templates/task.html:144
 msgid "Next page"
 msgstr ""
 
-#: app/templates/task.html:132
+#: app/templates/task.html:148
 msgid ""
 "You can zoom in/out the page view by pressing ctrl+/ctrl- (Windows) or "
 "⌘+/⌘- (Mac)"

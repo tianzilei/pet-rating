@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-12-13 13:13+0200\n"
+"POT-Creation-Date: 2018-12-21 11:49+0200\n"
 "PO-Revision-Date: 2018-11-27 16:38+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fi\n"
@@ -61,12 +61,8 @@ msgid "Consent for participation:"
 msgstr "Suostumus osallistumiseksi:"
 
 #: app/templates/consent.html:20
-msgid "Research bulletin can be read"
-msgstr "Tutkimustiedote on luettavissa"
-
-#: app/templates/consent.html:20
-msgid "here."
-msgstr "täällä"
+msgid "Research bulletin can be read here"
+msgstr ""
 
 #: app/templates/consent.html:29
 msgid "Agree"
@@ -99,14 +95,20 @@ msgid ""
 "Welcome to the Human Emotion Systems -laboratory`s Onni-net laboratory! "
 "The experiments that are currently underway are listed below -\n"
 "       you can participate for as many experiments you want."
-msgstr "Tervetuloa Human Emotion Systems –laboratorion Onni-nettilaboratorioon! Alla on listattuna tällä hetkellä käynnissä olevat kokeet – voit osallistua niin moneen kuin vain haluat."
+msgstr ""
+"Tervetuloa Human Emotion Systems –laboratorion Onni-nettilaboratorioon! "
+"Alla on listattuna tällä hetkellä käynnissä olevat kokeet – voit "
+"osallistua niin moneen kuin vain haluat."
 
 #: app/templates/index.html:20
 msgid ""
 "If you are participating for a study for the first time, click on the "
 "\"Begin task\" -button. If you are returning to continue \n"
 "      a previously started task, click on the \"Continue task\" button."
-msgstr "Jos osallistut kokeeseen ensimmäistä kertaa, klikkaa \"Aloita\" –painiketta. Jos taas palaat täyttämään kesken jäänyttä koetta, klikkaa \"Jatka\" –nappulaa.
+msgstr ""
+"Jos osallistut kokeeseen ensimmäistä kertaa, klikkaa \"Aloita\" "
+"–painiketta. Jos taas palaat täyttämään kesken jäänyttä koetta, klikkaa "
+"\"Jatka\" –nappulaa"
 
 #: app/templates/index.html:23
 msgid ""
@@ -116,37 +118,37 @@ msgstr "Voit valita kielen oikeassa yläkulmassa olevasta language-valikosta."
 
 #: app/templates/index.html:29
 msgid "List of experiments:"
-msgstr ""
+msgstr "Käynnissä olevat kokeet"
 
-#: app/templates/index.html:36 app/templates/index.html:72
+#: app/templates/index.html:36 app/templates/index.html:77
 msgid "Name:"
 msgstr "Nimi:"
 
-#: app/templates/index.html:37 app/templates/index.html:73
+#: app/templates/index.html:37 app/templates/index.html:78
 msgid "Instruction:"
 msgstr "Ohjeet:"
 
-#: app/templates/index.html:45 app/templates/index.html:80
+#: app/templates/index.html:50 app/templates/index.html:93
 msgid "Participation ID is required for this task."
 msgstr "Tähän kokeeseen osallistumiseen vaaditaan ID-tunnus."
 
-#: app/templates/index.html:51 app/templates/index.html:86
+#: app/templates/index.html:56 app/templates/index.html:99
 msgid "Begin task"
 msgstr "Aloita"
 
-#: app/templates/index.html:52 app/templates/index.html:87
+#: app/templates/index.html:57 app/templates/index.html:100
 msgid "Continue task"
 msgstr "Jatka"
 
-#: app/templates/index.html:56 app/templates/index.html:91
+#: app/templates/index.html:61 app/templates/index.html:104
 msgid "AdminRun"
 msgstr "AdminRun"
 
-#: app/templates/index.html:57 app/templates/index.html:92
+#: app/templates/index.html:62 app/templates/index.html:105
 msgid "Statistics"
 msgstr "Statistics"
 
-#: app/templates/index.html:58 app/templates/index.html:93
+#: app/templates/index.html:63 app/templates/index.html:106
 msgid "View / Edit"
 msgstr "View / Edit"
 
@@ -160,7 +162,10 @@ msgid ""
 "return to finish the task later but you will need your participant ID-"
 "number in order to do that. Please save your participant ID before "
 "starting the rating task!"
-msgstr "Voit palata myöhemmin jatkamaan mahdollisesti kesken jäänyttä tehtävää, mutta tarvitset silloin osallistujatunnustasi. Ole hyvä ja talleta alla oleva ID-numerosi ennen kuin aloitat!"
+msgstr ""
+"Voit palata myöhemmin jatkamaan mahdollisesti kesken jäänyttä tehtävää, "
+"mutta tarvitset silloin osallistujatunnustasi. Ole hyvä ja talleta alla "
+"oleva ID-numerosi ennen kuin aloitat!"
 
 #: app/templates/instructions.html:17 app/templates/quit_task.html:11
 msgid "Your participant ID is:"
@@ -198,15 +203,15 @@ msgstr "Valitse"
 msgid "Submit"
 msgstr "Jatka"
 
-#: app/templates/task.html:127
+#: app/templates/task.html:143
 msgid "Quit task"
 msgstr "Lopeta"
 
-#: app/templates/task.html:128
+#: app/templates/task.html:144
 msgid "Next page"
 msgstr "Seuraava"
 
-#: app/templates/task.html:132
+#: app/templates/task.html:148
 msgid ""
 "You can zoom in/out the page view by pressing ctrl+/ctrl- (Windows) or "
 "⌘+/⌘- (Mac)"
@@ -274,4 +279,10 @@ msgstr ""
 
 #~ msgid "Continue task"
 #~ msgstr "Jatka"
+
+#~ msgid "Research bulletin can be read"
+#~ msgstr "Tutkimustiedote on luettavissa"
+
+#~ msgid "here."
+#~ msgstr "täällä"
 

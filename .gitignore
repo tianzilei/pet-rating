@@ -6,6 +6,7 @@ cmd.txt
 DB_inserts.txt
 dumb.sql
 scrap_script.py
+config.py
 *.pyc
 *.db
 

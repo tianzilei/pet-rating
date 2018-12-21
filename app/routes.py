@@ -1929,7 +1929,6 @@ def remove_research_notification():
 
 
 @app.route('/view_research_notification')
-@login_required
 def view_research_notification():
     
     exp_id = request.args.get('exp_id', None)
