@@ -19,24 +19,15 @@
     </div>
     <div class="custom-file">
     <input type="file" class="custom-file-input" id="file" name="file" accept="audio/*,image/*, .mp4" multiple> 
+
+    <!-- TODO add hidden type field  { stimulus_type } else this will be None!! -->
+
     <label class="custom-file-label" for="upload_file">Choose file</label>
     </div>
     </div>
   {% endif %}
   
-  
-  
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-   
    <br>  
    <button type="submit" class="btn btn-primary">Submit</button>
    <a class="btn btn-primary" href="{{ request.referrer }}" role="button">Cancel</a>

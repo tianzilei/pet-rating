@@ -7,19 +7,19 @@ CREATE TABLE background_question (
 CREATE TABLE experiment (
 	idexperiment INTEGER NOT NULL AUTO_INCREMENT,
 	name VARCHAR(120), 
-	instruction TEXT, 
+	instruction MEDIUMTEXT, 
 	directoryname VARCHAR(120), 
 	language VARCHAR(120), 
 	status VARCHAR(120), 
 	randomization VARCHAR(120), 
-	short_instruction TEXT, 
-	single_sentence_instruction TEXT, 
+	short_instruction MEDIUMTEXT, 
+	single_sentence_instruction MEDIUMTEXT, 
 	is_archived VARCHAR(120), 
 	creator_name VARCHAR(120), 
 	research_notification_filename VARCHAR(120), 
 	creation_time DATETIME, 
 	stimulus_size VARCHAR(120), 
-	consent_text TEXT, 
+	consent_text MEDIUMTEXT, 
 	use_forced_id VARCHAR(120), 
 	PRIMARY KEY (idexperiment)
 );

@@ -18,12 +18,11 @@ class Config(object):
     """
 
     #MariaDB mysql database settings
-    
 
     MYSQL_USER = 'rating'
-    MYSQL_PASSWORD = 'timotimo'
+    MYSQL_PASSWORD = 'rating_passwd'
     MYSQL_SERVER = 'localhost'
-    MYSQL_DB = 'rating_tool_db' 
+    MYSQL_DB = 'rating_db' 
     
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://'+MYSQL_USER+':'+MYSQL_PASSWORD+'@'+MYSQL_SERVER+'/'+MYSQL_DB+'?charset=utf8mb4'
    

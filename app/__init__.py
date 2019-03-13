@@ -1,16 +1,18 @@
-from flask import Flask
+
+import pymysql
+
+from flask import Flask, request, session, flash
+
 from flask_bootstrap import Bootstrap
-from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_babel import Babel
-from flask import request
-from flask import session
-from flask import flash
-import pymysql
+
+from config import Config
 
 app = Flask(__name__)
+
 #app.config['BABEL_DEFAULT_LOCALE'] = 'fin'
 #app.config['BABEL_TRANSLATION_DIRECTORIES'] ='C:/Users/Timo/git/pet-rating/app/translations'
 babel = Babel(app)
@@ -38,11 +40,8 @@ def get_locale():
     
         if session['lang'] == 'zh':
             session['language'] = 'Chinese'
-
-    
     
     return session.get('lang', 'en')
-
 
 
 """
@@ -73,6 +72,14 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
 
+# Register blueprints
+from .task.views import task_blueprint
+from .experiment.views import experiment_blueprint
+from .create.views import create_blueprint
+
+app.register_blueprint(task_blueprint)
+app.register_blueprint(experiment_blueprint)
+app.register_blueprint(create_blueprint)
 
 app.secret_key = 'random string'
 """app.secret_key = os.urandom(24)"""

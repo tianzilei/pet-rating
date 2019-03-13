@@ -54,13 +54,13 @@
                         
                         
                         <a class="btn btn-outline-primary" href="{{ url_for('consent', exp_id=exp.idexperiment) }}" role="button">{{ _('Begin task') }}</a>
-                        <a class="btn btn-outline-primary" href="{{ url_for('continue_task', exp_id=exp.idexperiment) }}" role="button">{{ _('Continue task') }}</a>
+                        <a class="btn btn-outline-primary" href="{{ url_for('task.continue_task', exp_id=exp.idexperiment) }}" role="button">{{ _('Continue task') }}</a>
                         
                             {% if current_user.is_authenticated %}
                             <span class="text-right">
                             <a class="btn btn-outline-info" href="{{ url_for('admin_dryrun', exp_id=exp.idexperiment) }}" role="button">{{ _('AdminRun') }}</a>
-                            <a class="btn btn-outline-info" href="{{ url_for('experiment_statistics', exp_id=exp.idexperiment) }}" role="button">{{ _('Statistics') }}</a>
-                            <a class="btn btn-outline-info" href="{{ url_for('view_experiment', exp_id=exp.idexperiment) }}" role="button">{{ _('View / Edit') }}</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment.statistics', exp_id=exp.idexperiment) }}" role="button">{{ _('Statistics') }}</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment.view', exp_id=exp.idexperiment) }}" role="button">{{ _('View / Edit') }}</a>
                             
                             {% endif %}
                        
@@ -97,13 +97,13 @@
                         <li class="list-group-item">
 
                         <a class="btn btn-outline-primary" href="{{ url_for('consent', exp_id=exp.idexperiment) }}" role="button">{{ _('Begin task') }}</a>
-                        <a class="btn btn-outline-primary" href="{{ url_for('continue_task', exp_id=exp.idexperiment) }}" role="button">{{ _('Continue task') }}</a
+                        <a class="btn btn-outline-primary" href="{{ url_for('task.continue_task', exp_id=exp.idexperiment) }}" role="button">{{ _('Continue task') }}</a
                         
                             {% if current_user.is_authenticated %}
                             <span class="text-right">    
                             <a class="btn btn-outline-info" href="{{ url_for('admin_dryrun', exp_id=exp.idexperiment) }}" role="button">{{ _('AdminRun') }}</a>
-                            <a class="btn btn-outline-info" href="{{ url_for('experiment_statistics', exp_id=exp.idexperiment) }}" role="button">{{ _('Statistics') }}</a>
-                            <a class="btn btn-outline-info" href="{{ url_for('view_experiment', exp_id=exp.idexperiment) }}" role="button">{{ _('View / Edit') }}</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment.statistics', exp_id=exp.idexperiment) }}" role="button">{{ _('Statistics') }}</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment.view', exp_id=exp.idexperiment) }}" role="button">{{ _('View / Edit') }}</a>
                             
                             {% endif %}
                        
@@ -147,12 +147,12 @@
 
                         <li class="list-group-item">
                         <a class="btn btn-outline-primary" href="{{ url_for('consent', exp_id=exp.idexperiment) }}" role="button">Begin task</a>
-                        <a class="btn btn-outline-primary" href="{{ url_for('continue_task', exp_id=exp.idexperiment) }}" role="button">Continue task</a>
+                        <a class="btn btn-outline-primary" href="{{ url_for('task.continue_task', exp_id=exp.idexperiment) }}" role="button">Continue task</a>
                             {% if current_user.is_authenticated %}
                             
                             <a class="btn btn-outline-info" href="{{ url_for('admin_dryrun', exp_id=exp.idexperiment) }}" role="button">AdminRun</a>
-                            <a class="btn btn-outline-info" href="{{ url_for('experiment_statistics', exp_id=exp.idexperiment) }}" role="button">Statistics</a>
-                            <a class="btn btn-outline-info" href="{{ url_for('view_experiment', exp_id=exp.idexperiment) }}" role="button">View / Edit</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment.statistics', exp_id=exp.idexperiment) }}" role="button">Statistics</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment.view', exp_id=exp.idexperiment) }}" role="button">View / Edit</a>
                             
                             
                             {% endif %}
@@ -187,12 +187,12 @@
 
                         <li class="list-group-item">
                         <a class="btn btn-outline-primary" href="{{ url_for('consent', exp_id=exp.idexperiment) }}" role="button">Begin task</a>
-                        <a class="btn btn-outline-primary" href="{{ url_for('continue_task', exp_id=exp.idexperiment) }}" role="button">Continue task</a>
+                        <a class="btn btn-outline-primary" href="{{ url_for('task.continue_task', exp_id=exp.idexperiment) }}" role="button">Continue task</a>
                             {% if current_user.is_authenticated %}
                             
                             <a class="btn btn-outline-info" href="{{ url_for('admin_dryrun', exp_id=exp.idexperiment) }}" role="button">AdminRun</a>
-                            <a class="btn btn-outline-info" href="{{ url_for('experiment_statistics', exp_id=exp.idexperiment) }}" role="button">Statistics</a>
-                            <a class="btn btn-outline-info" href="{{ url_for('view_experiment', exp_id=exp.idexperiment) }}" role="button">View / Edit</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment.statistics', exp_id=exp.idexperiment) }}" role="button">Statistics</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment.view', exp_id=exp.idexperiment) }}" role="button">View / Edit</a>
                             
                             
                             {% endif %}
@@ -249,12 +249,12 @@
 
                         <li class="list-group-item">
                         <a class="btn btn-outline-primary" href="{{ url_for('consent', exp_id=exp.idexperiment) }}" role="button">Begin task</a>
-                        <a class="btn btn-outline-primary" href="{{ url_for('continue_task', exp_id=exp.idexperiment) }}" role="button">Continue task</a>
+                        <a class="btn btn-outline-primary" href="{{ url_for('task.continue_task', exp_id=exp.idexperiment) }}" role="button">Continue task</a>
                             {% if current_user.is_authenticated %}
                             
                             <a class="btn btn-outline-info" href="{{ url_for('admin_dryrun', exp_id=exp.idexperiment) }}" role="button">AdminRun</a>
-                            <a class="btn btn-outline-info" href="{{ url_for('experiment_statistics', exp_id=exp.idexperiment) }}" role="button">Statistics</a>
-                            <a class="btn btn-outline-info" href="{{ url_for('view_experiment', exp_id=exp.idexperiment) }}" role="button">View / Edit</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment.statistics', exp_id=exp.idexperiment) }}" role="button">Statistics</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment.view', exp_id=exp.idexperiment) }}" role="button">View / Edit</a>
                             
                             
                             {% endif %}
@@ -289,12 +289,12 @@
 
                         <li class="list-group-item">
                         <a class="btn btn-outline-primary" href="{{ url_for('consent', exp_id=exp.idexperiment) }}" role="button">Begin task</a>
-                        <a class="btn btn-outline-primary" href="{{ url_for('continue_task', exp_id=exp.idexperiment) }}" role="button">Continue task</a>
+                        <a class="btn btn-outline-primary" href="{{ url_for('task.continue_task', exp_id=exp.idexperiment) }}" role="button">Continue task</a>
                             {% if current_user.is_authenticated %}
                             
                             <a class="btn btn-outline-info" href="{{ url_for('admin_dryrun', exp_id=exp.idexperiment) }}" role="button">AdminRun</a>
-                            <a class="btn btn-outline-info" href="{{ url_for('experiment_statistics', exp_id=exp.idexperiment) }}" role="button">Statistics</a>
-                            <a class="btn btn-outline-info" href="{{ url_for('view_experiment', exp_id=exp.idexperiment) }}" role="button">View / Edit</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment.statistics', exp_id=exp.idexperiment) }}" role="button">Statistics</a>
+                            <a class="btn btn-outline-info" href="{{ url_for('experiment.view', exp_id=exp.idexperiment) }}" role="button">View / Edit</a>
                             
                             
                             {% endif %}

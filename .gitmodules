@@ -1,0 +1,3 @@
+[submodule "embody"]
+	path = embody
+	url = https://version.aalto.fi/gitlab/eglerean/embody.git

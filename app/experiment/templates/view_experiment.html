@@ -32,7 +32,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-              <a class="btn btn-primary" href="{{ url_for('remove_experiment', exp_id=exp.idexperiment) }}" role="button">Yes, remove</a>
+              <a class="btn btn-primary" href="{{ url_for('experiment.remove', exp_id=exp.idexperiment) }}" role="button">Yes, remove</a>
             </div>
           </div>
         </div>
@@ -45,12 +45,12 @@
       <td>{{ exp.status }}</td>
       <td>
     {% if exp.status == 'Hidden' %}      
-      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('publish_experiment', exp_id=exp.idexperiment) }}" role="button">Publish (visible)</a>
-      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('private_experiment', exp_id=exp.idexperiment) }}" role="button">Publish (private)</a>
+      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('experiment.publish', exp_id=exp.idexperiment) }}" role="button">Publish (visible)</a>
+      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('experiment.private', exp_id=exp.idexperiment) }}" role="button">Publish (private)</a>
       </td>
     {% endif %}
     {% if exp.status != 'Hidden' %}      
-      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('hide_experiment', exp_id=exp.idexperiment) }}" role="button">Unpublish</a></td>
+      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('experiment.hide', exp_id=exp.idexperiment) }}" role="button">Unpublish</a></td>
     {% endif %}
     </tr>
 
@@ -81,10 +81,10 @@
       <td>{{ exp.randomization }}</td>
       <td nowrap>
     {% if exp.randomization == 'Off' %}      
-      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('enable_randomization', exp_id=exp.idexperiment) }}" role="button">Enable</a></td>
+      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('experiment.randomization', exp_id=exp.idexperiment, set='On') }}" role="button">Enable</a></td>
     {% endif %}
     {% if exp.randomization == 'On' %}      
-      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('disable_randomization', exp_id=exp.idexperiment) }}" role="button">Disable</a></td>
+      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('experiment.randomization', exp_id=exp.idexperiment, set='Off') }}" role="button">Disable</a></td>
     {% endif %}
 
     </td>
@@ -93,13 +93,13 @@
       <td>{{ exp.use_forced_id }}</td>
       <td nowrap>
     {% if exp.use_forced_id == 'Off' %}      
-      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('enable_forced_id', exp_id=exp.idexperiment) }}" role="button">Enable</a>
+      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('experiment.set_forced_id', exp_id=exp.idexperiment, set='On') }}" role="button">Enable</a>
       
       
     {% endif %}
     {% if exp.use_forced_id == 'On' %}      
-      <a class="btn btn-primary w-50 btn-sm btn-info" href="{{ url_for('disable_forced_id', exp_id=exp.idexperiment) }}" role="button">Disable</a>
-      <a class="btn btn-primary w-50 btn-sm btn-info" href="{{ url_for('view_forced_id_list', exp_id=exp.idexperiment) }}" role="button">Check ID</a>
+      <a class="btn btn-primary w-50 btn-sm btn-info" href="{{ url_for('experiment.set_forced_id', exp_id=exp.idexperiment, set='Off') }}" role="button">Disable</a>
+      <a class="btn btn-primary w-50 btn-sm btn-info" href="{{ url_for('experiment.view_forced_id_list', exp_id=exp.idexperiment) }}" role="button">Check ID</a>
     {% endif %}
       
     </td>
@@ -108,9 +108,9 @@
     <td> Research bulletin:</td>   
     <td> {{ exp.research_notification_filename }}</td>   
     {% if exp.research_notification_filename  %}
-    <td> <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('remove_research_notification', exp_id=exp.idexperiment) }}" role="button">Remove</a></td>   
+    <td> <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('experiment.remove_research_notification', exp_id=exp.idexperiment) }}" role="button">Remove</a></td>   
     {% else %}
-    <td> <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('upload_research_notification', exp_id=exp.idexperiment) }}" role="button">Upload</a></td>   
+    <td> <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('experiment.upload_research_notification', exp_id=exp.idexperiment) }}" role="button">Upload</a></td>   
     {% endif %}
     </tr>
     
@@ -121,7 +121,7 @@
       <td class="text-justify">{{ exp.instruction }}</td>
       
       <td nowrap>
-     <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('edit_experiment', exp_id=exp.idexperiment) }}" role="button">Edit properties</a>
+     <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('experiment.edit', exp_id=exp.idexperiment) }}" role="button">Edit properties</a>
     </td>
     </tr>
     <tr>
@@ -190,12 +190,12 @@
                             </div>
                             <div class="modal-footer">
                               <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                              <a class="btn btn-primary" href="{{ url_for('remove_bg_question', idbackground_question=options[0], exp_id=exp_id) }}" role="button">Yes, remove</a>
+                              <a class="btn btn-primary" href="{{ url_for('experiment.remove_bg_question', idbackground_question=options[0], exp_id=exp_id) }}" role="button">Yes, remove</a>
                             </div>
                           </div>
                         </div>
                       </div>
-    <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('edit_bg_question', idbackground_question=options[0]) }}" role="button">Edit</a>
+    <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('experiment.edit_bg_question', idbackground_question=options[0]) }}" role="button">Edit</a>
 
     </td>
     </tr>
@@ -206,7 +206,7 @@
     <table class="table">
     <tbody>
     <td class="text-nowrap align-bottom text-right col-8">
-    <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('add_bg_question', exp_id=exp_id) }}" role="button">Add more</a>
+    <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('experiment.add_bg_question', exp_id=exp_id) }}" role="button">Add more</a>
     </td>
     </tbody>
     </table>
@@ -214,6 +214,9 @@
 
 
 <h1 class="container mt-5 display-4 text-left"><br>Rating set:</h1>
+
+<hr>
+TODO: add embody tool
 <hr>
 <br>    
     {% for category in categories1 %}
@@ -247,12 +250,12 @@
                             </div>
                             <div class="modal-footer">
                               <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                              <a class="btn btn-primary" href="{{ url_for('remove_question', idquestion=category[0], exp_id=exp_id) }}" role="button">Yes, remove</a>
+                              <a class="btn btn-primary" href="{{ url_for('experiment.remove_question', idquestion=category[0], exp_id=exp_id) }}" role="button">Yes, remove</a>
                             </div>
                           </div>
                         </div>
                       </div>
-                <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('edit_question', idquestion=category[0]) }}" role="button">Edit</a>
+                <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('experiment.edit_question', idquestion=category[0]) }}" role="button">Edit</a>
                  
                 </div>
 
@@ -264,7 +267,7 @@
     <table class="table">
     <tbody>
     <td class="text-nowrap align-bottom text-right col-8">
-    <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('add_questions', exp_id=exp_id) }}" role="button">Add more</a>
+    <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('experiment.add_questions', exp_id=exp_id) }}" role="button">Add more</a>
     </td>
     </tbody>
     </table>
@@ -304,12 +307,12 @@
                             </div>
                             <div class="modal-footer">
                               <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                              <a class="btn btn-primary" href="{{ url_for('remove_page', idpage=page.idpage, exp_id=exp_id) }}" role="button">Yes, remove</a>
+                              <a class="btn btn-primary" href="{{ url_for('experiment.remove_stimuli', idpage=page.idpage, exp_id=exp_id) }}" role="button">Yes, remove</a>
                             </div>
                           </div>
                         </div>
                       </div>
-                     <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('edit_stimuli', idpage=page.idpage, exp_id=exp_id) }}" role="button">Edit</a>
+                     <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('experiment.edit_stimuli', idpage=page.idpage, exp_id=exp_id) }}" role="button">Edit</a>
                     </td>
                 </tr>
             {% endfor %}
@@ -317,7 +320,7 @@
                   <table class="table">
                   <tbody>
                   <td class="text-nowrap align-bottom text-right col-8">
-                  <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('add_stimuli', exp_id=exp_id, stimulus_type=mtype.type) }}" role="button">Add more</a>
+                  <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('experiment.add_stimuli', exp_id=exp_id, stimulus_type=mtype.type) }}" role="button">Add more</a>
                   </td>
                   </tbody>
                   </table>
@@ -346,12 +349,12 @@
                             </div>
                             <div class="modal-footer">
                               <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                              <a class="btn btn-primary" href="{{ url_for('remove_page', idpage=page.idpage, exp_id=exp_id) }}" role="button">Yes, remove</a>
+                              <a class="btn btn-primary" href="{{ url_for('experiment.remove_stimuli', idpage=page.idpage, exp_id=exp_id) }}" role="button">Yes, remove</a>
                             </div>
                           </div>
                         </div>
                       </div>
-                     <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('edit_stimuli', idpage=page.idpage, exp_id=exp_id) }}" role="button">Replace</a>
+                     <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('experiment.edit_stimuli', idpage=page.idpage, exp_id=exp_id) }}" role="button">Replace</a>
                  
                     </td>
                 </tr>
@@ -360,7 +363,8 @@
                           <table class="table">
                   <tbody>
                   <td class="text-nowrap align-bottom text-right col-8">
-                  <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('add_stimuli', exp_id=exp_id, stimulus_type=mtype.type) }}" role="button">Add more</a>
+                  {{ mtype }}
+                  <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('experiment.add_stimuli', exp_id=exp_id, stimulus_type=mtype.type) }}" role="button">Add more</a>
                   </td>
                   </tbody>
                   </table>    

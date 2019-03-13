@@ -9,4 +9,5 @@ scrap_script.py
 config.py
 *.pyc
 *.db
+/embody
 
