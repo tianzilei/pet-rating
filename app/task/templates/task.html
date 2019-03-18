@@ -101,6 +101,7 @@
   <canvas id="embody-canvas" width="200" height="100" style="border: 1px solid blue;"  ></canvas>
 
   <img id="baseImage" class="" src={{ url_for('static', filename='img/dummy_600.png') }} />
+  <img id="baseImageMask" class="hidden" src={{ url_for('static', filename='img/dummy_600_mask.png') }} />
   <form class="form-group mt-5" action="/task/embody/{{ page_num }}" method="post">
 
     <input id="canvas-data" type="hidden" value="" name="text">
@@ -112,6 +113,7 @@
         </div>
         <div class="col-12">
             <br>
+            <p>{{ _("Reload the page if painting canvas didn't appear.") }} </p>
             <p>{{ _('You can zoom in/out the page view by pressing ctrl+/ctrl- (Windows) or ⌘+/⌘- (Mac)') }} </p>
         </div>
     </div>    

@@ -7,7 +7,6 @@ $(document).ready(function() {
     var canvas = $("#embody-canvas")
     var context = document.getElementById("embody-canvas").getContext("2d");
 
-
     canvas.mousedown(function(e){
         var mouseX = e.pageX - this.offsetLeft;
         var mouseY = e.pageY - this.offsetTop;
@@ -41,18 +40,48 @@ $(document).ready(function() {
     {
         clickX.push(x);
         clickY.push(y);
+
+        // ClickDrag array is unnecessary beacause all the coordinates are saved to
+        // X & Y -arrays
         clickDrag.push(dragging);
     }
 
 
     function redraw(){
-        context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
+
+        /* 
+        Check:
+        https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+
+        TODO: It's possible to use only one mask image propably
+        */
+        //context.globalCompositeOperation='destination-over' // 
+        //context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
+
+        lastX = clickX[clickX.length - 1]
+        lastY = clickY[clickY.length - 1]
+
+        // Opacity (there was 0.2 opacity in the old version):
+        context.globalAlpha = 0.2
         
-        context.strokeStyle = "#df4b26";
-        context.lineJoin = "round";
-        context.lineWidth = 5;
-                  
+        // Gradient:
+        var gradient = context.createRadialGradient(lastX, lastY, 1, lastX, lastY, 15);
+        gradient.addColorStop(0, "rgba(255,0,0,1)");
+        gradient.addColorStop(1, "rgba(255,0,0,0.1)");
+
+        // Draw circle with gradient
+        context.beginPath();
+        context.arc(lastX, lastY, 15, 0, 2 * Math.PI, false);
+        context.fillStyle = gradient
+        context.fill()
+
+        drawMaskToBaseImage()
+
+        /*
+        OLD version, where line is drawn continuously (not needed probably)
+
         for(var i=0; i < clickX.length; i++) {		
+
             context.beginPath();
 
             if (clickDrag[i] && i) { 
@@ -65,9 +94,16 @@ $(document).ready(function() {
             context.closePath();
             context.stroke();
         }
+        */
 
     }
 
+    function drawMaskToBaseImage()
+    {
+        var img = document.getElementById("baseImageMask");
+        context.globalAlpha = 1
+        context.drawImage(img, 0, 0);
+    }
 
     function drawBaseImage()
     {
@@ -78,9 +114,9 @@ $(document).ready(function() {
         context.canvas.height = height
         context.canvas.width = width
         context.drawImage(img, 0, 0);
-
         img.classList.add("hidden")
     }
 
     drawBaseImage()
+
 });
