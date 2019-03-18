@@ -23,7 +23,7 @@ from app.models import experiment
 from app.models import page, question
 from app.models import answer_set, answer 
 from app.models import user, trial_randomization
-from app.forms import Answers, TaskForm, ContinueTaskForm
+from app.forms import Answers, TaskForm, ContinueTaskForm, StringForm
 
 task_blueprint = Blueprint("task", __name__, 
                 template_folder='templates',
@@ -31,19 +31,20 @@ task_blueprint = Blueprint("task", __name__,
                 url_prefix='/task')
 
 
-def get_randomized_page(pages):
+def get_randomized_page(page_id):
 
     #this variable is feeded to the template as empty if trial randomization is set to "off"
     randomized_stimulus = ""
 
     #if trial randomization is on we will still use the same functionality that is used otherwise
     #but we will pass the randomized pair of the page_id from trial randomization table to the task.html
-    randomized_page_id = trial_randomization.query.filter(and_(
+    randomized_page = trial_randomization.query.filter(and_(
             trial_randomization.answer_set_idanswer_set==session['answer_set'], 
-            trial_randomization.page_idpage==pages.items[0].idpage
+            trial_randomization.page_idpage==page_id
+            #trial_randomization.page_idpage==pages.items[0].idpage
         )).first()
 
-    return randomized_page_id
+    return randomized_page
 
 
 def add_slider_answer(key, value, randomized_page_id):
@@ -51,19 +52,71 @@ def add_slider_answer(key, value, randomized_page_id):
     the values are inputted for session['current_idpage']. Otherwise the values 
     are set for the corresponding id found in the trial randomization table'''
 
-    page_idpage = session['current_idpage'] if session['randomization'] == 'Off' else randomized_page_id.randomized_idpage 
+    page_idpage = session['current_idpage'] if session['randomization'] == 'Off' else randomized_page_id
     participant_answer = answer(question_idquestion=key, answer_set_idanswer_set=session['answer_set'], answer=value, page_idpage=page_idpage)
     db.session.add(participant_answer)
     db.session.commit()
 
 
-@task_blueprint.route('/<int:page_num>', methods=['POST'])
+def update_answer_set():
+    the_time = datetime.now()
+    the_time = the_time.replace(microsecond=0)
+
+    update_answer_counter = answer_set.query.filter_by(idanswer_set=session['answer_set']).first()
+    update_answer_counter.answer_counter = int(update_answer_counter.answer_counter) + 1 
+    update_answer_counter.last_answer_time = the_time
+    db.session.commit()
+
+
+def slider_question_has_answers(user, page_id):
+    '''This should return true IF there are questions from certain page and no answers'''
+
+    answer_set_id = answer_set.query.filter_by(session=user).first().idanswer_set
+    experiment_id = answer_set.query.filter_by(session=user).first().experiment_idexperiment
+
+    if session['randomization'] == 'On':
+        randomized_page_id = get_randomized_page(page_id).randomized_idpage
+        answers = answer.query.filter_by(answer_set_idanswer_set=answer_set_id, page_idpage=randomized_page_id).all()
+    else:
+        answers = answer.query.filter_by(answer_set_idanswer_set=answer_set_id, page_idpage=page_id).all()
+
+    questions = question.query.filter_by(experiment_idexperiment=experiment_id).all()
+
+    return (True if (len(answers) == 0 and len(questions) > 0) else False)
+
+
+@task_blueprint.route('/embody/<int:page_num>', methods=['POST'])
+def task_embody(page_num):
+    '''Save embody drawing to database'''
+
+    form = StringForm(request.form)
+    pages = page.query.filter_by(experiment_idexperiment=session['exp_id']).paginate(per_page=1, page=page_num, error_out=True)
+    page_id = pages.items[0].idpage
+
+    if form.validate():
+        data = request.form.to_dict()
+        for key, value in data.items():
+            print(key)
+            print(value)
+
+    # Check if there are unanswered slider questions
+    if slider_question_has_answers(session['user'], page_id):
+        return redirect( url_for('task.task', page_num=page_num, show_sliders=True))
+
+    if not pages.has_next:
+        return redirect ( url_for('task.completed'))
+
+    # If user has answered to all questions, then move to next page
+    return redirect( url_for('task.task', page_num=pages.next_num))
+
+
+@task_blueprint.route('/question/<int:page_num>', methods=['POST'])
 def task_answer(page_num):
+    '''Save slider answers to database'''
 
     form = TaskForm(request.form)
     pages = page.query.filter_by(experiment_idexperiment=session['exp_id']).paginate(per_page=1, page=page_num, error_out=True)
-
-    # TODO: determine wheter handling POST data from slider or embody!!!
+    page_id = pages.items[0].idpage
 
     if form.validate():
         #Lets check if there are answers in database already for this page_id (eg. if user returned to previous page and tried to answer again)
@@ -71,19 +124,13 @@ def task_answer(page_num):
         #this has to be done separately for trial randomization "on" and "off" situations        
 
         if session['randomization'] == 'On':
-            randomized_page_id = get_randomized_page(pages)
-            check_answer = answer.query.filter(and_(answer.answer_set_idanswer_set==session['answer_set'], answer.page_idpage==randomized_page_id.randomized_idpage)).first()
+            randomized_page_id = get_randomized_page(page_id).randomized_idpage
+            check_answer = answer.query.filter(and_(answer.answer_set_idanswer_set==session['answer_set'], answer.page_idpage==randomized_page_id)).first()
         else:
             check_answer = answer.query.filter(and_(answer.answer_set_idanswer_set==session['answer_set'], answer.page_idpage==session['current_idpage'])).first()
 
         if check_answer is None:
-            the_time = datetime.now()
-            the_time = the_time.replace(microsecond=0)
-            
-            update_answer_counter = answer_set.query.filter_by(idanswer_set=session['answer_set']).first()
-            update_answer_counter.answer_counter = int(update_answer_counter.answer_counter) + 1 
-            update_answer_counter.last_answer_time = the_time
-            db.session.commit()
+            update_answer_set()
         
             data = request.form.to_dict()
             for key, value in data.items():
@@ -103,7 +150,14 @@ def task_answer(page_num):
 @task_blueprint.route('/<int:page_num>', methods=['GET'])
 def task(page_num):
 
-    experiment_info = experiment.query.filter_by(idexperiment=session['exp_id']).first()
+    try:
+        experiment_info = experiment.query.filter_by(idexperiment=session['exp_id']).first()
+    except KeyError as err:
+        print(err)
+        flash("No valid session found")
+        return redirect('/')
+
+
     rating_instruction = experiment_info.single_sentence_instruction
     stimulus_size = experiment_info.stimulus_size
     
@@ -111,9 +165,8 @@ def task(page_num):
     #A value of stimulus size 12 gives h1 and value of 1 gives h6
     stimulus_size_text = 7-math.ceil((int(stimulus_size)/2))
 
-    print(stimulus_size_text)
-    
     pages = page.query.filter_by(experiment_idexperiment=session['exp_id']).paginate(per_page=1, page=page_num, error_out=True)
+    page_id = pages.items[0].idpage
     progress_bar_percentage = round((pages.page/pages.pages)*100)
 
     #this variable is feeded to the template as empty if trial randomization is set to "off"
@@ -122,35 +175,45 @@ def task(page_num):
     # if trial randomization is on we will still use the same functionality that is used otherwise
     # but we will pass the randomized pair of the page_id from trial randomization table to the task.html
     if session['randomization'] == 'On':
-
-        #set the stimulus to be shown if randomization is on
-        randomized_page_id = get_randomized_page(pages)
-        randomized_stimulus = page.query.filter_by(idpage=randomized_page_id.randomized_idpage).first()
+        randomized_page_id = get_randomized_page(page_id).randomized_idpage
+        randomized_stimulus = page.query.filter_by(idpage=randomized_page_id).first()
         
     for p in pages.items:
         session['current_idpage'] = p.idpage
-    
-    #slider set
-    form = TaskForm(request.form)
-    categories_and_scales = {}
-    categories = question.query.filter_by(experiment_idexperiment=session['exp_id']).all()
 
-    for cat in categories:    
-        scale_list = [(cat.left, cat.right)]
-        categories_and_scales[cat.idquestion, cat.question]  = scale_list
-    
-    form.categories1 = categories_and_scales
+    print(session)
+
+    # Select form type (TODO: question order is now harcoded to EMBODY -> SLIDERS
+    # there should be more flexible solution if more question types are added...)
+    if request.args.get('show_sliders', False) or not session['embody']:
+        # Init slider form
+        form = TaskForm()
+
+        # Get sliders from this experiment
+        categories = question.query.filter_by(experiment_idexperiment=session['exp_id']).all()
+
+        categories_and_scales = {}
+        for cat in categories:    
+            scale_list = [(cat.left, cat.right)]
+            categories_and_scales[cat.idquestion, cat.question]  = scale_list
+        
+        form.categories1 = categories_and_scales
+
+    else:
+        form = StringForm()
 
     return render_template(
-                        'task.html', 
-                        pages=pages, 
-                        progress_bar_percentage=progress_bar_percentage, 
-                        form=form, 
-                        randomized_stimulus=randomized_stimulus, 
-                        rating_instruction=rating_instruction, 
-                        stimulus_size=stimulus_size, 
-                        stimulus_size_text=stimulus_size_text
-                        )
+        'task.html', 
+        pages=pages, 
+        page_num=page_num,
+        progress_bar_percentage=progress_bar_percentage, 
+        form=form, 
+        randomized_stimulus=randomized_stimulus, 
+        rating_instruction=rating_instruction, 
+        stimulus_size=stimulus_size, 
+        stimulus_size_text=stimulus_size_text,
+        experiment_info=experiment_info
+        )
 
 
 @task_blueprint.route('/completed')
@@ -188,9 +251,10 @@ def continue_task():
         session['answer_set'] = participant.idanswer_set
         mediatype = page.query.filter_by(experiment_idexperiment=session['exp_id']).first()
         
-        rand = experiment.query.filter_by(idexperiment=session['exp_id']).first()
+        exp = experiment.query.filter_by(idexperiment=session['exp_id']).first()
         
-        session['randomization'] = rand.randomization
+        session['randomization'] = exp.randomization
+        session['embody'] = exp.embody_enabled
     
         if mediatype:
             session['type'] = mediatype.type

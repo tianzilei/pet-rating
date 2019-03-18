@@ -84,5 +84,6 @@ app.register_blueprint(create_blueprint)
 app.secret_key = 'random string'
 """app.secret_key = os.urandom(24)"""
 
+app.jinja_env.auto_reload = True
 
 from app import routes, models

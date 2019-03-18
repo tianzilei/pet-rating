@@ -25,8 +25,14 @@ class RegisterForm(Form):
 
 
 class TaskForm(Form):
-    
+    __name__= 'slider'
     categories1 = FieldList(SelectField([validators.InputRequired()]))
+    submit = SubmitField("Send")
+
+
+class StringForm(Form):
+    __name__= 'embody'
+    text = StringField()
     submit = SubmitField("Send")
 
 

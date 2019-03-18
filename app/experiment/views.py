@@ -79,15 +79,8 @@ def view():
         categories_and_scales[cat.idquestion, cat.question]  = scale_list
  
     categories1 = categories_and_scales
-    
+
     return render_template('view_experiment.html', exp_id=exp_id, media=media, mtype=mtype, experiment_info=experiment_info, categories1=categories1, questions1=questions1)
-
-
-
-
-
-
-
 
 
 # Experiment info:
@@ -556,6 +549,20 @@ def remove_bg_question():
 
 # Rating set:
 
+@experiment_blueprint.route('/set_embody')
+@login_required
+def set_embody():
+    '''Enable/disable embody tool'''
+    
+    exp_id = request.args.get('exp_id', None)
+    
+    exp = experiment.query.filter_by(idexperiment = exp_id).first()
+    exp.embody_enabled = (True if exp.embody_enabled == False else False)
+    db.session.commit() 
+    
+    return redirect(url_for('experiment.view', exp_id=exp_id))
+
+
 @experiment_blueprint.route('/add_questions', methods=['GET', 'POST'])
 @login_required
 def add_questions():
@@ -856,6 +863,8 @@ def remove_stimuli():
 @experiment_blueprint.route('/statistics')
 @login_required
 def statistics():
+
+    # TODO: Answers are in normal order although questions might be in randomized order
     
     exp_id = request.args.get('exp_id', None)
     
@@ -878,51 +887,6 @@ def statistics():
         
     #List of answers per participant in format question Stimulus ID/Question ID
     #those are in answer table as page_idpage and question_idquestion respectively
-    
-    
-    
-    """
-    pages = page.query.filter_by(experiment_idexperiment=exp_id).all()
-    
-    participants_and_answers = {}
-    
-    #participants on kaikki expin osallistujat
-    for participant in participants:
- 
-        #kaikki yhden khn vastaukset ko experimentille koska answer_setin id matchaa answereiden kanssa
-        flash(participant.session)
-        for p in pages:
-        
-            answers = answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()
-            #kaikki yhden participantin vastaukset pagelle
-            answers_for_page = answer.query.filter(and_(answer.answer_set_idanswer_set==participant.idanswer_set, answer.page_idpage==p.idpage)).all()
-            
-            for ans in answers:
-                if ans.page_idpage == p.idpage:
-                    #flash(ans.page_idpage)
-                    flash("X")
-                else:
-                    flash("NA")
-            
-            #pages on kaikki experimentin paget
-            
-            for a in answers:
-                if p.idpage == a.page_idpage:
-                    flash("match")
-                else:
-                    flash("no match")
-                 flash("participant:")
-                flash(participant.session)
-                flash("stimulus:")
-                flash(a.page_idpage)
-                flash("Kysymys")
-                flash(a.question_idquestion)
-                flash("vastaus:")
-                flash(a.answer)
-
-            #answers_list = (a.idanswer, a.question_idquestion, a.answer_set_idanswer_set, a.answer, a.page_idpage)
-            #participants_and_answers[participant.session] = answers_list 
-    """
     
     participants_and_answers = {}
     

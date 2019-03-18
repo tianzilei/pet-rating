@@ -8,6 +8,7 @@
 <!-- TODO change session['type'] TO stimulus['type'] 
      because session should have multiple type of stimuli!!!
  -->
+
     
     {% if session['type']=='text' %}
         <div class="container text-center mt-5 pt-5">
@@ -89,12 +90,36 @@
     
 <br>
  
- 
- 
- 
  <h4 class="text-center">{{ rating_instruction }}</h4>
 
-  <form class="form-group mt-5" action="" method="post">
+ <!-- Select form type -->
+
+ {{page_num}}
+
+ {% if form.__name__ == 'embody' %}
+
+  <canvas id="embody-canvas" width="200" height="100" style="border: 1px solid blue;"  ></canvas>
+
+  <img id="baseImage" class="" src={{ url_for('static', filename='img/dummy_600.png') }} />
+  <form class="form-group mt-5" action="/task/embody/{{ page_num }}" method="post">
+
+    <input id="canvas-data" type="hidden" value="" name="text">
+
+    <div class="form-row text-center">
+        <div class="col-12">
+            <a class="btn btn-primary" href={{ url_for('task.quit') }} role="button">{{ _('Quit task') }}</a>
+            <button type="submit" class="btn btn-primary">{{ _('Next page') }}</button>
+        </div>
+        <div class="col-12">
+            <br>
+            <p>{{ _('You can zoom in/out the page view by pressing ctrl+/ctrl- (Windows) or ⌘+/⌘- (Mac)') }} </p>
+        </div>
+    </div>    
+  </form>  
+
+{% elif form.__name__ == 'slider' %}
+
+  <form class="form-group mt-5" action="/task/question/{{ page_num }}" method="post">
     {% for category in form.categories1 %}
         {% for scale in form.categories1[category] %}
             <div class="row form-group mt-0 mb-0">
@@ -104,7 +129,6 @@
                 <h6 class="col text-center mt-0 mb-0">
                     <label for="customRange">{{ category[1] }}</label>
                     <input type="range" class="custom-range" id="customRange" name={{ category[0] }}>
-                    
                 </h6>
                 <h6 class="col-3 text-left mt-0 mb-0">
                 {{ scale[1] }}
@@ -112,16 +136,20 @@
             </div>
          {% endfor %}   
     {% endfor %}
-        <div class="form-row text-center">
-            <div class="col-12">
-                <a class="btn btn-primary" href={{ url_for('task.quit') }} role="button">{{ _('Quit task') }}</a>
-                <button type="submit" class="btn btn-primary">{{ _('Next page') }}</button>
-            </div>
-            <div class="col-12">
-                     <br>
-                    <p>{{ _('You can zoom in/out the page view by pressing ctrl+/ctrl- (Windows) or ⌘+/⌘- (Mac)') }} </p>
-            </div>
-        </div>    
+    <div class="form-row text-center">
+        <div class="col-12">
+            <a class="btn btn-primary" href={{ url_for('task.quit') }} role="button">{{ _('Quit task') }}</a>
+            <button type="submit" class="btn btn-primary">{{ _('Next page') }}</button>
+        </div>
+        <div class="col-12">
+            <br>
+            <p>{{ _('You can zoom in/out the page view by pressing ctrl+/ctrl- (Windows) or ⌘+/⌘- (Mac)') }} </p>
+        </div>
+    </div>    
   </form>  
+
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/canvas.js') }}" ></script>
     
 {% endblock %}

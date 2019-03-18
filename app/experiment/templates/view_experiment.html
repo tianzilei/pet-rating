@@ -9,9 +9,8 @@
 <table class="table">
   <tbody>
 
-
 {% for exp in experiment_info %}
-
+<!-- Why there is a for loop her ?! -->
 
     <tr>
       <td nowrap>Name:</td>
@@ -215,53 +214,70 @@
 
 <h1 class="container mt-5 display-4 text-left"><br>Rating set:</h1>
 
-<hr>
-TODO: add embody tool
+<table class="table">
+  <colgroup>
+    <col style="width:33%;%">
+    <col style="width:33%;%">
+    <col style="width:33%;%">
+  </colgroup>
+  <tr>
+    <td>Add embody tool:</td>
+    <td> 
+    {% if experiment_info[0].embody_enabled %}   
+      Enabled
+    {% else %}
+      Disabled
+    {% endif %}
+    </td>
+    <td><a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('experiment.set_embody', exp_id=exp_id) }}" role="button">Enable embody</a></td>
+  </tr>
+</table>
+
 <hr>
 <br>    
-    {% for category in categories1 %}
-        {% for scale in categories1[category] %}
-            <div class="row form-group">
-                <div class="col-2 text-center">
-                    <p>{{ scale[0] }}</p> 
-                </div>
-                <div class="col text-center">
-                    <label for="customRange">{{ category[1] }}</label>
-                    <input type="range" class="custom-range" id="customRange" name={{ category[0] }}>
-                 </div>
-                <div class="col-2 text-center">
-                <p>{{ scale[1] }}</p> 
-                </div>
-                <div class="col-2 text-center">
-                
-                
-                   <button type="button" class="btn btn-primary btn-sm btn-dark" data-toggle="modal" data-target="#mymodal{{category[0]}}">Remove</button>
-                      <!-- Modal -->
-                      <div class="modal fade" id="mymodal{{category[0]}}" role="dialog">
-                        <div class="modal-dialog modal-dialog-centered" id="{{category[0]}}">
-                          <!-- Modal content-->
-                          <div class="modal-content modal-dialog-centered">
-                            <div class="modal-header">
-                              <button type="button" class="close" data-dismiss="modal">&times;</button>
-                              <h4 class="modal-title">Notice!</h4>
-                            </div>
-                            <div class="modal-body">
-                              <p>Are you sure you want to remove this?</p>
-                            </div>
-                            <div class="modal-footer">
-                              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                              <a class="btn btn-primary" href="{{ url_for('experiment.remove_question', idquestion=category[0], exp_id=exp_id) }}" role="button">Yes, remove</a>
-                            </div>
-                          </div>
+{% for category in categories1 %}
+    {% for scale in categories1[category] %}
+        <div class="row form-group">
+            <div class="col-2 text-center">
+                <p>{{ scale[0] }}</p> 
+            </div>
+            <div class="col text-center">
+                <label for="customRange">{{ category[1] }}</label>
+                <input type="range" class="custom-range" id="customRange" name={{ category[0] }}>
+              </div>
+            <div class="col-2 text-center">
+            <p>{{ scale[1] }}</p> 
+            </div>
+            <div class="col-2 text-center">
+            
+            
+                <button type="button" class="btn btn-primary btn-sm btn-dark" data-toggle="modal" data-target="#mymodal{{category[0]}}">Remove</button>
+                  <!-- Modal -->
+                  <div class="modal fade" id="mymodal{{category[0]}}" role="dialog">
+                    <div class="modal-dialog modal-dialog-centered" id="{{category[0]}}">
+                      <!-- Modal content-->
+                      <div class="modal-content modal-dialog-centered">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <h4 class="modal-title">Notice!</h4>
+                        </div>
+                        <div class="modal-body">
+                          <p>Are you sure you want to remove this?</p>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                          <a class="btn btn-primary" href="{{ url_for('experiment.remove_question', idquestion=category[0], exp_id=exp_id) }}" role="button">Yes, remove</a>
                         </div>
                       </div>
-                <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('experiment.edit_question', idquestion=category[0]) }}" role="button">Edit</a>
-                 
-                </div>
-
+                    </div>
+                  </div>
+            <a class="btn btn-primary btn-sm btn-info" href="{{ url_for('experiment.edit_question', idquestion=category[0]) }}" role="button">Edit</a>
+              
             </div>
-         {% endfor %}   
-    {% endfor %}
+
+        </div>
+      {% endfor %}   
+{% endfor %}
 
     </table>
     <table class="table">

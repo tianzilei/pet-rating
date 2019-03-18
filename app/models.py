@@ -1,9 +1,7 @@
 from app import db
-from sqlalchemy import Column, Integer, String, Text
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, String, Text, Boolean
 from flask_wtf import FlaskForm
 from wtforms_sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField 
-from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from app import login
@@ -53,9 +51,10 @@ class experiment (db.Model):
     stimulus_size = db.Column(db.String(120))
     consent_text = db.Column(db.Text, index=True)
     use_forced_id = db.Column(db.String(120))
+    embody_enabled = db.Column(db.Boolean, unique=False, default=True)
     
     def __repr__(self):
-        return "<idexperiment = '%s', name='%s', instruction='%s', directoryname='%s', language='%s', status='%s', randomization='%s', short_instruction='%s', single_sentence_instruction='%s', is_archived='%s', creator_name='%s', research_notification_filename='%s', creation_time='%s', stimulus_size='%s', consent_text='%s', use_forced_id='%s'>" % (self.idexperiment, self.name, self.instruction, self.directoryname, self.language, self.status, self.randomization, self.short_instruction, self.single_sentence_instruction, self.is_archived, self.creator_name, self.research_notification_filename, self.creation_time, self.stimulus_size, self.consent_text, self.use_forced_id)
+        return "<idexperiment = '%s', name='%s', instruction='%s', directoryname='%s', language='%s', status='%s', randomization='%s', short_instruction='%s', single_sentence_instruction='%s', is_archived='%s', creator_name='%s', research_notification_filename='%s', creation_time='%s', stimulus_size='%s', consent_text='%s', use_forced_id='%s', embody_enabled='%s'>" % (self.idexperiment, self.name, self.instruction, self.directoryname, self.language, self.status, self.randomization, self.short_instruction, self.single_sentence_instruction, self.is_archived, self.creator_name, self.research_notification_filename, self.creation_time, self.stimulus_size, self.consent_text, self.use_forced_id, self.embody_enabled)
 
 
 class answer_set (db.Model):

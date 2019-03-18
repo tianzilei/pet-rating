@@ -83,8 +83,7 @@ def remove_language():
 
 @app.route('/session')
 def participant_session():
-
-    # TODO: too long method? 
+    '''Set up session variables'''
 
     #start session
     session['exp_id'] = request.args.get('exp_id', None)
@@ -100,12 +99,11 @@ def participant_session():
         check_id = answer_set.query.filter_by(session=random_id).first()
 
         while check_id is not None:
-            #flash("ID already existed; generated a new one")
             random_id = secrets.token_hex(3)
             check_id = answer_set.query.filter_by(session=random_id).first()
         
         session['user'] = random_id
-    
+
     #create answer set for the participant in the database
     the_time = datetime.now()
     the_time = the_time.replace(microsecond=0)
@@ -115,29 +113,21 @@ def participant_session():
                                         answer_counter = '0', 
                                         registration_time=the_time, 
                                         last_answer_time=the_time)
-
     db.session.add(participant_answer_set)
     db.session.commit()
+
+    # Set session status variables
+    exp_status = experiment.query.filter_by(idexperiment=session['exp_id']).first()
     
     #If trial randomization is set to 'On' for the experiment, create a randomized trial order for this participant
     #identification is based on the uniquie answer set id
-
-    exp_status = experiment.query.filter_by(idexperiment=session['exp_id']).first()
-
     if exp_status.randomization == 'On':
     
         session['randomization'] = 'On'
         
-        #flash("answer_set_id")
-        #flash(participant_answer_set.idanswer_set)
-        
         #create a list of page id:s for the experiment
         experiment_pages = page.query.filter_by(experiment_idexperiment=session['exp_id']).all()
         original_id_order_list = [(int(o.idpage)) for o in experiment_pages]
-        
-        #flash("original Page id order:")
-        #for a in range(len(original_id_order_list)):
-            #flash(original_id_order_list[a])
         
         #create a randomized page id list    
         helper_list = original_id_order_list 
@@ -159,29 +149,33 @@ def participant_session():
     
     if exp_status.randomization == "Off":
         session['randomization'] = "Off"
-    
-    #store participants session id in session list as answer_set
 
-    #old: was missing experiment id so made duplicates
-    #session_id_for_participant = answer_set.query.filter_by(session=session['user']).first()
+    if exp_status.embody_enabled:
+        session['embody'] = True
+    else:
+        session['embody'] = False
+    
     
     #store participants session id in session list as answer_set, based on experiment id and session id
     session_id_for_participant = answer_set.query.filter(and_(answer_set.session==session['user'], answer_set.experiment_idexperiment==session['exp_id'])).first()
     session['answer_set'] = session_id_for_participant.idanswer_set
-    
+
+
+
+    # TODO: this is unnecessary if experiment contains multiple stimulus types
     #collect experiments mediatype from db to session['type']. 
     #This is later used in task.html to determine page layout based on stimulus type
     mediatype = page.query.filter_by(experiment_idexperiment=session['exp_id']).first()
-
     if mediatype:
         session['type'] = mediatype.type
     else:
         flash('No pages or mediatype set for experiment')
         return redirect('/')
+
     
+    # Redirect user to register page
     if 'user' in session:
         user = session['user']
-        #flash('Session started for user {}'.format(user))
         return redirect('/register')
       
     return "Session start failed return <a href = '/login'></b>" + "Home</b></a>"

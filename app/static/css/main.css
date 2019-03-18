@@ -1,15 +1,5 @@
 body {
-    background-color: darkgrey;
     font-family: Helvetica, Arial, sans-serif;
-}
-
-
-container {
-    
-    text-decoration-color: #4EB1BA;
-    margin-left: auto;
-    margin-right: auto;
-    
 }
 
 #header{
@@ -19,10 +9,13 @@ container {
     
 }
 
-#nav{
-    
+.hidden {
+    display: none;
 }
 
-#main{
+#embody-canvas {
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 30px;
     
 }
