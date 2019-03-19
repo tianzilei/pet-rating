@@ -98,7 +98,10 @@
 
  {% if form.__name__ == 'embody' %}
 
+  <div class="canvas-container">
+  <span class="canvas-info"></span>
   <canvas id="embody-canvas" width="200" height="100" style="border: 1px solid blue;"  ></canvas>
+  </div>
 
   <img id="baseImage" class="" src={{ url_for('static', filename='img/dummy_600.png') }} />
   <img id="baseImageMask" class="hidden" src={{ url_for('static', filename='img/dummy_600_mask.png') }} />

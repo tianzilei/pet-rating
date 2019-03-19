@@ -35,6 +35,33 @@ $(document).ready(function() {
     var clickY = new Array();
     var clickDrag = new Array();
     var paint;
+    var drawRadius=15;
+
+    // TODO: changing drawradius doesnt affect to the saved datapoints !!!
+    // Bigger brush should make more datapoints compared to smaller ones.
+    $(".canvas-container").bind('DOMMouseScroll',function(event) {
+        event.preventDefault()
+
+        // Change brush size
+        if (event.originalEvent.detail >= 0){
+            if (drawRadius >= 15) {
+                drawRadius -= 5; 
+            }
+        } else {
+            if (drawRadius <= 15) {
+                drawRadius += 5; 
+            }
+        }
+
+        // Show brush size to user
+        if (drawRadius == 10) {
+            this.firstElementChild.innerHTML = "small brush"
+        } else if (drawRadius == 15) {
+            this.firstElementChild.innerHTML = "normal brush"
+        } else if (drawRadius == 20) {
+            this.firstElementChild.innerHTML = "large brush"
+        }
+    })
 
     function addClick(x, y, dragging)
     {
@@ -44,6 +71,12 @@ $(document).ready(function() {
         // ClickDrag array is unnecessary beacause all the coordinates are saved to
         // X & Y -arrays
         clickDrag.push(dragging);
+    }
+
+    function drawPoint(x, y, radius) {
+        context.beginPath();
+        context.arc(x, y, radius, 0, 2 * Math.PI, false);
+        context.fill()
     }
 
 
@@ -65,16 +98,19 @@ $(document).ready(function() {
         context.globalAlpha = 0.2
         
         // Gradient:
-        var gradient = context.createRadialGradient(lastX, lastY, 1, lastX, lastY, 15);
+        var gradient = context.createRadialGradient(lastX, lastY, 1, lastX, lastY, drawRadius);
         gradient.addColorStop(0, "rgba(255,0,0,1)");
         gradient.addColorStop(1, "rgba(255,0,0,0.1)");
+        context.fillStyle = gradient
 
         // Draw circle with gradient
-        context.beginPath();
-        context.arc(lastX, lastY, 15, 0, 2 * Math.PI, false);
-        context.fillStyle = gradient
-        context.fill()
-
+        drawPoint(lastX, lastY, drawRadius)
+        /*
+        drawPoint(lastX + 3, lastY, drawRadius)
+        drawPoint(lastX - 3, lastY, drawRadius)
+        drawPoint(lastX, lastY + 3, drawRadius)
+        drawPoint(lastX, lastY - 3, drawRadius)
+        */
         drawMaskToBaseImage()
 
         /*
