@@ -40,6 +40,7 @@ $(document).ready(function() {
     });
 
     canvas.mousemove(function(e){
+        // TODO: if mousedown -> can draw outside of image
         var mouseX = e.pageX - this.offsetLeft;
         var mouseY = e.pageY - this.offsetTop;
         if(paint && pointInsideBaseImage([mouseX, mouseY])){

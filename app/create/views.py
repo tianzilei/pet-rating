@@ -111,8 +111,12 @@ def experiment_questions():
     
     exp_id = request.args.get('exp_id', None)
     form = CreateQuestionForm(request.form)
+
+    print(form)
+    print(form.validate())
     
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
+    #if request.method == 'POST' and form.validate():
 
         str = form.questions_and_options.data
         str_list = str.split('/n')
@@ -140,9 +144,10 @@ def experiment_questions():
             db.session.add(add_question)
             db.session.commit()
         
-        return redirect(url_for('create.experiment_upload_stimuli', exp_id=exp_id))    
+        #return redirect(url_for('create.experiment_upload_stimuli', exp_id=exp_id))    
+    return redirect(url_for('create.experiment_upload_stimuli', exp_id=exp_id))    
 
-    return render_template('create_experiment_questions.html', form=form)
+    #return render_template('create_experiment_questions.html', form=form)
 
 
 @create_blueprint.route('/experiment_upload_stimuli', methods=['GET', 'POST'])

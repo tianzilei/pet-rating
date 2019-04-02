@@ -55,6 +55,10 @@ CREATE TABLE answer_set (
 	FOREIGN KEY(experiment_idexperiment) REFERENCES experiment (idexperiment)
 );
 
+ALTER TABLE answer_set ADD COLUMN (answer_type VARCHAR(120));
+
+/* TODO: Update answer_set so it knows which part of the page the user is doing (embody/sliders/something else) */ 
+
 /* Background questions are asked before the experiment begins */ 
 CREATE TABLE background_question (
 	idbackground_question INTEGER NOT NULL AUTO_INCREMENT,

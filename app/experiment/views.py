@@ -517,13 +517,12 @@ def remove_bg_question():
     exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
 
     if exp_status.status != 'Hidden':
-    
         flash("Experiment is public. Cannot modify structure.")
-
         return redirect(url_for('experiment.view', exp_id=exp_id))
         
     else:
-    
+
+        # TODO: cannot remove background question if there are answers
         remove_id = request.args.get('idbackground_question', None)
         remove_options = background_question_option.query.filter_by(background_question_idbackground_question=remove_id).all()
         
@@ -541,8 +540,6 @@ def remove_bg_question():
         db.session.commit()
   
     return redirect(url_for('experiment.view', exp_id=exp_id))
-
-
 
 
 

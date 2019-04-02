@@ -83,7 +83,7 @@ def remove_language():
 
 @app.route('/session')
 def participant_session():
-    '''Set up session variables'''
+    '''Set up session variables and create answer_set (database level sessions)'''
 
     #start session
     session['exp_id'] = request.args.get('exp_id', None)
@@ -104,20 +104,29 @@ def participant_session():
         
         session['user'] = random_id
 
+    # Set session status variables
+    exp_status = experiment.query.filter_by(idexperiment=session['exp_id']).first()
+
+
     #create answer set for the participant in the database
     the_time = datetime.now()
     the_time = the_time.replace(microsecond=0)
+
+    # TODO: Check which question type is the first in answer_set
+    answer_set_type = 'slider'
+    if exp_status.embody_enabled:
+        answer_set_type = 'embody'
+
     participant_answer_set = answer_set(experiment_idexperiment=session['exp_id'],
                                         session=session['user'], 
                                         agreement = session['agree'], 
                                         answer_counter = '0', 
+                                        answer_type = answer_set_type, 
                                         registration_time=the_time, 
                                         last_answer_time=the_time)
     db.session.add(participant_answer_set)
     db.session.commit()
 
-    # Set session status variables
-    exp_status = experiment.query.filter_by(idexperiment=session['exp_id']).first()
     
     #If trial randomization is set to 'On' for the experiment, create a randomized trial order for this participant
     #identification is based on the uniquie answer set id
@@ -150,16 +159,9 @@ def participant_session():
     if exp_status.randomization == "Off":
         session['randomization'] = "Off"
 
-    if exp_status.embody_enabled:
-        session['embody'] = True
-    else:
-        session['embody'] = False
-    
-    
     #store participants session id in session list as answer_set, based on experiment id and session id
     session_id_for_participant = answer_set.query.filter(and_(answer_set.session==session['user'], answer_set.experiment_idexperiment==session['exp_id'])).first()
     session['answer_set'] = session_id_for_participant.idanswer_set
-
 
 
     # TODO: this is unnecessary if experiment contains multiple stimulus types
@@ -172,7 +174,6 @@ def participant_session():
         flash('No pages or mediatype set for experiment')
         return redirect('/')
 
-    
     # Redirect user to register page
     if 'user' in session:
         user = session['user']

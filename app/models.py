@@ -28,7 +28,6 @@ class background_question_option(db.Model):
     background_question_idbackground_question = db.Column(db.Integer, db.ForeignKey('background_question.idbackground_question'))
     option = db.Column(db.String(120))
     
-    
     def __repr__(self):
         return "<idbackground_question_option = '%s', background_question_idbackground_question = '%s',  option = '%s'>" % (self.idbackground_question_option, self.background_question_idbackground_question, self.option) 
 
@@ -64,6 +63,7 @@ class answer_set (db.Model):
     session = db.Column(db.String(120))
     agreement = db.Column(db.String(120))
     answer_counter = db.Column(db.Integer)
+    answer_type = db.Column(db.String(120))
     registration_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     last_answer_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
@@ -78,15 +78,8 @@ class background_question_answer(db.Model):
     answer = db.Column(db.String(120))
     background_question_idbackground_question = db.Column(db.Integer, db.ForeignKey('background_question.idbackground_question'))
 
-    
     def __repr__(self):
         return "<idbackground_question_answer = '%s', answer_set_idanswer_set = '%s', answer = '%s', background_question_idbackground_question = '%s'>" % (self.idbackground_question_answer, self.answer_set_idanswer_set, self.answer, self.background_question_idbackground_question) 
-    """
-
-    def __repr__(self):
-        return '<answer {}>'.format(self.answer) 
-
-    """
 
 
 def background_question_answer_query():
@@ -95,10 +88,7 @@ def background_question_answer_query():
 """
 class ChoiceForm(FlaskForm):
     opts = QuerySelectField(query_factory=background_question_answer_query, allow_blank=True)
-"""    
 
-
-"""
 u = background_question.query.get(1)
 vastaukset = u.answers.all()
 ## pitää sisällään kysymyksen 1 vastaukset
@@ -124,13 +114,7 @@ class page (db.Model):
     type = db.Column(db.String(120), index=True)
     text = db.Column(db.Text)
     media = db.Column(db.String(120), index=True)
-    """
-    def __repr__(self):
-        return "<idpage = '%s', experiment_idexperiment = '%s', type = '%s', text = '%s', media = '%s'>" % (self.idpage, self.experiment_idexperiment, self.type, self.text, self.media) 
-    
-    def __repr__(self):
-        return '{}'.format(self.text) 
-    """
+
     def __repr__(self):
         return "<idpage = '%s', experiment_idexperiment = '%s', type = '%s', text = '%s', media = '%s'>" % (self.idpage, self.experiment_idexperiment, self.type, self.text, self.media)
 
@@ -145,6 +129,17 @@ class answer (db.Model):
 
     def __repr__(self):
         return "<idanswer = '%s', question_idquestion = '%s', answer_set_idanswer_set = '%s', answer = '%s', page_idpage = '%s'>" % (self.idanswer, self.question_idquestion, self.answer_set_idanswer_set, self.answer, self.page_idpage)
+
+
+class embody_answer (db.Model):
+    __tablename__ = "embody_answer"
+    idanswer = db.Column(db.Integer, primary_key=True)
+    answer_set_idanswer_set = db.Column(db.Integer, db.ForeignKey('answer_set.idanswer_set'))
+    page_idpage = db.Column(db.Integer, db.ForeignKey('page.idpage'))
+    coordinates = db.Column(db.Text)
+
+    def __repr__(self):
+        return "<idanswer = '%s', answer_set_idanswer_set = '%s', coordinates = '%s', page_idpage = '%s'>" % (self.idanswer, self.answer_set_idanswer_set, self.coordinates, self.page_idpage)
 
 
 class trial_randomization (db.Model):
@@ -167,11 +162,6 @@ class forced_id (db.Model):
         
     def __repr__(self):
         return "<idforced_id = '%s', experiment_idexperiment = '%s', pregenerated_id = '%s'>" % (self.idforced_id, self.experiment_idexperiment, self.pregenerated_id)
-
-
-
-
-
 
 
 class user(UserMixin, db.Model):
