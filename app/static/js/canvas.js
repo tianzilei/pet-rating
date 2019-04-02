@@ -1,24 +1,49 @@
 
 
+const url = 'http://127.0.0.1:8000/';
+
 $(document).ready(function() {
 
+    try {
+        var canvas = $("#embody-canvas")
+        var context = document.getElementById("embody-canvas").getContext("2d");
 
-    $("#canvas-data").val("hello world");
-    var canvas = $("#embody-canvas")
-    var context = document.getElementById("embody-canvas").getContext("2d");
+        // Base image
+        var img = document.getElementById("baseImage");
 
+        console.log(img)
+        console.log(canvas)
+    } catch (e) {
+        console.log(e)
+        if (e instanceof TypeError) {
+            return
+        }
+    }
+
+    // Init draw variables
+    var clickX = new Array();
+    var clickY = new Array();
+    var clickDrag = new Array();
+    var paint;
+    var drawRadius=15;
+
+    // Click handlers
     canvas.mousedown(function(e){
         var mouseX = e.pageX - this.offsetLeft;
         var mouseY = e.pageY - this.offsetTop;
-              
         paint = true;
-        addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
-        redraw();
+
+        if (pointInsideBaseImage([mouseX, mouseY])) {
+            addClick(mouseX, mouseY);
+            redraw();
+        }
     });
 
     canvas.mousemove(function(e){
-        if(paint){
-          addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
+        var mouseX = e.pageX - this.offsetLeft;
+        var mouseY = e.pageY - this.offsetTop;
+        if(paint && pointInsideBaseImage([mouseX, mouseY])){
+          addClick(mouseX, mouseY, true);
           redraw();
         }
     });
@@ -31,16 +56,10 @@ $(document).ready(function() {
         paint = false;
     });
 
-    var clickX = new Array();
-    var clickY = new Array();
-    var clickDrag = new Array();
-    var paint;
-    var drawRadius=15;
-
     // TODO: changing drawradius doesnt affect to the saved datapoints !!!
     // Bigger brush should make more datapoints compared to smaller ones.
     $(".canvas-container").bind('DOMMouseScroll',function(event) {
-        event.preventDefault()
+        //event.preventDefault()
 
         // Change brush size
         if (event.originalEvent.detail >= 0){
@@ -63,13 +82,20 @@ $(document).ready(function() {
         }
     })
 
-    function addClick(x, y, dragging)
+    $(".clear-button").on('click', function() {
+        clearCanvas()
+    })
+
+    $(".next-page").click(function() {
+        saveData()
+    })
+
+
+    // Draw methods
+    function addClick(x, y, dragging=false)
     {
         clickX.push(x);
         clickY.push(y);
-
-        // ClickDrag array is unnecessary beacause all the coordinates are saved to
-        // X & Y -arrays
         clickDrag.push(dragging);
     }
 
@@ -79,6 +105,26 @@ $(document).ready(function() {
         context.fill()
     }
 
+    function isWhite(color) {
+        if (color === 255) 
+            return true
+        return false
+    }
+
+    // Method for checking if cursor is inside human body before creating brush stroke
+    function pointInsideBaseImage(point) {
+        var imageData = context.getImageData(point[0], point[1],1,1)
+
+        startR = imageData.data[0];
+        startG = imageData.data[1];
+        startB = imageData.data[2];
+
+        if (isWhite(startB) && isWhite(startG) && isWhite(startR)) {
+            return false;
+        }
+
+        return true;
+    }
 
     function redraw(){
 
@@ -105,13 +151,6 @@ $(document).ready(function() {
 
         // Draw circle with gradient
         drawPoint(lastX, lastY, drawRadius)
-        /*
-        drawPoint(lastX + 3, lastY, drawRadius)
-        drawPoint(lastX - 3, lastY, drawRadius)
-        drawPoint(lastX, lastY + 3, drawRadius)
-        drawPoint(lastX, lastY - 3, drawRadius)
-        */
-        drawMaskToBaseImage()
 
         /*
         OLD version, where line is drawn continuously (not needed probably)
@@ -131,9 +170,9 @@ $(document).ready(function() {
             context.stroke();
         }
         */
-
     }
 
+    // This is not needed, because canvas dont allow to draw on white points (mask points)
     function drawMaskToBaseImage()
     {
         var img = document.getElementById("baseImageMask");
@@ -143,14 +182,41 @@ $(document).ready(function() {
 
     function drawBaseImage()
     {
-        var img = document.getElementById("baseImage");
-        var width = img.clientWidth;
-        var height = img.clientHeight;
+        var width = img.width;
+        var height = img.height;
 
         context.canvas.height = height
         context.canvas.width = width
         context.drawImage(img, 0, 0);
         img.classList.add("hidden")
+    }
+
+    function clearCanvas() {
+        // Clear canvas
+        img.classList.remove("hidden")
+        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+        drawBaseImage()
+
+        // Remove saved coordinates
+        clickX = []
+        clickY = []
+        clickDrag = []
+    }
+
+    function saveData() {
+
+        var points = {
+            x: clickX,
+            y: clickY
+        }
+
+        points = JSON.stringify(points)
+
+        console.log(points)
+
+        $("#canvas-data").val(points);
+        $("#canvas-form").submit();
+
     }
 
     drawBaseImage()

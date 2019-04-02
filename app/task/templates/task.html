@@ -105,14 +105,18 @@
 
   <img id="baseImage" class="" src={{ url_for('static', filename='img/dummy_600.png') }} />
   <img id="baseImageMask" class="hidden" src={{ url_for('static', filename='img/dummy_600_mask.png') }} />
-  <form class="form-group mt-5" action="/task/embody/{{ page_num }}" method="post">
+  <form id="canvas-form" class="form-group mt-5" action="/task/embody/{{ page_num }}" method="post">
 
-    <input id="canvas-data" type="hidden" value="" name="text">
+    <input id="canvas-data" type="hidden" value="" name="coordinates">
+
+    <div class="row justify-content-md-center">
+    <button type="button" class="btn btn-primary clear-button">Clear</button>
+    </div>
 
     <div class="form-row text-center">
-        <div class="col-12">
+        <div class="centered col-12">
             <a class="btn btn-primary" href={{ url_for('task.quit') }} role="button">{{ _('Quit task') }}</a>
-            <button type="submit" class="btn btn-primary">{{ _('Next page') }}</button>
+            <button type="button" class="btn btn-primary next-page">{{ _('Next page') }}</button>
         </div>
         <div class="col-12">
             <br>

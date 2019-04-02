@@ -306,7 +306,7 @@ def view_forced_id_list():
             db.session.add(input_id)
             db.session.commit()
         
-        return redirect(url_for('view_forced_id_list', exp_id=exp_id))
+        return redirect(url_for('experiment.view_forced_id_list', exp_id=exp_id))
     
     return render_template('view_forced_id_list.html', exp_id=exp_id, id_list=id_list)
 

@@ -2,6 +2,7 @@
 
 
 import math
+import json
 from datetime import datetime
 
 from flask import (
@@ -95,9 +96,15 @@ def task_embody(page_num):
 
     if form.validate():
         data = request.form.to_dict()
-        for key, value in data.items():
-            print(key)
-            print(value)
+
+        coordinates = json.loads(data['coordinates'])
+        print("x:",coordinates['x'])
+        print("y:",coordinates['y'])
+
+
+
+    # Test that everything OK
+    return json.dumps(coordinates)
 
     # Check if there are unanswered slider questions
     if slider_question_has_answers(session['user'], page_id):
@@ -265,7 +272,7 @@ def continue_task():
         #If participant has done just the registration redirect to the first page of the experiment        
         if participant.answer_counter == 0:
             #flash("Ei vastauksia ohjataan ekalle sivulle")
-            return redirect( url_for('task', page_num=1))
+            return redirect( url_for('task.task', page_num=1))
         
         
         redirect_to_page = participant.answer_counter + 1
