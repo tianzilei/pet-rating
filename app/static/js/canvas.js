@@ -7,12 +7,7 @@ $(document).ready(function() {
     try {
         var canvas = $("#embody-canvas")
         var context = document.getElementById("embody-canvas").getContext("2d");
-
-        // Base image
         var img = document.getElementById("baseImage");
-
-        console.log(img)
-        console.log(canvas)
     } catch (e) {
         console.log(e)
         if (e instanceof TypeError) {
@@ -59,6 +54,7 @@ $(document).ready(function() {
 
     // TODO: changing drawradius doesnt affect to the saved datapoints !!!
     // Bigger brush should make more datapoints compared to smaller ones.
+    // add brush size to click arry -> {x:[...], y:[...], size:[...]} ?? 
     $(".canvas-container").bind('DOMMouseScroll',function(event) {
         //event.preventDefault()
 
@@ -128,7 +124,6 @@ $(document).ready(function() {
     }
 
     function redraw(){
-
         /* 
         Check:
         https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
@@ -152,28 +147,10 @@ $(document).ready(function() {
 
         // Draw circle with gradient
         drawPoint(lastX, lastY, drawRadius)
+        drawMaskToBaseImage()
 
-        /*
-        OLD version, where line is drawn continuously (not needed probably)
-
-        for(var i=0; i < clickX.length; i++) {		
-
-            context.beginPath();
-
-            if (clickDrag[i] && i) { 
-                context.moveTo(clickX[i-1], clickY[i-1]);
-            } else {
-                context.moveTo(clickX[i]-1, clickY[i]);
-            }
-
-            context.lineTo(clickX[i], clickY[i]);
-            context.closePath();
-            context.stroke();
-        }
-        */
     }
 
-    // This is not needed, because canvas dont allow to draw on white points (mask points)
     function drawMaskToBaseImage()
     {
         var img = document.getElementById("baseImageMask");
@@ -212,12 +189,8 @@ $(document).ready(function() {
         }
 
         points = JSON.stringify(points)
-
-        console.log(points)
-
         $("#canvas-data").val(points);
         $("#canvas-form").submit();
-
     }
 
     drawBaseImage()

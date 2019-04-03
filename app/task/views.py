@@ -72,8 +72,6 @@ def update_answer_set_type(answer_type):
     the_time = datetime.now()
     the_time = the_time.replace(microsecond=0)
 
-    print("UPDATE TYPE")
-
     updated_answer_set = answer_set.query.filter_by(idanswer_set=session['answer_set']).first()
     updated_answer_set.answer_type = answer_type
     updated_answer_set.last_answer_time = the_time
@@ -85,9 +83,6 @@ def select_form_type():
 
     form = None
     answer_set_type = answer_set.query.filter_by(idanswer_set=session['answer_set']).first().answer_type
-
-    print(session['answer_set'])
-    print(answer_set_type)
 
     if answer_set_type == 'slider':
         form = TaskForm()
@@ -148,8 +143,6 @@ def slider_on():
     experiment_info = get_experiment_info()
     questions = question.query.filter_by(experiment_idexperiment=experiment_info.idexperiment).all()
 
-    print(questions)
-
     if len(questions) == 0:
         return False
     return True
@@ -184,7 +177,6 @@ def task_embody(page_num):
 
     # Check if there are unanswered slider questions -> if true redirect to same page
     if slider_on():
-        print("SLIDER ON")
         update_answer_set_type('slider')
         return redirect( url_for('task.task', page_num=page_num))
 
@@ -245,17 +237,6 @@ def task(page_num):
         randomized_page_id = get_randomized_page(page_id).randomized_idpage
         randomized_stimulus = page.query.filter_by(idpage=randomized_page_id).first()
         
-    # OLD
-    for p in pages.items:
-        #session['current_idpage'] = p.idpage
-        print('p.idpage -loop:', p.idpage)
-
-
-
-    # TODO: if no form found -> go to next page
-
-    # TODO: check if embody ON and no answer
-
     return render_template(
         'task.html', 
         pages=pages, 
