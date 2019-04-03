@@ -23,3 +23,5 @@ body {
 .clear-button {
     margin:10px;
 }
+
+.crosshair {cursor: crosshair;}

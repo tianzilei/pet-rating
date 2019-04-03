@@ -6,6 +6,7 @@ $(document).ready(function() {
 
     try {
         var canvas = $("#embody-canvas")
+        var canvasInfo = $(".canvas-info")
         var context = document.getElementById("embody-canvas").getContext("2d");
         var img = document.getElementById("baseImage");
 
@@ -43,9 +44,10 @@ $(document).ready(function() {
         // TODO: if mousedown -> can draw outside of image
         var mouseX = e.pageX - this.offsetLeft;
         var mouseY = e.pageY - this.offsetTop;
-        if(paint && pointInsideBaseImage([mouseX, mouseY])){
-          addClick(mouseX, mouseY, true);
-          redraw();
+
+        if (paint && pointInsideBaseImage([mouseX, mouseY])){
+            addClick(mouseX, mouseY, true);
+            redraw();
         }
     });
 
@@ -57,11 +59,12 @@ $(document).ready(function() {
         paint = false;
     });
 
+
     // TODO: changing drawradius doesnt affect to the saved datapoints !!!
     // Bigger brush should make more datapoints compared to smaller ones.
     // add brush size to click arry -> {x:[...], y:[...], size:[...]} ?? 
     
-    $(".canvas-container").bind('DOMMouseScroll', changeBrushSize)
+    $("#embody-canvas").bind('DOMMouseScroll', changeBrushSize)
     // DOMMouseScroll is only for firefox
     //$(".canvas-container").bind('wheel', changeBrushSize)
     
@@ -81,11 +84,11 @@ $(document).ready(function() {
 
         // Show brush size to user
         if (drawRadius == 10) {
-            this.firstElementChild.innerHTML = "small brush"
+            canvasInfo.html("small brush")
         } else if (drawRadius == 15) {
-            this.firstElementChild.innerHTML = "normal brush"
+            canvasInfo.html("normal brush")
         } else if (drawRadius == 20) {
-            this.firstElementChild.innerHTML = "large brush"
+            canvasInfo.html("large brush")
         }
     }
 
@@ -123,7 +126,7 @@ $(document).ready(function() {
         startG = imageData.data[1];
         startB = imageData.data[2];
 
-        return (isWhite(startB) && isWhite(startG) && isWhite(startR)) ? true : false;
+        return (isWhite(startB) && isWhite(startG) && isWhite(startR)) ? false : true;
     }
 
     function redraw() {
