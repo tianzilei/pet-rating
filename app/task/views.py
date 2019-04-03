@@ -125,7 +125,7 @@ def get_experiment_info():
     """Return experiment information from current session"""
     try:
         return experiment.query.filter_by(idexperiment=session['exp_id']).first()
-    except exc.KeyError as err:
+    except KeyError as err:
         flash("No valid session found")
         return redirect('/')
 

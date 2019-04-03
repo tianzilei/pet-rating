@@ -8,6 +8,11 @@ $(document).ready(function() {
         var canvas = $("#embody-canvas")
         var context = document.getElementById("embody-canvas").getContext("2d");
         var img = document.getElementById("baseImage");
+
+        $(img).on('load', function() {
+            drawBaseImage()
+        })
+
     } catch (e) {
         console.log(e)
         if (e instanceof TypeError) {
@@ -55,8 +60,13 @@ $(document).ready(function() {
     // TODO: changing drawradius doesnt affect to the saved datapoints !!!
     // Bigger brush should make more datapoints compared to smaller ones.
     // add brush size to click arry -> {x:[...], y:[...], size:[...]} ?? 
-    $(".canvas-container").bind('DOMMouseScroll',function(event) {
-        //event.preventDefault()
+    
+    $(".canvas-container").bind('DOMMouseScroll', changeBrushSize)
+    // DOMMouseScroll is only for firefox
+    //$(".canvas-container").bind('wheel', changeBrushSize)
+    
+    function changeBrushSize(event) {
+        event.preventDefault()
 
         // Change brush size
         if (event.originalEvent.detail >= 0){
@@ -77,7 +87,7 @@ $(document).ready(function() {
         } else if (drawRadius == 20) {
             this.firstElementChild.innerHTML = "large brush"
         }
-    })
+    }
 
     $(".clear-button").on('click', function() {
         clearCanvas()
@@ -89,8 +99,7 @@ $(document).ready(function() {
 
 
     // Draw methods
-    function addClick(x, y, dragging=false)
-    {
+    function addClick(x, y, dragging=false) {
         clickX.push(x);
         clickY.push(y);
         clickDrag.push(dragging);
@@ -103,9 +112,7 @@ $(document).ready(function() {
     }
 
     function isWhite(color) {
-        if (color === 255) 
-            return true
-        return false
+        return (color === 255) ? true : false;
     }
 
     // Method for checking if cursor is inside human body before creating brush stroke
@@ -116,14 +123,10 @@ $(document).ready(function() {
         startG = imageData.data[1];
         startB = imageData.data[2];
 
-        if (isWhite(startB) && isWhite(startG) && isWhite(startR)) {
-            return false;
-        }
-
-        return true;
+        return (isWhite(startB) && isWhite(startG) && isWhite(startR)) ? true : false;
     }
 
-    function redraw(){
+    function redraw() {
         /* 
         Check:
         https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
@@ -151,27 +154,24 @@ $(document).ready(function() {
 
     }
 
-    function drawMaskToBaseImage()
-    {
+    function drawMaskToBaseImage() {
         var img = document.getElementById("baseImageMask");
         context.globalAlpha = 1
         context.drawImage(img, 0, 0);
     }
 
-    function drawBaseImage()
-    {
+    function drawBaseImage() {
         var width = img.width;
         var height = img.height;
 
         context.canvas.height = height
         context.canvas.width = width
+
         context.drawImage(img, 0, 0);
-        img.classList.add("hidden")
+        $(img).hide()
     }
 
     function clearCanvas() {
-        // Clear canvas
-        img.classList.remove("hidden")
         context.clearRect(0, 0, context.canvas.width, context.canvas.height);
         drawBaseImage()
 
@@ -182,7 +182,6 @@ $(document).ready(function() {
     }
 
     function saveData() {
-
         var points = {
             x: clickX,
             y: clickY
