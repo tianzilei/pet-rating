@@ -26,7 +26,7 @@ $(document).ready(function() {
     var clickY = new Array();
     var clickDrag = new Array();
     var paint;
-    var drawRadius=15;
+    var drawRadius=13;
 
     // Click handlers
     canvas.mousedown(function(e){
@@ -73,21 +73,21 @@ $(document).ready(function() {
 
         // Change brush size
         if (event.originalEvent.detail >= 0){
-            if (drawRadius >= 15) {
+            if (drawRadius >= 13) {
                 drawRadius -= 5; 
             }
         } else {
-            if (drawRadius <= 15) {
+            if (drawRadius <= 13) {
                 drawRadius += 5; 
             }
         }
 
         // Show brush size to user
-        if (drawRadius == 10) {
+        if (drawRadius == 8) {
             canvasInfo.html("small brush")
-        } else if (drawRadius == 15) {
+        } else if (drawRadius == 13) {
             canvasInfo.html("normal brush")
-        } else if (drawRadius == 20) {
+        } else if (drawRadius == 18) {
             canvasInfo.html("large brush")
         }
     }
@@ -143,7 +143,7 @@ $(document).ready(function() {
         lastY = clickY[clickY.length - 1]
 
         // Opacity (there was 0.2 opacity in the old version):
-        context.globalAlpha = 0.2
+        context.globalAlpha = 0.15
         
         // Gradient:
         var gradient = context.createRadialGradient(lastX, lastY, 1, lastX, lastY, drawRadius);

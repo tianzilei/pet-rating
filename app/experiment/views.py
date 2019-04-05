@@ -396,41 +396,30 @@ def add_bg_question():
     exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
 
     if exp_status.status != 'Hidden':
-    
         flash("Experiment is public. Cannot modify structure.")
-
         return redirect(url_for('experiment.view', exp_id=exp_id))
         
     else:
-        
         form = CreateBackgroundQuestionForm(request.form)
         
         if request.method == 'POST' and form.validate():
             
-            str = form.bg_questions_and_options.data
-    
             #Split the form data into a list that separates questions followed by the corresponding options
+            str = form.bg_questions_and_options.data
             str_list = str.split('/n')
     
             #Iterate through the questions and options list
             for a in range(len(str_list)):
-            
                 #Split the list cells further into questions and options
                 list = str_list[a].split(';')
             
                 #Input the first item of the list as a question in db and the items followed by that as options for that question
                 for x in range(len(list)):
-                
                     if x == 0:
-                        #flash("Kysymys")
-                        #flash(list[x])
                         add_bgquestion = background_question(background_question=list[x], experiment_idexperiment=exp_id)
                         db.session.add(add_bgquestion)
                         db.session.commit()
-    
                     else:
-                        #flash("optio")
-                        #flash(list[x])
                         add_bgq_option = background_question_option(background_question_idbackground_question=add_bgquestion.idbackground_question, option=list[x])
                         db.session.add(add_bgq_option)
                         db.session.commit()
@@ -454,7 +443,6 @@ def edit_bg_question():
     options  = background_question_option.query.filter_by(background_question_idbackground_question=bg_question_id).all()    
     
     for o in range(len(options)):    
-        
         question_string = str(question_string) + str("; ") + str(options[o].option)
     
     form = EditBackgroundQuestionForm(request.form)
@@ -462,15 +450,12 @@ def edit_bg_question():
 
     #After user chooses to update the question and options lets replace the old question and options with the ones from the form
     if request.method == 'POST' and form.validate():
-
-        
         #Explode the string with new values from the form 
         form_values = form.new_values.data
         form_values_list = form_values.split(';')
         
         #Check and remove possible whitespaces from string beginnings with lstrip
         for x in range(len(form_values_list)):
-            
             form_values_list[x] = form_values_list[x].lstrip()
         
         #Cycle through strings and update db
@@ -478,28 +463,16 @@ def edit_bg_question():
         
             #Replace question and update the object to database
             if x == 0:
-                
-                #flash("delete kys:")
-                #flash(current_bg_question.background_question)
-                #flash("insert kys:")
                 current_bg_question.background_question  = form_values_list[x] 
-                #flash(current_bg_question.background_question)
-                #flash(current_bg_question.idbackground_question)
-                #flash(current_bg_question.experiment_idexperiment)
-                
                 db.session.commit()
                 
                 #Delete old options from db
                 for o in options:
-                    
                     db.session.delete(o)
                     db.session.commit()
             
             #Insert new options to db
             else:
-               
-                #flash("insert opt:")
-                #flash(form_values_list[x])
                 new_option = background_question_option(background_question_idbackground_question=current_bg_question.idbackground_question, option=form_values_list[x])
                 db.session.add(new_option)
                 db.session.commit()
@@ -522,14 +495,13 @@ def remove_bg_question():
         
     else:
 
-        # TODO: cannot remove background question if there are answers
+        # foreign key constraint fails!!!
+        # TODO: remove background_question_answer, background_question_options
+        # before removing background question 
         remove_id = request.args.get('idbackground_question', None)
         remove_options = background_question_option.query.filter_by(background_question_idbackground_question=remove_id).all()
         
         for a in range(len(remove_options)): 
-            
-            #flash(remove_options[a].idbackground_question_option)
-        
             db.session.delete(remove_options[a])
             db.session.commit()
     
@@ -544,7 +516,7 @@ def remove_bg_question():
 
 
 
-# Rating set:
+# Rating set sliders/embody:
 
 @experiment_blueprint.route('/set_embody')
 @login_required
@@ -568,13 +540,9 @@ def add_questions():
     exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
 
     if exp_status.status != 'Hidden':
-    
         flash("Experiment is public. Cannot modify structure.")
-
         return redirect(url_for('experiment.view', exp_id=exp_id))
-        
     else:
-    
         form = CreateQuestionForm(request.form)
         
         if request.method == 'POST' and form.validate():
@@ -583,28 +551,18 @@ def add_questions():
             str_list = str.split('/n')
     
             for a in range(len(str_list)): 
-    
                 list = str_list[a].split(';')
                          
                 #If there are the right amount of values for the slider input values
                 if len(list) == 3:
-                    
-                    #flash("Question:")
-                    #flash(list[0])
-                    #flash("Left:")
-                    #flash(list[1])
-                    #flash("Right:")
-                    #flash(list[2])
-    
                     add_question = question(experiment_idexperiment=exp_id, question=list[0], left=list[1], right=list[2])
                     db.session.add(add_question)
                     db.session.commit()
                         
-                    #If slider has too many or too litlle parameters give an error and redirect back to input form
+                #If slider has too many or too litlle parameters give an error and redirect back to input form
                 else:
                     flash("Error Each slider must have 3 parameters separated by ; Some slider has:")
                     flash(len(list))
-                        
                     return redirect(url_for('create.experiment_questions', exp_id=exp_id))
             
             return redirect(url_for('experiment.view', exp_id=exp_id))    
@@ -646,12 +604,12 @@ def remove_question():
         remove_id = request.args.get('idquestion', None)
         remove_question = question.query.filter_by(idquestion=remove_id).first()
         
+        # TODO: foreign key constraint fails!!!
+        # answers has reference to question -> remove answers first
         db.session.delete(remove_question)
         db.session.commit()
   
     return redirect(url_for('experiment.view', exp_id=exp_id))
-
-
 
 
 
@@ -669,7 +627,6 @@ def add_stimuli():
         return redirect(url_for('experiment.view', exp_id=exp_id))
     else:
         #If there are no pages set for the experiment lets reroute user to create experiment stimuli upload instead
-    
         is_there_any_stimuli = page.query.filter_by(experiment_idexperiment = exp_id).first()
     
         if is_there_any_stimuli is None:
@@ -680,21 +637,13 @@ def add_stimuli():
     
         if request.method == 'POST':
             if stimulus_type == 'text':
-            
-                #flash("db insert text")
-                
                 string = form.text.data
                 str_list = string.split('/n')
     
                 for a in range(len(str_list)):
-    
-                    #flash("lisättiin:")
-                    #flash(str_list[a])
                     add_text_stimulus = page(experiment_idexperiment=exp_id, type='text', text=str_list[a], media='none')
                     db.session.add(add_text_stimulus)
                     db.session.commit()
-    
-                    #flash("Succes!")
                     
                 return redirect(url_for('experiment.view', exp_id=exp_id))  
             
@@ -706,32 +655,19 @@ def add_stimuli():
                 
                 if not os.path.isdir(target):
                     os.mkdir(target)
-                    #flash("make dir")
             
                 #This returns a list of filenames: request.files.getlist("file")
-            
                 for file in request.files.getlist("file"):
-                
                     #save files in the correct folder
-                    #flash(file.filename)
                     filename = file.filename
                     destination = "/".join([target, filename])
-                    #flash("destination")
-                    #flash(destination)
                     file.save(destination)
                     
                     #add pages to the db
                     db_path = path +  str('/') + str(filename)
-                    
-                    #flash("db path")
-                    #flash(db_path)
-                    
                     new_page = page(experiment_idexperiment=exp_id, type=form.type.data, media=db_path)
-                    
                     db.session.add(new_page)
                     db.session.commit()
-                    
-                    #flash("Succes!")
                     
                 return redirect(url_for('experiment.view', exp_id=exp_id))
                 
@@ -750,48 +686,30 @@ def edit_stimuli():
     form = EditPageForm(request.form, obj=edit_page)
     
     if request.method == 'POST' and form.validate():
-        
         #If the stimulus type is not text, then the old stimulus file is deleted from os and replaced
         if edit_page.type != 'text':
-
             #remove old file            
             target = os.path.join(APP_ROOT, edit_page.media)
-            #flash("Remove:")
-            #flash(target)
             os.remove(target)
 
             #upload new file
-            
             path = 'static/experiment_stimuli/' + str(exp_id)
             target = os.path.join(APP_ROOT, path)
-            #flash(target)
             
             if not os.path.isdir(target):
                 os.mkdir(target)
-                #flash("make dir")
         
             #This returns a list of filenames: request.files.getlist("file")
-        
             for file in request.files.getlist("file"):
                 #save files in the correct folder
-                #flash(file.filename)
                 filename = file.filename
                 destination = "/".join([target, filename])
-                #flash("destination")
-                #flash(destination)
                 file.save(destination)
                 
                 #update db object
                 db_path = path +  str('/') + str(filename)
-                
-                #flash("db path")
-                #flash(db_path)
-                
                 edit_page.media=db_path
-                                
                 db.session.commit()
-                
-                #flash("Succes!")
 
         #If editing text stimulus no need for filehandling    
         else:
@@ -839,6 +757,8 @@ def remove_stimuli():
                 target = os.path.join(APP_ROOT, remove_page.media)
                 os.remove(target)
         
+            # TODO: foreign key constraint fails!!!
+            # answers has reference to page -> remove answers first
             db.session.delete(remove_page)
             db.session.commit()
       
@@ -846,6 +766,8 @@ def remove_stimuli():
         
         if remove_page.type == 'text':
             
+            # TODO: foreign key constraint fails!!!
+            # answers has reference to page -> remove answers first
             db.session.delete(remove_page)
             db.session.commit()
             
