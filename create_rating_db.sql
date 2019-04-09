@@ -146,7 +146,8 @@ CREATE TABLE answer (
 	FOREIGN KEY(question_idquestion) REFERENCES question (idquestion)
 );
 
-/* Embody answer (coordinates). Answer is saved as a json object {x:[1,2,100,..], y:[3,4,101,..]} */
+/* Embody answer (coordinates). Answer is saved as a json object: 
+   {x:[1,2,100,..], y:[3,4,101,..], r:[13,13,8,...]} */
 CREATE TABLE embody_answer (
 	idanswer INTEGER NOT NULL AUTO_INCREMENT,
 	answer_set_idanswer_set INTEGER, 

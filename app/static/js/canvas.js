@@ -22,8 +22,19 @@ $(document).ready(function() {
     }
 
     // Init draw variables
+    /*
+    OO-style coordinates:
+    var paint;
+    var point = {
+        x: null,
+        y: null,
+        r: 13
+    }
+    var points = new Array()
+    */
     var clickX = new Array();
     var clickY = new Array();
+    var clickRadius = new Array();
     var clickDrag = new Array();
     var paint;
     var drawRadius=13;
@@ -105,6 +116,7 @@ $(document).ready(function() {
     function addClick(x, y, dragging=false) {
         clickX.push(x);
         clickY.push(y);
+        clickRadius.push(drawRadius);
         clickDrag.push(dragging);
     }
 
@@ -185,9 +197,11 @@ $(document).ready(function() {
     }
 
     function saveData() {
+
         var points = {
             x: clickX,
-            y: clickY
+            y: clickY,
+            r: clickRadius
         }
 
         points = JSON.stringify(points)

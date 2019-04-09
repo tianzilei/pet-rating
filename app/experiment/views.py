@@ -2,6 +2,7 @@
 
 import os
 import secrets
+import json
 
 from flask import (
     Flask, 
@@ -11,7 +12,8 @@ from flask import (
     flash, 
     redirect, 
     url_for, 
-    Blueprint
+    Blueprint,
+    jsonify
 )
 
 from wtforms import Form
@@ -26,6 +28,7 @@ from app.models import page, question
 from app.models import background_question_option
 from app.models import answer_set, answer, forced_id
 from app.models import user, trial_randomization
+from app.models import embody_answer
 from app.forms import (
     CreateBackgroundQuestionForm, 
     CreateQuestionForm, UploadStimuliForm, EditBackgroundQuestionForm, 
@@ -683,9 +686,21 @@ def edit_stimuli():
     exp_id = request.args.get('exp_id', None)
     page_id = request.args.get('idpage', None)
     edit_page = page.query.filter_by(idpage=page_id).first()
-    form = EditPageForm(request.form, obj=edit_page)
+    form = EditPageForm(request.form)
+    #form = EditPageForm(request.form, obj=edit_page)
+
+    # TODO: replacing image not working!!
+
+    print(request.files.getlist("file"))
+    print("errors:", form.errors)
+    print("form:", form.__dict__)
+    print("type:", form.type.data)
+    print("media:", form.media.data)
+    print("file:", form.file.data)
+    print("text:", form.text.data)
     
     if request.method == 'POST' and form.validate():
+        print("POST IMAGE")
         #If the stimulus type is not text, then the old stimulus file is deleted from os and replaced
         if edit_page.type != 'text':
             #remove old file            
@@ -834,3 +849,16 @@ def statistics():
     return render_template('experiment_statistics.html', experiment_info=experiment_info, participants_and_answers=participants_and_answers, pages_and_questions=pages_and_questions, bg_questions=bg_questions, bg_answers_for_participants=bg_answers_for_participants, started_ratings=started_ratings, finished_ratings=finished_ratings, question_headers=question_headers, stimulus_headers=stimulus_headers)
 
 
+import embody_plot
+from flask_cors import CORS,cross_origin
+
+@experiment_blueprint.route('/create_embody', methods=['POST'])
+@cross_origin()
+def create_embody():
+
+    #page = request.args.get("page")
+    page = request.form["page"]
+    img_path = embody_plot.get_coordinates(page)
+
+    #return send_file('static/' + img_path, 'test')
+    return json.dumps({'path':img_path})

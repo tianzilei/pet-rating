@@ -236,7 +236,9 @@ def task(page_num):
     if session['randomization'] == 'On':
         randomized_page_id = get_randomized_page(page_id).randomized_idpage
         randomized_stimulus = page.query.filter_by(idpage=randomized_page_id).first()
+
         
+    print(session)
     return render_template(
         'task.html', 
         pages=pages, 

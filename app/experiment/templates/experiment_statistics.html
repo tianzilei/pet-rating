@@ -78,43 +78,36 @@
     <tr>
     <th scope="col" nowrap>Stimulus ID:</td>
     <th scope="col" nowrap>Stimulus:</th>
+    <th scope="col" nowrap>Embody:</th>
     </tr>
   </thead>
   <tbody>
     {% for s in stimulus_headers %}    
+
     <tr>
-    <td>{{ s.idpage }}</td>
-    {% if s.type == 'text' %}
-    <td>{{ s.text }}</td>
-    {% else %}
-    <td>{{ s.media }}</td>
-    {% endif %}
+      <td>{{ s.idpage }}</td>
+      {% if s.type == 'text' %}
+      <td>{{ s.text }}</td>
+      {% else %}
+      <td>{{ s.media }}</td>
+      {% endif %}
+
+
+      {% if experiment_info[0].embody_enabled %}
+      <td>
+      <button data-value={{ s.idpage }} class="btn btn-primary embody-get-drawing">
+        <span class="spinner-border spinner-border-sm hidden"></span>
+        Draw
+      </button>
+      </td>
+      {% endif %}
 
     </tr>
     {% endfor %}    
   </tbody>
 </table>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<img class="embody-image-container">
 
 
 <h1 class="container mt-5 display-4 text-left"><br>Rating task values: (Stimulus ID/Question ID)</h1>
@@ -147,10 +140,8 @@
   </tbody>
 </table>
 
-
 <h1 class="container mt-5 display-4 text-left"><br>Background question answers:</h1>
 <br>
-
 
 <table class="table">
   <thead>
@@ -174,9 +165,6 @@
   </tbody>
 </table>
 
-
-
-
-
+<script src="{{ url_for('static', filename='js/getDrawing.js') }}" ></script>
 
 {% endblock %}
