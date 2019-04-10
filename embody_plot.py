@@ -164,7 +164,13 @@ def format_coordinates(cursor):
         "coordinates":list(map(map_coordinates, x,y,r))
     }
 
+from flask_socketio import emit
+from app import socketio
+
 def plot_coordinates(coordinates):
+
+    # Total amount of points
+    points_count = len(coordinates['coordinates']) 
 
     # Load image to a plot
     image = mpimg.imread(IMAGE_PATH)
@@ -183,12 +189,17 @@ def plot_coordinates(coordinates):
     ax2.set_title("gaussian disk around points")
     frame = np.zeros((HEIGHT,WIDTH))
 
-    for point in coordinates["coordinates"]:
+    for idx, point in enumerate(coordinates["coordinates"]):
         frame[point[1], point[0]] = 1
         point = ndimage.gaussian_filter(frame, sigma=5)
         ax2.imshow(point, cmap='hot', interpolation='none')
 
-        # TODO: send progress information to frontend
+        # Try to send progress information to socket.io
+        try:
+            socketio.sleep(0)
+            emit('progress', {'done':idx+1/points_count, 'from':points_count})
+        except RuntimeError as err:
+            continue
 
     ax2.imshow(image_mask)
 

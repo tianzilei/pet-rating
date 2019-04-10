@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_babel import Babel
-
+from flask_socketio import SocketIO
 from config import Config
 
 app = Flask(__name__)
@@ -62,6 +62,10 @@ def get_locale():
     return request.accept_languages.best_match(app.config['LANGUAGES'])
 """
 
+
+# Run flask app with socketIO
+socketio = SocketIO()
+socketio.init_app(app)
 
 #mariabd mysql portti 3306 tarkista?
 
