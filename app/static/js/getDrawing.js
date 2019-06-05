@@ -44,9 +44,12 @@ $(document).ready(function()  {
         initConnection(socket)
 
         // 
-        var pageId = this.dataset.value
-        socket.emit('draw', {page:pageId})
+        var pageId = this.dataset.value.split('-')[0]
+        var embodyId = this.dataset.value.split('-')[1]
+        socket.emit('draw', {page:pageId, embody:embodyId})
         progressBarContainer.removeClass("hidden")
+
+        scrollTo('plotted-image')
 
         /*
         With AJAX -calls
@@ -67,5 +70,11 @@ $(document).ready(function()  {
         */
 
     })
+
+    function scrollTo(hash) {
+        $('html, body').animate({
+            'scrollTop':   $('#'+hash).offset().top - 250
+        }, 500);
+    }
 
 })

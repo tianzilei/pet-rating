@@ -94,18 +94,31 @@
 
  <!-- Select form type -->
 
- {{page_num}}
+
+ page num: {{page_num}} <br>
 
  {% if form.__name__ == 'embody' %}
+
+
+
+
 
   <div class="canvas-container">
   <span class="canvas-info"></span>
   <canvas id="embody-canvas" class="crosshair" width="20" height="20" style="border: 1px solid blue;"  ></canvas>
   </div>
 
-  <img id="baseImage" class="" src={{ url_for('static', filename='img/dummy_600.png') }} />
+
+  {% for embody_question in embody_questions %}
+        <img id="idembody-{{embody_question.idembody}}" class="embody-image {% if loop.last %}last-embody{% endif %} {% if loop.index != 1 %}hidden{% else %}selected-embody{% endif %}" src={{ embody_question.picture }} />
+  {% endfor %}
+
   <img id="baseImageMask" class="hidden" src={{ url_for('static', filename='img/dummy_600_mask.png') }} />
-  <form id="canvas-form" class="form-group mt-5" action="/task/embody/{{ page_num }}" method="post">
+
+
+
+
+  <form id="canvas-form" class="form-group mt-5" action="/task/embody/{{ page_num }}" method="post" >
 
     <input id="canvas-data" type="hidden" value="" name="coordinates">
 
@@ -125,6 +138,8 @@
         </div>
     </div>    
   </form>  
+
+<script src="{{ url_for('static', filename='js/canvas.js') }}" ></script>
 
 {% elif form.__name__ == 'slider' %}
 
@@ -158,7 +173,5 @@
   </form>  
 
 {% endif %}
-
-<script src="{{ url_for('static', filename='js/canvas.js') }}" ></script>
     
 {% endblock %}

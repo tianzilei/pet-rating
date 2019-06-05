@@ -10,8 +10,10 @@ from flask_login import LoginManager
 from flask_babel import Babel
 from flask_socketio import SocketIO
 from config import Config
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+CORS(app)
 
 #app.config['BABEL_DEFAULT_LOCALE'] = 'fin'
 #app.config['BABEL_TRANSLATION_DIRECTORIES'] ='C:/Users/Timo/git/pet-rating/app/translations'

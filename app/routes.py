@@ -5,6 +5,8 @@ import os
 import random
 import secrets
 from datetime import datetime
+import tempfile
+import json
 
 from flask import (
     Flask, 
@@ -14,7 +16,8 @@ from flask import (
     flash, 
     redirect, 
     url_for, 
-    Blueprint
+    Blueprint,
+    send_file
 )
 
 from sqlalchemy import and_
@@ -24,7 +27,7 @@ from flask_babel import Babel, _, lazy_gettext as _l
 from app import app, db, babel
 from app.models import background_question, experiment
 from app.models import background_question_answer
-from app.models import page, question
+from app.models import page, question, embody_question, embody_answer
 from app.models import background_question_option
 from app.models import answer_set, answer, forced_id
 from app.models import user, trial_randomization
@@ -340,18 +343,84 @@ def view_research_notification():
 def download_csv():
 
     exp_id = request.args.get('exp_id', None)
-    
-    """
-    with open('export_new.csv', 'w', newline='') as f:
-        
-        thewriter = csv.writer(f)
-        
-        thewriter.writerow(['1','2','3','4'])
-        thewriter.writerow(['a','b','c','d'])
-    """
-    
-    return redirect(url_for('experiment.statistics', exp_id=exp_id))
+    experiment_info = experiment.query.filter_by(idexperiment = exp_id).all()
 
+    # answer sets with participant ids
+    participants = answer_set.query.filter_by(experiment_idexperiment= exp_id).all()
+
+    # pages aka stimulants
+    pages = page.query.filter_by(experiment_idexperiment=exp_id).all()
+
+    # background questions
+    bg_questions = background_question.query.filter_by(
+        experiment_idexperiment=exp_id).all()
+
+    # question
+    questions = question.query.filter_by(experiment_idexperiment=exp_id).all()
+
+    # embody questions
+    embody_questions = embody_question.query.filter_by(experiment_idexperiment=exp_id).all()
+
+    #started and finished ratings counters
+    started_ratings = answer_set.query.filter_by(
+        experiment_idexperiment=exp_id).count()
+    experiment_page_count = page.query.filter_by(
+        experiment_idexperiment=exp_id).count()
+    finished_ratings = answer_set.query.filter(and_(
+        answer_set.answer_counter == experiment_page_count, answer_set.experiment_idexperiment == exp_id)).count()
+
+    csv = ''
+
+    # create CSV-header
+    header = 'participant id;'
+    header += ';'.join([str(count) +'. bg_question: '+ question.background_question for count,question in enumerate(bg_questions, 1)])
+
+    for idx in range(1,len(pages) + 1):
+        if len(questions) > 0:
+            header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) +'. slider_question: ' + question.question for count,question in enumerate(questions, 1)]) 
+    for idx in range(1,len(pages) + 1):
+        if len(embody_questions) > 0:
+            header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) +'. embody_question: '+ question.picture for count,question in enumerate(embody_questions, 1)])
+
+    csv += header + '\r\n'
+
+    answer_row = ''
+
+    for participant in participants:
+
+        # append user session id
+        answer_row += participant.session + ';'
+
+        # TODO:
+        # append background question answers
+        bg_answers = background_question_answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()
+        bg_answers_list = [(a.answer) for a in bg_answers]
+        answer_row += ';'.join(bg_answers_list) + ';'
+ 
+        # append slider answers 
+        slider_answers = answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
+        answers_list = [ a.answer for a in slider_answers]    
+        answer_row += ';'.join(answers_list) + ';'
+
+        # append embody answers (coordinates)
+        embody_answers = embody_answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
+        answers_list = [ json.dumps(list(zip( json.loads(a.coordinates)['x'], json.loads(a.coordinates)['y']))) for a in embody_answers]    
+        answer_row += ';'.join(answers_list)
+
+        csv += answer_row + '\r\n'
+        answer_row = ''
+
+    try:
+        fd, path = tempfile.mkstemp()
+        with os.fdopen(fd, 'w') as tmp:
+            tmp.write(csv)
+            tmp.flush()
+
+            return send_file(path, mimetype='text/csv')
+
+    finally:
+        os.remove(path)
+    
 
 @app.route('/researcher_info')
 @login_required

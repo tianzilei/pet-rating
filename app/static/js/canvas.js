@@ -1,25 +1,9 @@
 
 
 const url = 'http://127.0.0.1:8000/';
+const defaultEmbodySource = '/static/img/dummy_600.png';
 
 $(document).ready(function() {
-
-    try {
-        var canvas = $("#embody-canvas")
-        var canvasInfo = $(".canvas-info")
-        var context = document.getElementById("embody-canvas").getContext("2d");
-        var img = document.getElementById("baseImage");
-
-        $(img).on('load', function() {
-            drawBaseImage()
-        })
-
-    } catch (e) {
-        console.log(e)
-        if (e instanceof TypeError) {
-            return
-        }
-    }
 
     // Init draw variables
     /*
@@ -37,7 +21,45 @@ $(document).ready(function() {
     var clickRadius = new Array();
     var clickDrag = new Array();
     var paint;
-    var drawRadius=13;
+    var drawRadius=13
+    var default_embody=false
+    var points = []
+    var imageId = null;
+
+    try {
+        var canvas = $("#embody-canvas")
+        var canvasInfo = $(".canvas-info")
+        var context = document.getElementById("embody-canvas").getContext("2d");
+
+        //var oldimg = document.getElementById("baseImage");
+        var img = $('.embody-image.selected-embody')[0]
+
+        $(img).on('load', function() {
+            drawImage()
+        })
+
+    } catch (e) {
+        console.log(e)
+        if (e instanceof TypeError) {
+            return
+        }
+    }
+
+    function drawImage() {
+
+        newImage = new Image();
+        newImage.src =  img.src
+        imageId = img.id
+
+        var width = newImage.width;
+        var height = newImage.height;
+
+        context.canvas.height = height
+        context.canvas.width = width
+
+        context.drawImage(newImage, 0, 0);
+        $(img).hide()
+    }
 
     // Click handlers
     canvas.mousedown(function(e){
@@ -112,6 +134,41 @@ $(document).ready(function() {
     })
 
 
+    function saveData() {
+
+        points.push({
+            id: imageId,
+            x: clickX,
+            y: clickY,
+            r: clickRadius
+        })
+
+        clickX = []
+        clickY = []
+        clickRadius = []
+
+        if ($(img).hasClass('last-embody')) {
+            // Send data to db
+            try {
+                points = JSON.stringify(points)
+                $("#canvas-data").val(points);
+                $("#canvas-form").submit();
+            } catch(e) {
+                console.log(e)
+            }
+
+        } else {
+            // Show next picture
+            img = img.nextElementSibling
+
+            try {
+                drawImage()
+            } catch(e) {
+                console.log(e)
+            }
+        }
+    }
+
     // Draw methods
     function addClick(x, y, dragging=false) {
         clickX.push(x);
@@ -132,13 +189,18 @@ $(document).ready(function() {
 
     // Method for checking if cursor is inside human body before creating brush stroke
     function pointInsideBaseImage(point) {
-        var imageData = context.getImageData(point[0], point[1],1,1)
 
-        startR = imageData.data[0];
-        startG = imageData.data[1];
-        startB = imageData.data[2];
+        if (default_embody) {
+            var imageData = context.getImageData(point[0], point[1],1,1)
 
-        return (isWhite(startB) && isWhite(startG) && isWhite(startR)) ? false : true;
+            startR = imageData.data[0];
+            startG = imageData.data[1];
+            startB = imageData.data[2];
+
+            return (isWhite(startB) && isWhite(startG) && isWhite(startR)) ? false : true;
+        } else {
+            return true
+        }
     }
 
     function redraw() {
@@ -159,13 +221,23 @@ $(document).ready(function() {
         
         // Gradient:
         var gradient = context.createRadialGradient(lastX, lastY, 1, lastX, lastY, drawRadius);
+
+
         gradient.addColorStop(0, "rgba(255,0,0,1)");
         gradient.addColorStop(1, "rgba(255,0,0,0.1)");
+
+
         context.fillStyle = gradient
 
         // Draw circle with gradient
         drawPoint(lastX, lastY, drawRadius)
-        drawMaskToBaseImage()
+
+
+        // Draw mask on default image
+        
+        if (img.getAttribute('src') === defaultEmbodySource) {
+            drawMaskToBaseImage()
+        }
 
     }
 
@@ -196,19 +268,8 @@ $(document).ready(function() {
         clickDrag = []
     }
 
-    function saveData() {
 
-        var points = {
-            x: clickX,
-            y: clickY,
-            r: clickRadius
-        }
 
-        points = JSON.stringify(points)
-        $("#canvas-data").val(points);
-        $("#canvas-form").submit();
-    }
-
-    drawBaseImage()
-
+    drawImage()
+            
 });

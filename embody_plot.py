@@ -37,12 +37,15 @@ import matplotlib.image as mpimg
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
+from flask_socketio import emit
+from app import socketio
+
 # Hard coded image size
 WIDTH = 207
 HEIGHT = 600
 
 # image paths
-IMAGE_PATH = './app/static/img/dummy_600.png'
+DEFAULT_IMAGE_PATH = './app/static/img/dummy_600.png'
 IMAGE_PATH_MASK = './app/static/img/dummy_600_mask.png'
 STATIC_PATH = './app/static/'
 
@@ -54,15 +57,8 @@ SELECT_ALL = ("SELECT coordinates from embody_answer")
 SELECT_BY_EXP_ID = 'select coordinates from embody_answer as em JOIN (SELECT idanswer_set FROM answer_set as a JOIN experiment as e ON a.experiment_idexperiment=e.idexperiment AND e.idexperiment=%s) as ida ON em.answer_set_idanswer_set=ida.idanswer_set'
 SELECT_BY_ANSWER_SET = 'select coordinates from embody_answer WHERE answer_set_idanswer_set=%s'
 SELECT_BY_PAGE = 'select coordinates from embody_answer WHERE page_idpage=%s'
+SELECT_BY_PAGE_AND_PICTURE = 'select coordinates from embody_answer where page_idpage=%s and embody_question_idembody=%s'
 
-'''
-mariadb_connection = mariadb.connect(
-    user='rating', 
-    password='rating_passwd', 
-    database='rating_db'
-)
-'''
-    
 # Get date
 now = datetime.datetime.now()
 DATE_STRING = now.strftime("%Y-%m-%d")
@@ -79,7 +75,6 @@ class MyDB(object):
 
     def __del__(self):
         self._db_connection.close()
-
 
 
 def matlab_style_gauss2D(shape=(1,1),sigma=5):
@@ -118,21 +113,30 @@ def timeit(method):
 
 
 @timeit
-def get_coordinates(selected_value, select_clause=SELECT_BY_PAGE):
+def get_coordinates(idpage, idembody=None, select_clause=SELECT_BY_PAGE_AND_PICTURE):
     """Select all drawn points from certain stimulus and plot them onto 
     the human body"""
 
     db = MyDB()
-    db.query(select_clause, (selected_value,))
+    db.query(select_clause, (idpage,idembody))
 
     # Get coordinates
     coordinates = format_coordinates(db._db_cur)
 
-    # Draw image
-    plt = plot_coordinates(coordinates)
+    if idembody:
+        # Get image path
+        image_query = db.query('SELECT picture from embody_question where idembody=%s', (idembody,))
+        image_path = db._db_cur.fetchone()[0]
+        image_path = './app' + image_path
+
+        # Draw image
+        plt = plot_coordinates(coordinates, image_path)
+    else:
+        plt = plot_coordinates(coordinates, DEFAULT_IMAGE_PATH)
+
 
     # Save image to ./app/static/ 
-    img_filename = 'PAGE-' + str(selected_value) + '-' + DATE_STRING + '.png'
+    img_filename = 'PAGE-' + str(idpage) + '-' + DATE_STRING + '.png'
     plt.savefig(STATIC_PATH + img_filename)
 
     # Return image path to function caller
@@ -148,6 +152,7 @@ def format_coordinates(cursor):
 
     # Loop through all of the saved coordinates and push them to coordinates arrays
     for coordinate in cursor:
+
         try:
             coordinates = json.loads(coordinate[0])
             x.extend(coordinates['x'])
@@ -164,17 +169,15 @@ def format_coordinates(cursor):
         "coordinates":list(map(map_coordinates, x,y,r))
     }
 
-from flask_socketio import emit
-from app import socketio
 
-def plot_coordinates(coordinates):
+def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
 
     # Total amount of points
     points_count = len(coordinates['coordinates']) 
 
     # Load image to a plot
-    image = mpimg.imread(IMAGE_PATH)
-    image_mask = mpimg.imread(IMAGE_PATH_MASK)
+    image = mpimg.imread(image_path)
+    image_data = image.shape
 
     # Init plots
     fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2)
@@ -187,7 +190,9 @@ def plot_coordinates(coordinates):
     # Draw circles from coordinates (imshow don't need interpolation)
     # TODO: set sigma according to brush size!
     ax2.set_title("gaussian disk around points")
-    frame = np.zeros((HEIGHT,WIDTH))
+
+    # set height/width from image
+    frame = np.zeros((image_data[0] + 10,image_data[1] + 10))
 
     for idx, point in enumerate(coordinates["coordinates"]):
         frame[point[1], point[0]] = 1
@@ -201,23 +206,14 @@ def plot_coordinates(coordinates):
         except RuntimeError as err:
             continue
 
-    ax2.imshow(image_mask)
-
-    # Draw a gaussian heatmap on the whole image
-    # NOT USABLE
-    '''
-    x_min = min(x)
-    x_max = max(x)
-    y_min = min(y)
-    y_max = max(y)
-    extent=[x_min, x_max, y_min, y_max]
-    extent_all = [0,WIDTH,0,HEIGHT]
-    plt.subplot2grid((2, 2), (1, 1))
-    plt.title('gaussian heatmap')
-    plt.imshow(image)
-    plt.imshow(coordinates, extent=extent_all, cmap='hot', interpolation='gaussian')
-    plt.imshow(image_mask)
-    '''
+    if image_path == DEFAULT_IMAGE_PATH:
+        image_mask = mpimg.imread(IMAGE_PATH_MASK)
+        ax2.imshow(image_mask)
+    else:
+        # TODO: gaussian disk appearing only on empty spaces in the pictures
+        # -> at the moment this implementation works only for the default image
+        # with pre-created image mask (IMAGE_PATH_MASK)
+        ax2.imshow(image)
 
     # return figure for saving/etc...
     return fig
@@ -236,7 +232,6 @@ def plot_coordinates(coordinates):
     plt.show()
     '''
 
-
 if __name__=='__main__':
     
     arg_parser = argparse.ArgumentParser(description='Draw bodily maps of emotions')
@@ -248,11 +243,11 @@ if __name__=='__main__':
     value = args['integers'][0]
 
     if args['stimulus']:
-        get_coordinates(value, SELECT_BY_PAGE)
+        get_coordinates(value, None, SELECT_BY_PAGE)
     elif args['experiment']:
-        get_coordinates(value, SELECT_BY_EXP_ID)
+        get_coordinates(value, None, SELECT_BY_EXP_ID)
     elif args['answer_set']:
-        get_coordinates(value, SELECT_BY_ANSWER_SET)
+        get_coordinates(value, None, SELECT_BY_EXP_ID)
     else:
         print("No arguments given. Exit.")
         sys.exit(0)

@@ -15,6 +15,7 @@ from flask import (
     url_for, 
     Blueprint
 )
+from flask_cors import CORS,cross_origin
 
 from sqlalchemy import and_ 
 from sqlalchemy import exc
@@ -23,7 +24,7 @@ from flask_babel import _, lazy_gettext as _l
 from app import db
 from app.models import experiment
 from app.models import page, question
-from app.models import answer_set, answer, embody_answer
+from app.models import answer_set, answer, embody_answer, embody_question
 from app.models import user, trial_randomization
 from app.forms import Answers, TaskForm, ContinueTaskForm, StringForm
 
@@ -46,9 +47,9 @@ def get_randomized_page(page_id):
 
 
 def add_slider_answer(key, value, page_id=None):
-    '''Insert slider value to database. If trial randomization is set to 'Off' 
+    """Insert slider value to database. If trial randomization is set to 'Off' 
     the values are inputted for session['current_idpage']. Otherwise the values 
-    are set for the corresponding id found in the trial randomization table'''
+    are set for the corresponding id found in the trial randomization table"""
 
     participant_answer = answer(question_idquestion=key, answer_set_idanswer_set=session['answer_set'], answer=value, page_idpage=page_id)
     db.session.add(participant_answer)
@@ -149,8 +150,9 @@ def slider_on():
 
 
 @task_blueprint.route('/embody/<int:page_num>', methods=['POST'])
+@cross_origin()
 def task_embody(page_num):
-    '''Save embody drawing to database'''
+    '''Save embody drawing to database.'''
 
     form = StringForm(request.form)
     pages = page.query.filter_by(experiment_idexperiment=session['exp_id']).paginate(per_page=1, page=page_num, error_out=True)
@@ -168,12 +170,21 @@ def task_embody(page_num):
 
         # Add answer to DB
         if check_answer is None:
-            # Add new embody answer
-            participant_answer = embody_answer(answer_set_idanswer_set=session['answer_set'], coordinates=data['coordinates'], page_idpage=page_id)
-            db.session.add(participant_answer)
-            db.session.commit()
+            for coordinate_data in coordinates:
+
+                idembody = int(coordinate_data['id'].split('-')[1])
+                del coordinate_data['id']
+                del coordinate_data['r']
+
+                participant_answer = embody_answer(
+                    answer_set_idanswer_set=session['answer_set'], coordinates=json.dumps(coordinate_data), page_idpage=page_id, embody_question_idembody=idembody)
+                db.session.add(participant_answer)
+                db.session.commit()
+
         else:
             flash("Page has been answered already. Answers discarded")
+
+
 
     # Check if there are unanswered slider questions -> if true redirect to same page
     if slider_on():
@@ -210,7 +221,7 @@ def task_answer(page_num):
     if embody_on():
         update_answer_set_type('embody')
 
-    # Always redirect to next page from sliders
+    # Always redirect to next page(stimulus) from sliders
     update_answer_set_page()
     return next_page(pages)
 
@@ -237,8 +248,49 @@ def task(page_num):
         randomized_page_id = get_randomized_page(page_id).randomized_idpage
         randomized_stimulus = page.query.filter_by(idpage=randomized_page_id).first()
 
-        
+
+    # get all embody questions 
+
+    embody_questions = embody_question.query.filter_by(experiment_idexperiment=session['exp_id']).all()
+
+
+
+    print(embody_questions)
     print(session)
+
+    '''
+
+    [
+        <idembody = '7', experiment_idexperiment = '5', picture = '/static/embody_images/5/madam-300x250.jpg', question = 'Color the ares where human emotions can be found'>,
+        <idembody = '14', experiment_idexperiment = '5', picture = '/static/embody_images/5/onni_LOGO-RGB-transparent_bg_cut.png', question = 'dfDFADFADSFDFAS'>,
+        <idembody = '16', experiment_idexperiment = '5', picture = '/static/img/dummy_600.png', question = 'Color the regions whose activity you feel increasing or getting stronger'>]
+
+    <SecureCookieSession {
+        '_fresh': True, 
+        '_id': '64d8cf95fb694f63a0b4ffdfbdfde4b608fdcabd374869510101345cf3ce527576ba7b2c4b6ed24315eeb23eac573309ab75f22121d5618d3048479552b948e4',
+        'answer_set': 52,
+        'csrf_token': 'ab1381281c440e95afc3ef6c0c69712c8c64173a', 
+        'current_idpage': 13, 
+        'exp_id': '5', 
+        'language': 'English', 
+        'randomization': 'Off', 
+        'type': 'text', 
+        'user': 'f693e4', 
+        'user_id': '1'
+    }>
+
+
+    from session['current_idpage'] system gets CURRENT stimulant (page)
+
+    in select_from_type() the CURRENT question type is selected (embody/sliders)
+
+
+
+    '''
+
+    # TODO: show embody tool when its disabled!!!!
+
+
     return render_template(
         'task.html', 
         pages=pages, 
@@ -249,7 +301,8 @@ def task(page_num):
         rating_instruction=experiment_info.single_sentence_instruction, 
         stimulus_size=stimulus_size, 
         stimulus_size_text=stimulus_size_text,
-        experiment_info=experiment_info
+        experiment_info=experiment_info,
+        embody_questions=embody_questions
     )
 
 

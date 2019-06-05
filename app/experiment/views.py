@@ -28,13 +28,14 @@ from app.models import page, question
 from app.models import background_question_option
 from app.models import answer_set, answer, forced_id
 from app.models import user, trial_randomization
-from app.models import embody_answer
+from app.models import embody_answer, embody_question
 from app.forms import (
     CreateBackgroundQuestionForm, 
     CreateQuestionForm, UploadStimuliForm, EditBackgroundQuestionForm, 
     EditQuestionForm, EditExperimentForm, UploadResearchBulletinForm, 
-    EditPageForm, RemoveExperimentForm, GenerateIdForm
+    EditPageForm, RemoveExperimentForm, GenerateIdForm,CreateEmbodyForm
 )
+from werkzeug import secure_filename
 
 #Stimuli upload folder setting
 #APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -44,6 +45,9 @@ experiment_blueprint = Blueprint("experiment", __name__,
                 #static_folder='static',
                 url_prefix='/experiment')
 
+# Set sliders/embody:
+DEFAULT_EMBODY_PICTURE = '/static/img/dummy_600.png'
+DEFAULT_EMBODY_QUESTION = 'Color the regions whose activity you feel increasing or getting stronger'
 
 @experiment_blueprint.route('/view')
 @login_required
@@ -53,37 +57,44 @@ def view():
     exp_id = request.args.get('exp_id', None)
     media = page.query.filter_by(experiment_idexperiment=exp_id).all()
 
-    ## TODO: mtype can be multiple!
-    ## is this even necessary anymore?
+    # stimulus type 
     mtype = page.query.filter_by(experiment_idexperiment=exp_id).first()
     
     #experiment info    
     experiment_info = experiment.query.filter_by(idexperiment = exp_id).all()
-    
+
     #background questions
     questions_and_options = {}
-    questions = background_question.query.filter_by(experiment_idexperiment=exp_id).all()
+    questions = background_question.query.filter_by(
+        experiment_idexperiment=exp_id).all()
 
-    for q in questions:    
-    
-        options = background_question_option.query.filter_by(background_question_idbackground_question=q.idbackground_question).all()
-        options_list = [(o.option, o.idbackground_question_option) for o in options]
-        questions_and_options[q.idbackground_question, q.background_question]  = options_list
- 
+    for q in questions:
+
+        options = background_question_option.query.filter_by(
+            background_question_idbackground_question=q.idbackground_question).all()
+        options_list = [(o.option, o.idbackground_question_option)
+                        for o in options]
+        questions_and_options[q.idbackground_question,
+                              q.background_question] = options_list
+
     questions1 = questions_and_options
-    
+
     #sliderset
     categories_and_scales = {}
     categories = question.query.filter_by(experiment_idexperiment=exp_id).all()
 
-    for cat in categories:    
-        
+    for cat in categories:
+
         scale_list = [(cat.left, cat.right)]
-        categories_and_scales[cat.idquestion, cat.question]  = scale_list
- 
+        categories_and_scales[cat.idquestion, cat.question] = scale_list
+
     categories1 = categories_and_scales
 
-    return render_template('view_experiment.html', exp_id=exp_id, media=media, mtype=mtype, experiment_info=experiment_info, categories1=categories1, questions1=questions1)
+    # embody pictures
+    embody_pictures = embody_question.query.filter_by(
+        experiment_idexperiment=exp_id).all()
+
+    return render_template('view_experiment.html', exp_id=exp_id, media=media, mtype=mtype, experiment_info=experiment_info, categories1=categories1, questions1=questions1, embody_pictures=embody_pictures)
 
 
 # Experiment info:
@@ -121,50 +132,37 @@ def remove():
                 
                 #Tables
                 remove_forced_id = forced_id.query.filter_by(experiment_idexperiment=exp_id).all()
-                
-                for b in range(len(remove_forced_id)):
-                    db.session.delete(remove_forced_id[b])
-                    db.session.commit()
+                remove_rows(remove_forced_id)
 
                 #background_question_option & background_question & background question answers:
                 remove_background_question = background_question.query.filter_by(experiment_idexperiment=exp_id).all()
                 
-                #cycle through all bg questions and delete their options
-                for a in range(len(remove_background_question)):
-                
-                    remove_background_question_option = background_question_option.query.filter_by(background_question_idbackground_question=remove_background_question[a].idbackground_question).all() 
-                
-                    for b in range(len(remove_background_question_option)):
-                        
-                        db.session.delete(remove_background_question_option[b])
-                        db.session.commit()
-                
                 #Remove all background questions and all answers given to each bg question
                 for a in range(len(remove_background_question)):
-                    
+                    remove_background_question_option = background_question_option.query.filter_by(background_question_idbackground_question=remove_background_question[a].idbackground_question).all() 
+                    remove_rows(remove_background_question_option)
+
                     remove_background_question_answers = background_question_answer.query.filter_by(background_question_idbackground_question=remove_background_question[a].idbackground_question).all()
-                    
-                    for b in range(len(remove_background_question_answers)):
-                        db.session.delete(remove_background_question_answers[b])
-                        db.session.commit()
-                    
+                    remove_rows(remove_background_question_answers)
+
                     db.session.delete(remove_background_question[a])
                     db.session.commit()
                
                 #Remove all questions and answers 
                 remove_question = question.query.filter_by(experiment_idexperiment=exp_id).all()
-               
                 for a in range(len(remove_question)):
-                    
                     remove_question_answers = answer.query.filter_by(question_idquestion=remove_question[a].idquestion).all()
-                    
-                    for b in range(len(remove_question_answers)):
-                        db.session.delete(remove_question_answers[b])
-                        db.session.commit()
-                    
+                    remove_rows(remove_question_answers)
                     db.session.delete(remove_question[a])
                     db.session.commit()
-               
+
+                # Remove experiment embody pictures, questions and answers
+                remove_embody_answers = embody_answer.query.filter(embody_answer.page_idpage.in_(list(map(
+                    lambda x: x[0], page.query.with_entities(page.idpage).filter_by(experiment_idexperiment=exp_id).all())))).all()
+                remove_rows(remove_embody_answers)
+                remove_embody_questions = embody_question.query.filter_by(experiment_idexperiment=exp_id).all()
+                remove_rows(remove_embody_questions)
+
                 #Remove all pages and datafiles
                 remove_pages = page.query.filter_by(experiment_idexperiment=exp_id).all()
                 
@@ -187,11 +185,7 @@ def remove():
                 
                 for a in range(len(remove_answer_set)):
                     remove_trial_randomizations = trial_randomization.query.filter_by(answer_set_idanswer_set=remove_answer_set[a].idanswer_set).all()
-                    
-                    for b in range(len(remove_trial_randomizations)):
-                        db.session.delete(remove_trial_randomizations[b])
-                        db.session.commit()
-                    
+                    remove_rows(remove_trial_randomizations)
                     db.session.delete(remove_answer_set[a])
                     db.session.commit()
                 
@@ -498,16 +492,12 @@ def remove_bg_question():
         
     else:
 
-        # foreign key constraint fails!!!
-        # TODO: remove background_question_answer, background_question_options
-        # before removing background question 
         remove_id = request.args.get('idbackground_question', None)
         remove_options = background_question_option.query.filter_by(background_question_idbackground_question=remove_id).all()
         
         for a in range(len(remove_options)): 
             db.session.delete(remove_options[a])
             db.session.commit()
-    
             
         remove_question = background_question.query.filter_by(idbackground_question=remove_id).first()
         
@@ -519,20 +509,68 @@ def remove_bg_question():
 
 
 
-# Rating set sliders/embody:
-
 @experiment_blueprint.route('/set_embody')
 @login_required
 def set_embody():
     '''Enable/disable embody tool'''
-    
     exp_id = request.args.get('exp_id', None)
-    
     exp = experiment.query.filter_by(idexperiment = exp_id).first()
     exp.embody_enabled = (True if exp.embody_enabled == False else False)
-    db.session.commit() 
-    
     return redirect(url_for('experiment.view', exp_id=exp_id))
+
+
+@experiment_blueprint.route('/add_embody', methods=['GET', 'POST'])
+@login_required
+def add_embody():
+
+    exp_id = request.args.get('exp_id', None)
+    default = request.args.get('default', None)
+    exp_info = experiment.query.filter_by(idexperiment=exp_id).first()
+
+    if exp_info.status != 'Hidden':
+        flash("Experiment is public. Cannot modify structure.")
+        return redirect(url_for('experiment.view', exp_id=exp_id))
+    elif default:
+
+        # TODO: check if default image already added
+
+        default_embody = embody_question(experiment_idexperiment=exp_id, picture=DEFAULT_EMBODY_PICTURE, question=DEFAULT_EMBODY_QUESTION)
+        db.session.add(default_embody) 
+        exp_info.embody_enabled = 1
+        db.session.commit() 
+        return redirect(url_for('experiment.view', exp_id=exp_id))
+
+    else:
+        form = CreateEmbodyForm(request.form)
+
+        if request.method == 'POST' and form.validate():
+            picture = request.files.get("picture")
+            question = request.form.get("question")
+
+            # get filename 
+            filename = secure_filename(picture.filename)
+            path = 'static/embody_images/' + str(exp_id)
+            db_path = '/' + path +  str('/') + str(filename)
+            target = os.path.join(APP_ROOT, path)
+
+            # create folder with experiment id (if it does not exist)
+            if not os.path.isdir(target):
+                os.mkdir(target)
+
+            # save file to server
+            destination = "/".join([target, filename])
+            picture.save(destination)
+
+            #add pages to the db
+            new_embody = embody_question(experiment_idexperiment=exp_id, question=question, picture=db_path)
+            db.session.add(new_embody)
+            exp_info.embody_enabled = 1
+            db.session.commit()
+
+
+            return redirect(url_for('experiment.view', exp_id=exp_id))    
+
+        return render_template('add_embody.html', form=form)
 
 
 @experiment_blueprint.route('/add_questions', methods=['GET', 'POST'])
@@ -606,9 +644,43 @@ def remove_question():
 
         remove_id = request.args.get('idquestion', None)
         remove_question = question.query.filter_by(idquestion=remove_id).first()
+
+        # remove answers before removing questions
+        remove_answers = answer.query.filter_by(question_idquestion=remove_question.idquestion).all()
+        for a in range(len(remove_answers)):
+            db.session.delete(remove_answers[a])
+            db.session.commit()
+                    
+        db.session.delete(remove_question)
+        db.session.commit()
+  
+    return redirect(url_for('experiment.view', exp_id=exp_id))
+
+
+@experiment_blueprint.route('/remove_embody')
+@login_required
+def remove_embody():
+
+    # TODO: if len(embody_questions) == 0:
+    #           set embody_enabled to False (in experiment)
+
+    exp_id = request.args.get('exp_id', None)
+    exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
+
+    if exp_status.status != 'Hidden':
+        flash("Experiment is public. Cannot modify structure.")
+        return redirect(url_for('experiment.view', exp_id=exp_id))
         
-        # TODO: foreign key constraint fails!!!
-        # answers has reference to question -> remove answers first
+    else:
+        remove_id = request.args.get('idembody', None)
+        remove_question = embody_question.query.filter_by(idembody=remove_id).first()
+
+        # remove embody image from server
+        if DEFAULT_EMBODY_PICTURE != remove_question.picture:
+            os.remove(APP_ROOT + remove_question.picture)
+
+        remove_answers = embody_answer.query.filter_by(embody_question_idembody=remove_question.idembody).all()
+        remove_rows(remove_answers)
         db.session.delete(remove_question)
         db.session.commit()
   
@@ -772,17 +844,30 @@ def remove_stimuli():
                 target = os.path.join(APP_ROOT, remove_page.media)
                 os.remove(target)
         
-            # TODO: foreign key constraint fails!!!
-            # answers has reference to page -> remove answers first
+            # remove slider answer from this page
+            remove_question_answers = answer.query.filter_by(page_idpage=remove_page.idpage).all()
+            remove_rows(remove_question_answers)
+
+            # remove embody answer from this page
+            remove_embody_answers = embody_answer.query.filter_by(page_idpage=remove_page.idpage).all()
+            remove_rows(remove_embody_answers)
+
             db.session.delete(remove_page)
             db.session.commit()
       
             return redirect(url_for('experiment.view', exp_id=exp_id))
         
+        
         if remove_page.type == 'text':
             
-            # TODO: foreign key constraint fails!!!
-            # answers has reference to page -> remove answers first
+            # remove slider answer from this page
+            remove_question_answers = answer.query.filter_by(page_idpage=remove_page.idpage).all()
+            remove_rows(remove_question_answers)
+
+            # remove embody answer from this page
+            remove_embody_answers = embody_answer.query.filter_by(page_idpage=remove_page.idpage).all()
+            remove_rows(remove_embody_answers)
+
             db.session.delete(remove_page)
             db.session.commit()
             
@@ -832,21 +917,30 @@ def statistics():
 
     #Background question answers
         
-    bg_questions = background_question.query.filter_by(experiment_idexperiment=exp_id).all()
+    bg_questions = background_question.query.filter_by(
+        experiment_idexperiment=exp_id).all()
     bg_answers_for_participants = {}
 
     for participant in participants:
-        
-        bg_answers = background_question_answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all() 
-        bg_answers_list = [(a.answer) for a in bg_answers] 
-        bg_answers_for_participants[participant.session] = bg_answers_list 
 
-    #started and finished ratings counters    
-    started_ratings = answer_set.query.filter_by(experiment_idexperiment=exp_id).count()
-    experiment_page_count = page.query.filter_by(experiment_idexperiment=exp_id).count()
-    finished_ratings = answer_set.query.filter(and_(answer_set.answer_counter==experiment_page_count, answer_set.experiment_idexperiment==exp_id)).count()
-    
-    return render_template('experiment_statistics.html', experiment_info=experiment_info, participants_and_answers=participants_and_answers, pages_and_questions=pages_and_questions, bg_questions=bg_questions, bg_answers_for_participants=bg_answers_for_participants, started_ratings=started_ratings, finished_ratings=finished_ratings, question_headers=question_headers, stimulus_headers=stimulus_headers)
+        bg_answers = background_question_answer.query.filter_by(
+            answer_set_idanswer_set=participant.idanswer_set).all()
+        bg_answers_list = [(a.answer) for a in bg_answers]
+        bg_answers_for_participants[participant.session] = bg_answers_list
+
+    #started and finished ratings counters
+    started_ratings = answer_set.query.filter_by(
+        experiment_idexperiment=exp_id).count()
+    experiment_page_count = page.query.filter_by(
+        experiment_idexperiment=exp_id).count()
+    finished_ratings = answer_set.query.filter(and_(
+        answer_set.answer_counter == experiment_page_count, answer_set.experiment_idexperiment == exp_id)).count()
+
+    # embody questions
+    embody_questions = embody_question.query.filter_by(
+        experiment_idexperiment=exp_id).all()
+
+    return render_template('experiment_statistics.html', experiment_info=experiment_info, participants_and_answers=participants_and_answers, pages_and_questions=pages_and_questions, bg_questions=bg_questions, bg_answers_for_participants=bg_answers_for_participants, started_ratings=started_ratings, finished_ratings=finished_ratings, question_headers=question_headers, stimulus_headers=stimulus_headers, embody_questions=embody_questions)
 
 
 import embody_plot
@@ -881,8 +975,9 @@ def create_embody():
 @socketio.on('draw', namespace="/create_embody")
 def create_embody(page_id):
     page = page_id["page"]
+    embody = page_id["embody"]
 
-    img_path = embody_plot.get_coordinates(page)
+    img_path = embody_plot.get_coordinates(page, embody)
     print(img_path)
     emit('end', {'path':img_path})
 
@@ -892,5 +987,12 @@ def create_embody():
     print("connection end")
     emit('end', {'connection': 'off'})
 '''
+
+
+def remove_rows(rows):
+    """Remove list of rows from database"""
+    for a in range(len(rows)):
+        db.session.delete(rows[a])
+        db.session.commit()
 
 # EOF

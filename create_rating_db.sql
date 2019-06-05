@@ -13,12 +13,14 @@ DROP TABLE IF EXISTS forced_id;
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS trial_randomization;
 DROP TABLE IF EXISTS embody_answer;
+DROP TABLE IF EXISTS embody_question;
 DROP TABLE IF EXISTS answer;
 DROP TABLE IF EXISTS answer_set;
 DROP TABLE IF EXISTS question;
 DROP TABLE IF EXISTS page;
 DROP TABLE IF EXISTS experiment;
 
+/* Experiment set */
 CREATE TABLE experiment (
 	idexperiment INTEGER NOT NULL AUTO_INCREMENT,
 	name VARCHAR(120), 
@@ -39,9 +41,6 @@ CREATE TABLE experiment (
 	PRIMARY KEY (idexperiment)
 );
 
-/* New fields for updating embody tool to onni.utu.fi */
-ALTER TABLE experiment ADD COLUMN (embody_enabled BOOLEAN DEFAULT 0);
-
 /* Answer set holds session information about users experiment */
 CREATE TABLE answer_set (
 	idanswer_set INTEGER NOT NULL AUTO_INCREMENT, 
@@ -54,10 +53,6 @@ CREATE TABLE answer_set (
 	PRIMARY KEY (idanswer_set), 
 	FOREIGN KEY(experiment_idexperiment) REFERENCES experiment (idexperiment)
 );
-
-ALTER TABLE answer_set ADD COLUMN (answer_type VARCHAR(120));
-
-/* TODO: Update answer_set so it knows which part of the page the user is doing (embody/sliders/something else) */ 
 
 /* Background questions are asked before the experiment begins */ 
 CREATE TABLE background_question (
@@ -146,18 +141,6 @@ CREATE TABLE answer (
 	FOREIGN KEY(question_idquestion) REFERENCES question (idquestion)
 );
 
-/* Embody answer (coordinates). Answer is saved as a json object: 
-   {x:[1,2,100,..], y:[3,4,101,..], r:[13,13,8,...]} */
-CREATE TABLE embody_answer (
-	idanswer INTEGER NOT NULL AUTO_INCREMENT,
-	answer_set_idanswer_set INTEGER, 
-	page_idpage INTEGER, 
-	coordinates TEXT, 
-	PRIMARY KEY (idanswer), 
-	FOREIGN KEY(answer_set_idanswer_set) REFERENCES answer_set (idanswer_set), 
-	FOREIGN KEY(page_idpage) REFERENCES page (idpage) 
-);
-
 /* Create indexes for faster operations */
 CREATE INDEX ix_experiment_consent_text ON experiment (consent_text(255));
 CREATE INDEX ix_experiment_creation_time ON experiment (creation_time);
@@ -174,3 +157,37 @@ CREATE INDEX ix_page_media ON page (media);
 CREATE INDEX ix_page_text ON page (text);
 CREATE INDEX ix_page_type ON page (type);
 
+
+/* New fields for updating embody tool to onni.utu.fi */
+
+/* Embody answer (coordinates). Answer is saved as a json object: 
+	{x:[1,2,100,..], y:[3,4,101,..], r:[13,13,8,...]} */
+CREATE TABLE embody_answer (
+	idanswer INTEGER NOT NULL AUTO_INCREMENT,
+	answer_set_idanswer_set INTEGER, 
+	page_idpage INTEGER, 
+    embody_question_idembody INTEGER,
+	coordinates TEXT, 
+	PRIMARY KEY (idanswer), 
+	FOREIGN KEY(answer_set_idanswer_set) REFERENCES answer_set (idanswer_set), 
+	FOREIGN KEY(page_idpage) REFERENCES page (idpage) ,
+	FOREIGN KEY(embody_question_idembody) REFERENCES embody_question (idembody) 
+);
+
+/* Embody picture/question information */
+CREATE TABLE embody_question (
+	idembody INTEGER NOT NULL AUTO_INCREMENT,
+	experiment_idexperiment INTEGER, 
+	picture TEXT, 
+	question TEXT, 
+	PRIMARY KEY (idembody), 
+	FOREIGN KEY(experiment_idexperiment) REFERENCES experiment (idexperiment)
+);
+
+ALTER TABLE embody_answer ADD COLUMN (embody_question_idembody INTEGER DEFAULT 0);
+ALTER TABLE embody_answer ADD CONSTRAINT FOREIGN KEY (embody_question_idembody) REFERENCES embody_question (idembody);
+
+ALTER TABLE experiment ADD COLUMN (embody_enabled BOOLEAN DEFAULT 0); /*this might be unnecessary*/
+ALTER TABLE answer_set ADD COLUMN (answer_type VARCHAR(120));
+
+/* TODO: Update answer_set so it knows which part of the page the user is doing (embody/sliders/something else) */ 

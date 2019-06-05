@@ -46,8 +46,6 @@
 
 {% endfor %}
 
-
-
 <h1 class="container mt-5 display-4 text-left"><br>Rating task question headers:</h1>
 <br>
 <table class="table">
@@ -76,39 +74,41 @@
 <table class="table">
   <thead>
     <tr>
-    <th scope="col" nowrap>Stimulus ID:</td>
-    <th scope="col" nowrap>Stimulus:</th>
-    <th scope="col" nowrap>Embody:</th>
+    <th style="width:25%;%" scope="col" nowrap>Stimulus:</td>
+    <th style="width:25%;%" scope="col" nowrap>Picture:</th>
+    <th style="width:25%;%" scope="col" nowrap>Description:</th>
+    <th style="width:25%;%" scope="col" nowrap></th>
     </tr>
   </thead>
   <tbody>
     {% for s in stimulus_headers %}    
+      {% for embody_picture in embody_questions %}
+        <tr>
 
-    <tr>
-      <td>{{ s.idpage }}</td>
-      {% if s.type == 'text' %}
-      <td>{{ s.text }}</td>
-      {% else %}
-      <td>{{ s.media }}</td>
-      {% endif %}
+          {% if s.type == 'text' %}
+            <td>{{ s.text }}</td>
+          {% else %}
+            <td>{{ s.media }}</td>
+          {% endif %}
 
+          <td><img src="{{ embody_picture.picture }}" class="thumbnail" /></td>
+          <td>{{ embody_picture.question }}</td>
 
-      {% if experiment_info[0].embody_enabled %}
-      <td>
-      <button data-value={{ s.idpage }} class="btn btn-primary embody-get-drawing">
-        <span class="spinner-border spinner-border-sm hidden"></span>
-        Draw
-      </button>
-      </td>
-      {% endif %}
+          <td>
+          <button data-value="{{ s.idpage }}-{{ embody_picture.idembody }}" class="btn btn-primary embody-get-drawing">
+            <span class="spinner-border spinner-border-sm hidden"></span>
+            Draw
+          </button>
+          </td>
 
-    </tr>
+        </tr>
+      {% endfor %}    
     {% endfor %}    
   </tbody>
 </table>
 
 
-<div class="progress hidden">
+<div class="progress hidden" id="plotted-image">
   <div id="image-loading-progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
     <!-- Creating image... -->
   </div>

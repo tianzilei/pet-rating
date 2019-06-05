@@ -141,6 +141,12 @@ class CreateQuestionForm(Form):
     submit = SubmitField('Send')
 
 
+class CreateEmbodyForm(Form):
+    
+    question = TextAreaField('Question')
+    picture = FileField('Upload picture')
+    submit = SubmitField('Send')
+
 class EditQuestionForm(Form): 
 
     left = StringField('left_scale', [validators.DataRequired()])

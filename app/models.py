@@ -50,7 +50,7 @@ class experiment (db.Model):
     stimulus_size = db.Column(db.String(120))
     consent_text = db.Column(db.Text, index=True)
     use_forced_id = db.Column(db.String(120))
-    embody_enabled = db.Column(db.Boolean, unique=False, default=True)
+    embody_enabled = db.Column(db.Boolean, unique=False, default=False)
     
     def __repr__(self):
         return "<idexperiment = '%s', name='%s', instruction='%s', directoryname='%s', language='%s', status='%s', randomization='%s', short_instruction='%s', single_sentence_instruction='%s', is_archived='%s', creator_name='%s', research_notification_filename='%s', creation_time='%s', stimulus_size='%s', consent_text='%s', use_forced_id='%s', embody_enabled='%s'>" % (self.idexperiment, self.name, self.instruction, self.directoryname, self.language, self.status, self.randomization, self.short_instruction, self.single_sentence_instruction, self.is_archived, self.creator_name, self.research_notification_filename, self.creation_time, self.stimulus_size, self.consent_text, self.use_forced_id, self.embody_enabled)
@@ -107,6 +107,17 @@ class question (db.Model):
         return "<idquestion = '%s', experiment_idexperiment = '%s', question = '%s', left = '%s', right = '%s'>" % (self.idquestion, self.experiment_idexperiment, self.question, self.left, self.right) 
 
 
+class embody_question (db.Model):
+    __tablename__ = "embody_question"
+    idembody = db.Column(db.Integer, primary_key=True)
+    experiment_idexperiment = db.Column(db.Integer, db.ForeignKey('experiment.idexperiment'))
+    picture = db.Column(db.Text)
+    question = db.Column(db.Text)
+
+    def __repr__(self):
+        return "<idembody = '%s', experiment_idexperiment = '%s', picture = '%s', question = '%s'>" % (self.idembody, self.experiment_idexperiment, self.picture, self.question )
+
+
 class page (db.Model):
     __tablename__ = "page"
     idpage = db.Column(db.Integer, primary_key=True)
@@ -136,10 +147,11 @@ class embody_answer (db.Model):
     idanswer = db.Column(db.Integer, primary_key=True)
     answer_set_idanswer_set = db.Column(db.Integer, db.ForeignKey('answer_set.idanswer_set'))
     page_idpage = db.Column(db.Integer, db.ForeignKey('page.idpage'))
+    embody_question_idembody = db.Column(db.Integer, db.ForeignKey('embody_question.idembody'))
     coordinates = db.Column(db.Text)
 
     def __repr__(self):
-        return "<idanswer = '%s', answer_set_idanswer_set = '%s', coordinates = '%s', page_idpage = '%s'>" % (self.idanswer, self.answer_set_idanswer_set, self.coordinates, self.page_idpage)
+        return "<idanswer = '%s', answer_set_idanswer_set = '%s', coordinates = '%s', page_idpage = '%s', embody_question_idembody='%s' >" % (self.idanswer, self.answer_set_idanswer_set, self.coordinates, self.page_idpage, self.embody_question_idembody)
 
 
 class trial_randomization (db.Model):
