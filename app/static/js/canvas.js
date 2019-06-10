@@ -21,6 +21,8 @@ $(document).ready(function() {
     var clickRadius = new Array();
     var clickDrag = new Array();
     var paint;
+    var width = 0;
+    var height = 0;
     var drawRadius=13
     var default_embody=false
     var points = []
@@ -49,16 +51,16 @@ $(document).ready(function() {
 
         newImage = new Image();
         newImage.src =  img.src
-        imageId = img.id
 
-        var width = newImage.width;
-        var height = newImage.height;
-
-        context.canvas.height = height
-        context.canvas.width = width
-
-        context.drawImage(newImage, 0, 0);
-        $(img).hide()
+        newImage.onload = function() {
+            imageId = img.id
+            width = newImage.width;
+            height = newImage.height;
+            context.canvas.height = height
+            context.canvas.width = width
+            context.drawImage(newImage, 0, 0);
+            $(img).hide()
+        }
     }
 
     // Click handlers
@@ -140,7 +142,9 @@ $(document).ready(function() {
             id: imageId,
             x: clickX,
             y: clickY,
-            r: clickRadius
+            r: clickRadius,
+            width: width,
+            height: height
         })
 
         clickX = []
@@ -150,6 +154,7 @@ $(document).ready(function() {
         if ($(img).hasClass('last-embody')) {
             // Send data to db
             try {
+                console.log(points)
                 points = JSON.stringify(points)
                 $("#canvas-data").val(points);
                 $("#canvas-form").submit();

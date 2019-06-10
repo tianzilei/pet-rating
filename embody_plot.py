@@ -182,14 +182,10 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
     # Init plots
     fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2)
 
-    # Plot coordinates as points
-    ax1.set_title("raw points")
-    ax1.plot(coordinates["x"],coordinates["y"], 'ro', alpha=0.2)
-    ax1.imshow(image)
 
     # Draw circles from coordinates (imshow don't need interpolation)
     # TODO: set sigma according to brush size!
-    ax2.set_title("gaussian disk around points")
+    ax2.set_title("gaussian disk around points / raw image")
 
     # set height/width from image
     frame = np.zeros((image_data[0] + 10,image_data[1] + 10))
@@ -214,6 +210,11 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
         # -> at the moment this implementation works only for the default image
         # with pre-created image mask (IMAGE_PATH_MASK)
         ax2.imshow(image)
+
+    # Plot coordinates as points
+    ax1.set_title("raw points")
+    ax1.plot(coordinates["x"],coordinates["y"], 'ro', alpha=0.2)
+    ax1.imshow(image, alpha=0.6)
 
     # return figure for saving/etc...
     return fig

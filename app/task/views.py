@@ -171,20 +171,9 @@ def task_embody(page_num):
         # Add answer to DB
         if check_answer is None:
             for coordinate_data in coordinates:
-
-                idembody = int(coordinate_data['id'].split('-')[1])
-                del coordinate_data['id']
-                del coordinate_data['r']
-
-                participant_answer = embody_answer(
-                    answer_set_idanswer_set=session['answer_set'], coordinates=json.dumps(coordinate_data), page_idpage=page_id, embody_question_idembody=idembody)
-                db.session.add(participant_answer)
-                db.session.commit()
-
+                save_coordinates(coordinate_data, page_id)
         else:
             flash("Page has been answered already. Answers discarded")
-
-
 
     # Check if there are unanswered slider questions -> if true redirect to same page
     if slider_on():
@@ -193,6 +182,18 @@ def task_embody(page_num):
 
     update_answer_set_page()
     return next_page(pages)
+
+
+def save_coordinates(coordinate_data, page_id):
+    """All of the embody results from one page/stimulant is saved in this method"""
+    idembody = int(coordinate_data['id'].split('-')[1])
+    del coordinate_data['id']
+    del coordinate_data['r']
+
+    participant_answer = embody_answer(
+        answer_set_idanswer_set=session['answer_set'], coordinates=json.dumps(coordinate_data), page_idpage=page_id, embody_question_idembody=idembody)
+    db.session.add(participant_answer)
+    db.session.commit()
 
 
 @task_blueprint.route('/question/<int:page_num>', methods=['POST'])
