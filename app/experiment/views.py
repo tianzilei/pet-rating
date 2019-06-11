@@ -161,24 +161,27 @@ def remove():
                     lambda x: x[0], page.query.with_entities(page.idpage).filter_by(experiment_idexperiment=exp_id).all())))).all()
                 remove_rows(remove_embody_answers)
                 remove_embody_questions = embody_question.query.filter_by(experiment_idexperiment=exp_id).all()
+
+                for a in range(len(remove_embody_questions)):
+                    target = APP_ROOT + remove_embody_questions[a].picture
+                    if os.path.exists(target) and DEFAULT_EMBODY_PICTURE != remove_embody_questions[a].picture:                   
+                        os.remove(target)
+
                 remove_rows(remove_embody_questions)
 
                 #Remove all pages and datafiles
                 remove_pages = page.query.filter_by(experiment_idexperiment=exp_id).all()
                 
                 for a in range(len(remove_pages)):
-                    if remove_pages[a].type == 'text':
-                        db.session.delete(remove_pages[a])
-                        db.session.commit()
-                    else:
+                    if remove_pages[a].type != 'text':
                         target = os.path.join(APP_ROOT, remove_pages[a].media)
-    
                         if os.path.exists(target):                   
                             os.remove(target)
         
                     #Now that the files are removed we can delete the page
                     db.session.delete(remove_pages[a])
                     db.session.commit()
+
                     
                 #Remove all answer_sets and trial_randomization orders
                 remove_answer_set = answer_set.query.filter_by(experiment_idexperiment=exp_id).all()
@@ -193,6 +196,10 @@ def remove():
                 remove_experiment = experiment.query.filter_by(idexperiment=exp_id).first()
                 db.session.delete(remove_experiment)
                 db.session.commit()
+
+                # Remove empty directories
+                os.rmdir(APP_ROOT + '/static/embody_images/' + str(exp_id))
+                os.rmdir(APP_ROOT + '/static/experiment_stimuli/' + str(exp_id))
                 
                 flash("Experiment was removed from database!")
                 return redirect(url_for('index'))
@@ -661,9 +668,6 @@ def remove_question():
 @login_required
 def remove_embody():
 
-    # TODO: if len(embody_questions) == 0:
-    #           set embody_enabled to False (in experiment)
-
     exp_id = request.args.get('exp_id', None)
     exp_status = experiment.query.filter_by(idexperiment=exp_id).first()
 
@@ -682,6 +686,13 @@ def remove_embody():
         remove_answers = embody_answer.query.filter_by(embody_question_idembody=remove_question.idembody).all()
         remove_rows(remove_answers)
         db.session.delete(remove_question)
+        db.session.commit()
+
+    
+    question_count = embody_question.query.filter_by(experiment_idexperiment=exp_id).count()
+
+    if question_count == 0:
+        exp_status.embody_enabled = 0
         db.session.commit()
   
     return redirect(url_for('experiment.view', exp_id=exp_id))
@@ -737,7 +748,7 @@ def add_stimuli():
                     filename = file.filename
                     destination = "/".join([target, filename])
                     file.save(destination)
-                    
+
                     #add pages to the db
                     db_path = path +  str('/') + str(filename)
                     new_page = page(experiment_idexperiment=exp_id, type=form.type.data, media=db_path)
@@ -761,16 +772,8 @@ def edit_stimuli():
     form = EditPageForm(request.form)
     #form = EditPageForm(request.form, obj=edit_page)
 
-    # TODO: replacing image not working!!
+    # TODO: replacing image not working -> form not getting validated for some reaseon !!
 
-    print(request.files.getlist("file"))
-    print("errors:", form.errors)
-    print("form:", form.__dict__)
-    print("type:", form.type.data)
-    print("media:", form.media.data)
-    print("file:", form.file.data)
-    print("text:", form.text.data)
-    
     if request.method == 'POST' and form.validate():
         print("POST IMAGE")
         #If the stimulus type is not text, then the old stimulus file is deleted from os and replaced

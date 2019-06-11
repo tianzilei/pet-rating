@@ -249,48 +249,8 @@ def task(page_num):
         randomized_page_id = get_randomized_page(page_id).randomized_idpage
         randomized_stimulus = page.query.filter_by(idpage=randomized_page_id).first()
 
-
     # get all embody questions 
-
     embody_questions = embody_question.query.filter_by(experiment_idexperiment=session['exp_id']).all()
-
-
-
-    print(embody_questions)
-    print(session)
-
-    '''
-
-    [
-        <idembody = '7', experiment_idexperiment = '5', picture = '/static/embody_images/5/madam-300x250.jpg', question = 'Color the ares where human emotions can be found'>,
-        <idembody = '14', experiment_idexperiment = '5', picture = '/static/embody_images/5/onni_LOGO-RGB-transparent_bg_cut.png', question = 'dfDFADFADSFDFAS'>,
-        <idembody = '16', experiment_idexperiment = '5', picture = '/static/img/dummy_600.png', question = 'Color the regions whose activity you feel increasing or getting stronger'>]
-
-    <SecureCookieSession {
-        '_fresh': True, 
-        '_id': '64d8cf95fb694f63a0b4ffdfbdfde4b608fdcabd374869510101345cf3ce527576ba7b2c4b6ed24315eeb23eac573309ab75f22121d5618d3048479552b948e4',
-        'answer_set': 52,
-        'csrf_token': 'ab1381281c440e95afc3ef6c0c69712c8c64173a', 
-        'current_idpage': 13, 
-        'exp_id': '5', 
-        'language': 'English', 
-        'randomization': 'Off', 
-        'type': 'text', 
-        'user': 'f693e4', 
-        'user_id': '1'
-    }>
-
-
-    from session['current_idpage'] system gets CURRENT stimulant (page)
-
-    in select_from_type() the CURRENT question type is selected (embody/sliders)
-
-
-
-    '''
-
-    # TODO: show embody tool when its disabled!!!!
-
 
     return render_template(
         'task.html', 
@@ -381,9 +341,4 @@ def quit():
     return render_template('quit_task.html', user_id=user_id)
 
 
-# TODO: removable?
-@task_blueprint.route('/create')
-def create():
-    return render_template('create_task.html')
-
-
+#EOF

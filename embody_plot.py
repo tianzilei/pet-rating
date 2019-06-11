@@ -6,9 +6,6 @@ Visualize emBODY data
 This python script is based on matlab code found from:
 https://version.aalto.fi/gitlab/eglerean/embody/tree/master/matlab
 
-Data is loaded from hardcoded experiment (exp_id)
--> TODO: create argument parser where user determines which 
-         experiment is used or if data is loaded from all answers
 
 Requirements:
     - python 3+
@@ -18,6 +15,7 @@ Requirements:
 
 Run:
 python embody_plot.py
+
 """
 
 import sys
@@ -40,7 +38,7 @@ from matplotlib.figure import Figure
 from flask_socketio import emit
 from app import socketio
 
-# Hard coded image size
+# Hard coded image size for default embody image
 WIDTH = 207
 HEIGHT = 600
 
@@ -190,19 +188,20 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
     # set height/width from image
     frame = np.zeros((image_data[0] + 10,image_data[1] + 10))
 
-    for idx, point in enumerate(coordinates["coordinates"]):
-        frame[point[1], point[0]] = 1
-        point = ndimage.gaussian_filter(frame, sigma=5)
-        ax2.imshow(point, cmap='hot', interpolation='none')
-
-        # Try to send progress information to socket.io
-        try:
-            socketio.sleep(0)
-            emit('progress', {'done':idx+1/points_count, 'from':points_count})
-        except RuntimeError as err:
-            continue
-
     if image_path == DEFAULT_IMAGE_PATH:
+
+        for idx, point in enumerate(coordinates["coordinates"]):
+            frame[point[1], point[0]] = 1
+            point = ndimage.gaussian_filter(frame, sigma=5)
+            ax2.imshow(point, cmap='hot', interpolation='none')
+
+            # Try to send progress information to socket.io
+            try:
+                socketio.sleep(0)
+                emit('progress', {'done':idx+1/points_count, 'from':points_count})
+            except RuntimeError as err:
+                continue
+
         image_mask = mpimg.imread(IMAGE_PATH_MASK)
         ax2.imshow(image_mask)
     else:

@@ -111,11 +111,11 @@ def participant_session():
     exp_status = experiment.query.filter_by(idexperiment=session['exp_id']).first()
 
 
-    #create answer set for the participant in the database
+    # Create answer set for the participant in the database
     the_time = datetime.now()
     the_time = the_time.replace(microsecond=0)
 
-    # TODO: Check which question type is the first in answer_set
+    # Check which question type is the first in answer_set (embody is first if enabled)
     answer_set_type = 'slider'
     if exp_status.embody_enabled:
         answer_set_type = 'embody'
@@ -167,7 +167,6 @@ def participant_session():
     session['answer_set'] = session_id_for_participant.idanswer_set
 
 
-    # TODO: this is unnecessary if experiment contains multiple stimulus types
     #collect experiments mediatype from db to session['type']. 
     #This is later used in task.html to determine page layout based on stimulus type
     mediatype = page.query.filter_by(experiment_idexperiment=session['exp_id']).first()

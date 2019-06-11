@@ -5,11 +5,6 @@
 
 {% if session['randomization']=='Off' %}
 
-<!-- TODO change session['type'] TO stimulus['type'] 
-     because session should have multiple type of stimuli!!!
- -->
-
-    
     {% if session['type']=='text' %}
         <div class="container text-center mt-5 pt-5">
             {% for page in pages.items %}

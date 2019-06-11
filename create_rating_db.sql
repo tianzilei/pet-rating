@@ -187,7 +187,8 @@ CREATE TABLE embody_question (
 ALTER TABLE embody_answer ADD COLUMN (embody_question_idembody INTEGER DEFAULT 0);
 ALTER TABLE embody_answer ADD CONSTRAINT FOREIGN KEY (embody_question_idembody) REFERENCES embody_question (idembody);
 
-ALTER TABLE experiment ADD COLUMN (embody_enabled BOOLEAN DEFAULT 0); /*this might be unnecessary*/
-ALTER TABLE answer_set ADD COLUMN (answer_type VARCHAR(120));
+/* Set flag if embody tool is enabled -> this is not the most modulart solution, but works for now */
+ALTER TABLE experiment ADD COLUMN (embody_enabled BOOLEAN DEFAULT 0);
 
-/* TODO: Update answer_set so it knows which part of the page the user is doing (embody/sliders/something else) */ 
+/* Set current answer type (embody/slider/etc..) so returning users are routed to correct question */ 
+ALTER TABLE answer_set ADD COLUMN (answer_type VARCHAR(120));

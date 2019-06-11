@@ -76,7 +76,6 @@ $(document).ready(function() {
     });
 
     canvas.mousemove(function(e){
-        // TODO: if mousedown -> can draw outside of image
         var mouseX = e.pageX - this.offsetLeft;
         var mouseY = e.pageY - this.offsetTop;
 
@@ -95,10 +94,6 @@ $(document).ready(function() {
     });
 
 
-    // TODO: changing drawradius doesnt affect to the saved datapoints !!!
-    // Bigger brush should make more datapoints compared to smaller ones.
-    // add brush size to click arry -> {x:[...], y:[...], size:[...]} ?? 
-    
     $("#embody-canvas").bind('DOMMouseScroll', changeBrushSize)
     // DOMMouseScroll is only for firefox
     //$(".canvas-container").bind('wheel', changeBrushSize)
@@ -209,14 +204,6 @@ $(document).ready(function() {
     }
 
     function redraw() {
-        /* 
-        Check:
-        https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
-
-        TODO: It's possible to use only one mask image propably
-        */
-        //context.globalCompositeOperation='destination-over' // 
-        //context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
 
         lastX = clickX[clickX.length - 1]
         lastY = clickY[clickY.length - 1]

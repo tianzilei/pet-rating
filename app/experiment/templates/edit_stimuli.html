@@ -24,8 +24,16 @@
     </div>
   {% endif %}    
    <br>  
-   <button type="submit" class="btn btn-primary">Submit</button>
-   <a class="btn btn-primary" href="{{ request.referrer }}" role="button">Cancel</a>
+
+  <!-- this should be added in order to get the right stimulus type to database.. stimulus_type is not defined yet -->
+  <input style="display:none;" type="radio" name="type" value="{{ stimulus_type }}" checked >
+
+  <button type="submit" class="btn btn-primary">Submit</button>
+  <a class="btn btn-primary" href="{{ request.referrer }}" role="button">Cancel</a>
+
 </form>
+
+<script src="{{ url_for('static', filename='js/enable_button.js') }}" ></script>
+
 {% endblock %}
 
