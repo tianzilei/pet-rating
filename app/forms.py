@@ -81,8 +81,8 @@ class TestForm2(Form):
 
     questions1 = SelectField()
 
+
 #Forms for editing functions
-    
     
 class CreateExperimentForm(Form):
 
@@ -147,6 +147,7 @@ class CreateEmbodyForm(Form):
     picture = FileField('Upload picture')
     submit = SubmitField('Send')
 
+
 class EditQuestionForm(Form): 
 
     left = StringField('left_scale', [validators.DataRequired()])
@@ -168,7 +169,6 @@ class UploadResearchBulletinForm(Form):
     file = FileField('Upload file')
     submit = SubmitField('Send')
 
-    
 
 class EditPageForm(Form):
     
@@ -182,6 +182,7 @@ class EditPageForm(Form):
 class RemoveExperimentForm(Form):
     remove = TextAreaField('Remove')
     submit = SubmitField('Send')
+
 
 class GenerateIdForm(Form): 
 

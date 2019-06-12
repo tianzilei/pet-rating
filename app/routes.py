@@ -382,47 +382,50 @@ def download_csv():
             header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) +'. embody_question: '+ question.picture for count,question in enumerate(embody_questions, 1)])
 
     csv += header + '\r\n'
-
     answer_row = ''
 
     for participant in participants:
 
-        try:
+        # list only finished answer sets
+        if experiment_page_count == participant.answer_counter:
 
-            # append user session id
-            answer_row += participant.session + ';'
+            try:
 
-            # append background question answers
-            bg_answers = background_question_answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()
-            bg_answers_list = [(a.answer) for a in bg_answers]
-            answer_row += ';'.join(bg_answers_list) + ';'
-    
-            # append slider answers 
-            slider_answers = answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
-            answers_list = [ a.answer for a in slider_answers]    
-            answer_row += ';'.join(answers_list) + ';' if slider_answers else ''
+                # append user session id
+                answer_row += participant.session + ';'
 
-            # append embody answers (coordinates)
-            # save embody answers as bitmap images  
-            embody_answers = embody_answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
-            answers_list = []
-            for embody_answer_data in embody_answers:
-                embody_answer_data = json.loads(embody_answer_data.coordinates)
-                coordinates_to_bitmap = [[0 for x in range(embody_answer_data['height'] + 2)] for y in range(embody_answer_data['width'] + 2)] 
-                for point in list(zip( embody_answer_data['x'], embody_answer_data['y'])):
-                    coordinates_to_bitmap[point[0]][point[1]] += 0.1
+                # append background question answers
+                bg_answers = background_question_answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()
+                bg_answers_list = [ str(a.answer).strip() for a in bg_answers]
+                answer_row += ';'.join(bg_answers_list) + ';'
 
-                answers_list.append(json.dumps(coordinates_to_bitmap))
+                # append slider answers 
+                slider_answers = answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
+                answers_list = [ str(a.answer).strip() for a in slider_answers]    
+                answer_row += ';'.join(answers_list) + ';' if slider_answers else len(questions) * len(pages) * ';'
 
-            # old way to save only visited points:
-            # answers_list = [ json.dumps(list(zip( json.loads(a.coordinates)['x'], json.loads(a.coordinates)['y']))) for a in embody_answers]    
-            answer_row += ';'.join(answers_list) if embody_answers else ''
+                # append embody answers (coordinates)
+                # save embody answers as bitmap images  
+                embody_answers = embody_answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
+                answers_list = []
+                for embody_answer_data in embody_answers:
+                    embody_answer_data = json.loads(embody_answer_data.coordinates)
+                    coordinates_to_bitmap = [[0 for x in range(embody_answer_data['height'] + 2)] for y in range(embody_answer_data['width'] + 2)] 
+                    for point in list(zip( embody_answer_data['x'], embody_answer_data['y'])):
+                        coordinates_to_bitmap[point[0]][point[1]] += 0.1
 
-        except TypeError as err:
-            print(err)
+                    answers_list.append('hello')
+                    #answers_list.append(json.dumps(coordinates_to_bitmap))
 
-        csv += answer_row + '\r\n'
-        answer_row = ''
+                # old way to save only visited points:
+                # answers_list = [ json.dumps(list(zip( json.loads(a.coordinates)['x'], json.loads(a.coordinates)['y']))) for a in embody_answers]    
+                answer_row += ';'.join(answers_list) if embody_answers else len(embody_questions) * len(pages) * ';'
+
+            except TypeError as err:
+                print(err)
+
+            csv += answer_row + '\r\n'
+            answer_row = ''
 
     try:
         fd, path = tempfile.mkstemp()

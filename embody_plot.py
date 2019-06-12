@@ -38,6 +38,7 @@ from matplotlib.figure import Figure
 from flask_socketio import emit
 from app import socketio
 
+
 # Hard coded image size for default embody image
 WIDTH = 207
 HEIGHT = 600
@@ -191,15 +192,16 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
     if image_path == DEFAULT_IMAGE_PATH:
 
         for idx, point in enumerate(coordinates["coordinates"]):
-            frame[point[1], point[0]] = 1
+            frame[int(point[1]), int(point[0])] = 1
             point = ndimage.gaussian_filter(frame, sigma=5)
             ax2.imshow(point, cmap='hot', interpolation='none')
 
             # Try to send progress information to socket.io
             try:
-                socketio.sleep(0)
                 emit('progress', {'done':idx+1/points_count, 'from':points_count})
+                socketio.sleep(0)
             except RuntimeError as err:
+                print(err)
                 continue
 
         image_mask = mpimg.imread(IMAGE_PATH_MASK)

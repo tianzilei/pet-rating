@@ -6,16 +6,7 @@ const defaultEmbodySource = '/static/img/dummy_600.png';
 $(document).ready(function() {
 
     // Init draw variables
-    /*
-    OO-style coordinates:
-    var paint;
-    var point = {
-        x: null,
-        y: null,
-        r: 13
-    }
-    var points = new Array()
-    */
+
     var clickX = new Array();
     var clickY = new Array();
     var clickRadius = new Array();
@@ -36,9 +27,9 @@ $(document).ready(function() {
         //var oldimg = document.getElementById("baseImage");
         var img = $('.embody-image.selected-embody')[0]
 
-        $(img).on('load', function() {
+        img.onload = function() {
             drawImage()
-        })
+        }
 
     } catch (e) {
         console.log(e)
@@ -63,6 +54,8 @@ $(document).ready(function() {
         }
     }
 
+    drawImage()
+
     // Click handlers
     canvas.mousedown(function(e){
         var mouseX = e.pageX - this.offsetLeft;
@@ -85,6 +78,27 @@ $(document).ready(function() {
         }
     });
 
+    canvas.bind('touchmove', function(e){
+        e.preventDefault()
+        var mouseX = e.touches[0].pageX - this.offsetLeft;
+        var mouseY = e.touches[0].pageY - this.offsetTop;
+        if (paint && pointInsideBaseImage([mouseX, mouseY])){
+            addClick(mouseX, mouseY, true);
+            redraw();
+        }
+    });
+
+    canvas.bind('touchstart', function(e){
+        e.preventDefault()
+        var mouseX = e.touches[0].pageX - this.offsetLeft;
+        var mouseY = e.touches[0].pageY - this.offsetTop;
+        paint = true;
+        if (pointInsideBaseImage([mouseX, mouseY])) {
+            addClick(mouseX, mouseY);
+            redraw();
+        }
+    });
+
     canvas.mouseup(function(e){
         paint = false;
     });
@@ -96,7 +110,6 @@ $(document).ready(function() {
 
     $("#embody-canvas").bind('DOMMouseScroll', changeBrushSize)
     // DOMMouseScroll is only for firefox
-    //$(".canvas-container").bind('wheel', changeBrushSize)
     
     function changeBrushSize(event) {
         event.preventDefault()
@@ -149,7 +162,6 @@ $(document).ready(function() {
         if ($(img).hasClass('last-embody')) {
             // Send data to db
             try {
-                console.log(points)
                 points = JSON.stringify(points)
                 $("#canvas-data").val(points);
                 $("#canvas-form").submit();
@@ -259,9 +271,5 @@ $(document).ready(function() {
         clickY = []
         clickDrag = []
     }
-
-
-
-    drawImage()
             
 });

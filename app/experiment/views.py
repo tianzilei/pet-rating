@@ -893,6 +893,14 @@ def statistics():
     experiment_info = experiment.query.filter_by(idexperiment = exp_id).all()
     participants = answer_set.query.filter_by(experiment_idexperiment= exp_id).all()
     
+    #started and finished ratings counters
+    started_ratings = answer_set.query.filter_by(
+        experiment_idexperiment=exp_id).count()
+    experiment_page_count = page.query.filter_by(
+        experiment_idexperiment=exp_id).count()
+    finished_ratings = answer_set.query.filter(and_(
+        answer_set.answer_counter == experiment_page_count, answer_set.experiment_idexperiment == exp_id)).count()
+
     
     #Rating task headers
     question_headers = question.query.filter_by(experiment_idexperiment=exp_id).all()
@@ -903,47 +911,56 @@ def statistics():
     pages_and_questions = {}
 
     for p in pages:
-        
         questions_list = [(p.idpage, a.idquestion) for a in questions]
         pages_and_questions[p.idpage] = questions_list 
         
     #List of answers per participant in format question Stimulus ID/Question ID
     #those are in answer table as page_idpage and question_idquestion respectively
-    
-    participants_and_answers = {}
-    
+
+    slider_answers = {}
     for participant in participants:
- 
-        answers = answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
-        answers_list = [(a.idanswer, a.question_idquestion, a.answer_set_idanswer_set, a.answer, a.page_idpage) for a in answers]    
-        participants_and_answers[participant.session] = answers_list 
+
+        # list only finished answer sets
+        if experiment_page_count == participant.answer_counter:
+            answers = answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
+            slider_answers[participant.session] = [ a.answer for a in answers]     
+
+    # map slider_answers from str to int and calculate mean
+    a = [map(int,i) for i in list(slider_answers.values())]
+    slider_answers['mean'] = [float(sum(l))/len(l) for l in zip(*a)]
+
 
     #Background question answers
-        
     bg_questions = background_question.query.filter_by(
         experiment_idexperiment=exp_id).all()
     bg_answers_for_participants = {}
 
     for participant in participants:
 
-        bg_answers = background_question_answer.query.filter_by(
-            answer_set_idanswer_set=participant.idanswer_set).all()
-        bg_answers_list = [(a.answer) for a in bg_answers]
-        bg_answers_for_participants[participant.session] = bg_answers_list
+        # list only finished answer sets
+        if experiment_page_count == participant.answer_counter:
+            bg_answers = background_question_answer.query.filter_by(
+                answer_set_idanswer_set=participant.idanswer_set).all()
+            bg_answers_list = [(a.answer) for a in bg_answers]
+            bg_answers_for_participants[participant.session] = bg_answers_list
 
-    #started and finished ratings counters
-    started_ratings = answer_set.query.filter_by(
-        experiment_idexperiment=exp_id).count()
-    experiment_page_count = page.query.filter_by(
-        experiment_idexperiment=exp_id).count()
-    finished_ratings = answer_set.query.filter(and_(
-        answer_set.answer_counter == experiment_page_count, answer_set.experiment_idexperiment == exp_id)).count()
 
     # embody questions
     embody_questions = embody_question.query.filter_by(
         experiment_idexperiment=exp_id).all()
 
-    return render_template('experiment_statistics.html', experiment_info=experiment_info, participants_and_answers=participants_and_answers, pages_and_questions=pages_and_questions, bg_questions=bg_questions, bg_answers_for_participants=bg_answers_for_participants, started_ratings=started_ratings, finished_ratings=finished_ratings, question_headers=question_headers, stimulus_headers=stimulus_headers, embody_questions=embody_questions)
+    return render_template('experiment_statistics.html', 
+        experiment_info=experiment_info, 
+        participants_and_answers=slider_answers,  
+        pages_and_questions=pages_and_questions, 
+        bg_questions=bg_questions, 
+        bg_answers_for_participants=bg_answers_for_participants,  
+        started_ratings=started_ratings, 
+        finished_ratings=finished_ratings, 
+        question_headers=question_headers, 
+        stimulus_headers=stimulus_headers, 
+        embody_questions=embody_questions
+    )
 
 
 import embody_plot

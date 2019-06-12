@@ -187,7 +187,7 @@ CREATE TABLE embody_question (
 ALTER TABLE embody_answer ADD COLUMN (embody_question_idembody INTEGER DEFAULT 0);
 ALTER TABLE embody_answer ADD CONSTRAINT FOREIGN KEY (embody_question_idembody) REFERENCES embody_question (idembody);
 
-/* Set flag if embody tool is enabled -> this is not the most modulart solution, but works for now */
+/* Set flag if embody tool is enabled -> this is not the most modular solution, but works for now */
 ALTER TABLE experiment ADD COLUMN (embody_enabled BOOLEAN DEFAULT 0);
 
 /* Set current answer type (embody/slider/etc..) so returning users are routed to correct question */ 

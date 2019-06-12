@@ -35,18 +35,16 @@
     </tr>
     <tr>
       <td>Number of finished ratings:</td>
-      <td>{{ finished_ratings }}</td>
-    </tr>
-    <tr>
-    <td><a class="btn btn-primary btn-info" href="{{ url_for('download_csv', exp_id=exp.idexperiment) }}" role="button">Export results (csv)</a></td>
-    <td></td>
+      <td>{{ finished_ratings }}
+      <a class="btn btn-primary btn-info float-right" href="{{ url_for('download_csv', exp_id=exp.idexperiment) }}" role="button">Export results (csv)</a>
+      </td>
     </tr>
   </tbody>
 </table>
 
 {% endfor %}
 
-<h1 class="container mt-5 display-4 text-left"><br>Rating task question headers:</h1>
+<h1 class="container mt-5 display-6 text-left"><br>Slider question headers:</h1>
 <br>
 <table class="table">
   <thead>
@@ -69,7 +67,40 @@
   </tbody>
 </table>
 
-<h1 class="container mt-5 display-4 text-left"><br>Rating task stimulus headers:</h1>
+
+<h1 class="container mt-5 display-6 text-left"><br>Slider question answers: (Page ID/Question ID)</h1>
+<br>
+
+
+<table class="table">
+  <thead>
+      
+    <tr>
+     <th scope="col" nowrap>Participant ID:</th>
+     {% for page in pages_and_questions %}
+     
+            {% for p in pages_and_questions[page] %}
+             <th scope="col" nowrap>{{ p[0]}}/{{ p[1]}}</th>
+            {% endfor %}
+
+     {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for participant in participants_and_answers %}    
+    <tr>
+        <td>{{ participant }}</td>
+        {% for answer in participants_and_answers[participant] %}
+            <td>{{ answer }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+
+  </tbody>
+</table>
+
+
+<h1 class="container mt-5 display-6 text-left"><br>Embody pictures and answers:</h1>
 <br>
 <table class="table">
   <thead>
@@ -87,8 +118,16 @@
 
           {% if s.type == 'text' %}
             <td>{{ s.text }}</td>
+          {% elif s.type == 'picture' %}
+            <td><img src="/{{ s.media }}" class="thumbnail" /></td>
+          {% elif s.type == 'video' %}
+            <td>
+              <div class="embed-responsive embed-responsive-16by9 ">
+                  <iframe class="embed-responsive-item thumbnail" src="/{{ s.media }}" allowFullScreen></iframe>
+              </div>
+            </td>
           {% else %}
-            <td>{{ s.media }}</td>
+            <td>{{ s.text }}</td>
           {% endif %}
 
           <td><img src="{{ embody_picture.picture }}" class="thumbnail" /></td>
@@ -116,43 +155,14 @@
 <img class="embody-image-container">
 
 
-<h1 class="container mt-5 display-4 text-left"><br>Rating task values: (Stimulus ID/Question ID)</h1>
-<br>
 
-
-<table class="table">
-  <thead>
-      
-    <tr>
-     <th scope="col" nowrap>Participant ID:</th>
-     {% for page in pages_and_questions %}
-     
-            {% for p in pages_and_questions[page] %}
-             <th scope="col" nowrap>{{ p[0]}}/{{ p[1]}}</th>
-            {% endfor %}
-
-     {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for participant in participants_and_answers %}    
-    <tr>
-        <td>{{ participant }}</td>
-        {% for answer in participants_and_answers[participant] %}
-            <td>{{ answer[3] }}</td>
-        {% endfor %}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<h1 class="container mt-5 display-4 text-left"><br>Background question answers:</h1>
+<h1 class="container mt-5 display-6 text-left"><br>Background question answers:</h1>
 <br>
 
 <table class="table">
   <thead>
     <tr>
-     <th scope="col" nowrap>Question:</th>
+     <th scope="col" nowrap>Participant</th>
      
      {% for bg in bg_questions %}
      <th scope="col" nowrap>{{ bg.background_question }}</th>
@@ -168,6 +178,8 @@
         {% endfor %}
     </tr>
     {% endfor %}
+
+
   </tbody>
 </table>
 
