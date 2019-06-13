@@ -26,6 +26,7 @@ $(document).ready(function() {
 
         //var oldimg = document.getElementById("baseImage");
         var img = $('.embody-image.selected-embody')[0]
+        var instruction = $('.embody-question.selected-embody')[0]
 
         img.onload = function() {
             drawImage()
@@ -82,6 +83,9 @@ $(document).ready(function() {
         e.preventDefault()
         var mouseX = e.touches[0].pageX - this.offsetLeft;
         var mouseY = e.touches[0].pageY - this.offsetTop;
+
+        [mouseX, mouseY] = scaleClickCoordinates($(this)[0], mouseX, mouseY)
+
         if (paint && pointInsideBaseImage([mouseX, mouseY])){
             addClick(mouseX, mouseY, true);
             redraw();
@@ -93,11 +97,29 @@ $(document).ready(function() {
         var mouseX = e.touches[0].pageX - this.offsetLeft;
         var mouseY = e.touches[0].pageY - this.offsetTop;
         paint = true;
+
+        [mouseX, mouseY] = scaleClickCoordinates($(this)[0], mouseX, mouseY)
+
         if (pointInsideBaseImage([mouseX, mouseY])) {
             addClick(mouseX, mouseY);
             redraw();
         }
     });
+
+    function scaleClickCoordinates(element, x, y) { 
+        var clientHeight = element.clientHeight;
+        var trueHeight = element.height 
+        var clientWidth = element.clientWidth;
+        var trueWidth = element.width 
+
+        if (clientHeight !== trueHeight) {
+            y = y * (trueHeight / clientHeight)
+            x = x * (trueWidth / clientWidth)
+        }
+
+        return [x,y]
+
+    };
 
     canvas.mouseup(function(e){
         paint = false;
@@ -172,6 +194,9 @@ $(document).ready(function() {
         } else {
             // Show next picture
             img = img.nextElementSibling
+
+            $(instruction).addClass("hidden")
+            $(instruction.nextElementSibling).removeClass("hidden")
 
             try {
                 drawImage()

@@ -372,14 +372,14 @@ def download_csv():
 
     # create CSV-header
     header = 'participant id;'
-    header += ';'.join([str(count) +'. bg_question: '+ question.background_question for count,question in enumerate(bg_questions, 1)])
+    header += ';'.join([str(count) +'. bg_question: '+ question.background_question.strip() for count,question in enumerate(bg_questions, 1)])
 
     for idx in range(1,len(pages) + 1):
         if len(questions) > 0:
-            header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) +'. slider_question: ' + question.question for count,question in enumerate(questions, 1)]) 
+            header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) +'. slider_question: ' + question.question.strip() for count,question in enumerate(questions, 1)]) 
     for idx in range(1,len(pages) + 1):
         if len(embody_questions) > 0:
-            header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) +'. embody_question: '+ question.picture for count,question in enumerate(embody_questions, 1)])
+            header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) +'. embody_question: '+ question.picture.strip() for count,question in enumerate(embody_questions, 1)])
 
     csv += header + '\r\n'
     answer_row = ''
@@ -414,8 +414,7 @@ def download_csv():
                     for point in list(zip( embody_answer_data['x'], embody_answer_data['y'])):
                         coordinates_to_bitmap[point[0]][point[1]] += 0.1
 
-                    answers_list.append('hello')
-                    #answers_list.append(json.dumps(coordinates_to_bitmap))
+                    answers_list.append(json.dumps(coordinates_to_bitmap))
 
                 # old way to save only visited points:
                 # answers_list = [ json.dumps(list(zip( json.loads(a.coordinates)['x'], json.loads(a.coordinates)['y']))) for a in embody_answers]    

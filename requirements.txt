@@ -32,7 +32,6 @@ mysql-connector==2.2.9
 networkx==2.2
 numpy==1.16.2
 Pillow==6.0.0
-pkg-resources==0.0.0
 ply==3.11
 pycodestyle==2.5.0
 pyexcel==0.5.9.1

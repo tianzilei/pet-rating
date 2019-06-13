@@ -14,7 +14,7 @@ body {
     display: block;
     margin: 0 auto;
     margin-bottom: 30px;
-    
+    max-width: 100%; 
 }
 
 .clear-button {
@@ -62,4 +62,17 @@ body {
 
 .thumbnail {
     max-height: 100px;
+}
+
+.embody-question {
+    text-align: center;
+}
+
+
+@media (max-width: 600px) {
+  
+    .stimulus {
+        max-width: 90%;
+    }
+  
 }

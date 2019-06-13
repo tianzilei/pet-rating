@@ -927,7 +927,7 @@ def statistics():
 
     # map slider_answers from str to int and calculate mean
     a = [map(int,i) for i in list(slider_answers.values())]
-    slider_answers['mean'] = [float(sum(l))/len(l) for l in zip(*a)]
+    slider_answers['mean'] = [round(float(sum(l))/len(l), 2) for l in zip(*a)]
 
 
     #Background question answers
