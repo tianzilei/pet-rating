@@ -37,6 +37,7 @@ from matplotlib.figure import Figure
 
 from flask_socketio import emit
 from app import socketio
+from config import Config
 
 
 # Hard coded image size for default embody image
@@ -46,7 +47,7 @@ HEIGHT = 600
 # image paths
 DEFAULT_IMAGE_PATH = './app/static/img/dummy_600.png'
 IMAGE_PATH_MASK = './app/static/img/dummy_600_mask.png'
-STATIC_PATH = './app/static/'
+STATIC_PATH = './app/static/embody_drawings/'
 
 # Interpolation methods
 METHODS = ['none','bilinear', 'bicubic', 'gaussian']
@@ -66,7 +67,11 @@ DATE_STRING = now.strftime("%Y-%m-%d")
 class MyDB(object):
 
     def __init__(self):
-        self._db_connection = mariadb.connect(user='rating', password='rating_passwd', database='rating_db')
+        self._db_connection = mariadb.connect(
+		user = Config.MYSQL_USER, 
+		password = Config.MYSQL_PASSWORD, 
+		database = Config.MYSQL_DB
+	)
         self._db_cur = self._db_connection.cursor()
 
     def query(self, query, params):
@@ -110,6 +115,7 @@ def timeit(method):
 
     return timed
 
+import sys
 
 @timeit
 def get_coordinates(idpage, idembody=None, select_clause=SELECT_BY_PAGE_AND_PICTURE):

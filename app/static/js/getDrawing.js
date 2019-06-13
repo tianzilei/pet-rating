@@ -1,8 +1,7 @@
 
 
-const baseURI = 'http://127.0.0.1:8000/';
+const baseURI = 'http://onni.utu.fi/';
 var getDrawingURI = baseURI + 'create_embody';
-//var getDrawingURI = baseURI + 'experiment/create_embody';
 
 $(document).ready(function()  {
 
@@ -13,6 +12,7 @@ $(document).ready(function()  {
 
     // With sockets 
     function initConnection(socket) {
+
         socket.on('success', function(msg) {
             console.log(msg)
         });
@@ -22,12 +22,13 @@ $(document).ready(function()  {
         });
 
         socket.on('end', function(img) {
+
             socket.disconnect()            
 
             // Draw image to statistic -page
             var source = img.path
             d = new Date()
-            imageContainer.attr("src", "/static/" + source + "?" +d.getTime())
+            imageContainer.attr("src", "/static/embody_drawings/" + source + "?" +d.getTime())
 
             // Remove progress bar
             progressBarContainer.addClass("hidden")

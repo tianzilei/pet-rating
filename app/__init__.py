@@ -13,7 +13,9 @@ from config import Config
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+
 CORS(app)
+#CORS(app, resources={r"/*": {"cors_allowed_origins":"*"} } )
 
 #app.config['BABEL_DEFAULT_LOCALE'] = 'fin'
 #app.config['BABEL_TRANSLATION_DIRECTORIES'] ='C:/Users/Timo/git/pet-rating/app/translations'
@@ -62,6 +64,7 @@ def get_locale():
 @babel.localeselector
 def get_locale():
     return request.accept_languages.best_match(app.config['LANGUAGES'])
+
 """
 
 
