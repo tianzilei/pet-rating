@@ -30,6 +30,10 @@ import argparse
 
 import numpy as np
 import scipy.ndimage as ndimage
+
+import matplotlib
+matplotlib.use('agg')
+
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
