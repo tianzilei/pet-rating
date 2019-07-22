@@ -89,7 +89,11 @@
   <tbody>
     {% for participant in participants_and_answers %}    
     <tr>
+	{% if participant == 'mean' %}
+        <td><b>{{ participant }}</b></td>
+	{% else  %}
         <td>{{ participant }}</td>
+	{% endif  %}
         {% for answer in participants_and_answers[participant] %}
             <td>{{ answer }}</td>
         {% endfor %}

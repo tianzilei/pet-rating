@@ -3,6 +3,7 @@ __pycache__/
 /rating
 /logs
 /app/static/experiment_stimuli
+/app/static/embody_drawings/*
 cmd.txt
 DB_inserts.txt
 dumb.sql

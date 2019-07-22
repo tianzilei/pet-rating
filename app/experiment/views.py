@@ -963,35 +963,23 @@ def statistics():
     )
 
 
+def remove_rows(rows):
+    """Remove list of rows from database"""
+    for a in range(len(rows)):
+        db.session.delete(rows[a])
+        db.session.commit()
+
+
 import embody_plot
 from flask_cors import CORS,cross_origin
 from flask_socketio import emit
 from app import socketio
 
 
-''' 
-Old method
-#@experiment_blueprint.route('/create_embody', methods=['POST'])
-#@cross_origin()
-def create_embody():
-    #page = request.args.get("page")
-    page = request.form["page"]
-    img_path = embody_plot.get_coordinates(page)
-
-    #return send_file('static/' + img_path, 'test')
-    return json.dumps({'path':img_path})
-''' 
-# (https://flask-socketio.readthedocs.io/en/latest/)
-# TODO: Using nginx as a WebSocket Reverse Proxy
-# TODO: Gunicorn Web Server
-
-@cross_origin()
 @socketio.on('connect', namespace="/create_embody")
 def create_embody():
-    print("connection succesful")
     emit('success', {'connection': 'on'})
 
-@cross_origin()
 @socketio.on('draw', namespace="/create_embody")
 def create_embody(page_id):
     page = page_id["page"]
@@ -1001,18 +989,10 @@ def create_embody(page_id):
     print(img_path)
     emit('end', {'path':img_path})
 
-'''
 @socketio.on('end', namespace="/create_embody")
 def create_embody():
     print("connection end")
     emit('end', {'connection': 'off'})
-'''
 
-
-def remove_rows(rows):
-    """Remove list of rows from database"""
-    for a in range(len(rows)):
-        db.session.delete(rows[a])
-        db.session.commit()
 
 # EOF
