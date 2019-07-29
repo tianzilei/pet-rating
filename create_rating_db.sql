@@ -1,7 +1,10 @@
 /* 
-MYSQL script
+SQL initialization script
 
 Run: mysql -u rating -p -D rating_db < create_rating_db.sql
+
+This will create user 'admin' with password 'password'.
+
 */
 
 /* Drop all tables (cascade removes foreign keys also) */
