@@ -15,6 +15,13 @@ source venv/bin/activate
 pip install -r requirements.txt
 ``` 
 
+Create user 'rating' and grant access to database 'rating_db'.
+
+Create necessary tables by running the initialization script:
+```
+ mysql -u rating -p -D rating_db < create_rating_db.sql
+```
+
 ### Deployment
 
 There are multiple deployment options, but one working solution is:

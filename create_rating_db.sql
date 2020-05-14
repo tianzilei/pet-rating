@@ -1,7 +1,10 @@
 /* 
-MYSQL script
+SQL initialization script
 
 Run: mysql -u rating -p -D rating_db < create_rating_db.sql
+
+This will create user 'admin' with password 'password'.
+
 */
 
 /* Drop all tables (cascade removes foreign keys also) */
@@ -95,7 +98,6 @@ CREATE TABLE user (
 	password_hash VARCHAR(128), 
 	PRIMARY KEY (id)
 );
-INSERT INTO user VALUES(1,'Yngwie',NULL,'pbkdf2:sha256:50000$QioS5ICE$17a468394e72aef1243576aa80d29c296c6482ada48be9d25bd7c3b6e8129b40');
 
 /* By using forced ID login subjects can only participate to a rating task by logging in with a pregenerated ID */
 CREATE TABLE forced_id (
@@ -160,20 +162,6 @@ CREATE INDEX ix_page_type ON page (type);
 
 /* New fields for updating embody tool to onni.utu.fi */
 
-/* Embody answer (coordinates). Answer is saved as a json object: 
-	{x:[1,2,100,..], y:[3,4,101,..], r:[13,13,8,...]} */
-CREATE TABLE embody_answer (
-	idanswer INTEGER NOT NULL AUTO_INCREMENT,
-	answer_set_idanswer_set INTEGER, 
-	page_idpage INTEGER, 
-    embody_question_idembody INTEGER,
-	coordinates TEXT, 
-	PRIMARY KEY (idanswer), 
-	FOREIGN KEY(answer_set_idanswer_set) REFERENCES answer_set (idanswer_set), 
-	FOREIGN KEY(page_idpage) REFERENCES page (idpage) ,
-	FOREIGN KEY(embody_question_idembody) REFERENCES embody_question (idembody) 
-);
-
 /* Embody picture/question information */
 CREATE TABLE embody_question (
 	idembody INTEGER NOT NULL AUTO_INCREMENT,
@@ -184,11 +172,25 @@ CREATE TABLE embody_question (
 	FOREIGN KEY(experiment_idexperiment) REFERENCES experiment (idexperiment)
 );
 
-ALTER TABLE embody_answer ADD COLUMN (embody_question_idembody INTEGER DEFAULT 0);
-ALTER TABLE embody_answer ADD CONSTRAINT FOREIGN KEY (embody_question_idembody) REFERENCES embody_question (idembody);
+/* Embody answer (coordinates). Answer is saved as a json object: 
+	{x:[1,2,100,..], y:[3,4,101,..], r:[13,13,8,...]} */
+CREATE TABLE embody_answer (
+	idanswer INTEGER NOT NULL AUTO_INCREMENT,
+	answer_set_idanswer_set INTEGER, 
+	page_idpage INTEGER, 
+    embody_question_idembody INTEGER DEFAULT 0,
+	coordinates TEXT, 
+	PRIMARY KEY (idanswer), 
+	FOREIGN KEY(answer_set_idanswer_set) REFERENCES answer_set (idanswer_set), 
+	FOREIGN KEY(page_idpage) REFERENCES page (idpage) ,
+	FOREIGN KEY(embody_question_idembody) REFERENCES embody_question (idembody) 
+);
+
 
 /* Set flag if embody tool is enabled -> this is not the most modular solution, but works for now */
 ALTER TABLE experiment ADD COLUMN (embody_enabled BOOLEAN DEFAULT 0);
 
 /* Set current answer type (embody/slider/etc..) so returning users are routed to correct question */ 
 ALTER TABLE answer_set ADD COLUMN (answer_type VARCHAR(120));
+
+INSERT INTO user VALUES(1,'admin',NULL,'pbkdf2:sha256:50000$6Cc6Mjmo$3fe413a88db1bacfc4d617f7c1547bd1ea4cbd6c5d675a58e78332201f6befc6');
