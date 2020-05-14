@@ -13,4 +13,5 @@ config.py
 *.db
 /embody
 /app/static/lib
+.env
 

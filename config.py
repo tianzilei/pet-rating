@@ -1,6 +1,8 @@
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+from decouple import config
+
 class Config(object):
 
     #seret key is set in __ini__.py
@@ -19,10 +21,10 @@ class Config(object):
 
     #MariaDB mysql database settings
 
-    MYSQL_USER = 'rating'
-    MYSQL_PASSWORD = 'rating_passwd'
-    MYSQL_SERVER = 'localhost'
-    MYSQL_DB = 'rating_db' 
+    MYSQL_USER = config('MYSQL_USER')
+    MYSQL_PASSWORD = config('MYSQL_PASSWORD')
+    MYSQL_SERVER = config('MYSQL_SERVER')
+    MYSQL_DB = config('MYSQL_DB')
     
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://'+MYSQL_USER+':'+MYSQL_PASSWORD+'@'+MYSQL_SERVER+'/'+MYSQL_DB+'?charset=utf8mb4'
    
