@@ -986,7 +986,7 @@ def create_embody(page_id):
     embody = page_id["embody"]
 
     img_path = embody_plot.get_coordinates(page, embody)
-    print(img_path)
+    app.logger.info(img_path)
     emit('end', {'path':img_path})
 
 @socketio.on('end', namespace="/create_embody")

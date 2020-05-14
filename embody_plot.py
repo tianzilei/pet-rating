@@ -36,7 +36,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from flask_socketio import emit
-from app import socketio
+from app import socketio, app
 from config import Config
 
 
@@ -134,6 +134,7 @@ def get_coordinates(idpage, idembody=None, select_clause=SELECT_BY_PAGE_AND_PICT
         image_path = db._db_cur.fetchone()[0]
         image_path = './app' + image_path
 
+
         # Draw image
         plt = plot_coordinates(coordinates, image_path)
     else:
@@ -167,6 +168,9 @@ def format_coordinates(cursor):
             standard_radiuses = np.full((1, len(coordinates['x'])), standard_radius).tolist()[0]
             r.extend(standard_radiuses)
             continue
+        except ValueError as err:
+            app.logger.info(err)
+            continue
 
     return {
         "x":x,
@@ -196,9 +200,15 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
     frame = np.zeros((image_data[0] + 10,image_data[1] + 10))
 
     if image_path == DEFAULT_IMAGE_PATH:
+        #app.logger.info(coordinates)
 
         for idx, point in enumerate(coordinates["coordinates"]):
-            frame[int(point[1]), int(point[0])] = 1
+
+            try:
+            	frame[int(point[1]), int(point[0])] = 1
+            except IndexError as err:
+            	app.logger.info(err)
+
             point = ndimage.gaussian_filter(frame, sigma=5)
             ax2.imshow(point, cmap='hot', interpolation='none')
 
@@ -212,6 +222,7 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
 
         image_mask = mpimg.imread(IMAGE_PATH_MASK)
         ax2.imshow(image_mask)
+
     else:
         # TODO: gaussian disk appearing only on empty spaces in the pictures
         # -> at the moment this implementation works only for the default image
@@ -222,6 +233,8 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
     ax1.set_title("raw points")
     ax1.plot(coordinates["x"],coordinates["y"], 'ro', alpha=0.2)
     ax1.imshow(image, alpha=0.6)
+
+    app.logger.info("iamge plotted")
 
     # return figure for saving/etc...
     return fig

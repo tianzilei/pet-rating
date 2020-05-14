@@ -409,12 +409,22 @@ def download_csv():
                 embody_answers = embody_answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
                 answers_list = []
                 for embody_answer_data in embody_answers:
-                    embody_answer_data = json.loads(embody_answer_data.coordinates)
-                    coordinates_to_bitmap = [[0 for x in range(embody_answer_data['height'] + 2)] for y in range(embody_answer_data['width'] + 2)] 
-                    for point in list(zip( embody_answer_data['x'], embody_answer_data['y'])):
-                        coordinates_to_bitmap[point[0]][point[1]] += 0.1
 
-                    answers_list.append(json.dumps(coordinates_to_bitmap))
+                    try:
+                        embody_answer_data = json.loads(embody_answer_data.coordinates)
+                        coordinates_to_bitmap = [[0 for x in range(embody_answer_data['height'] + 2)] for y in range(embody_answer_data['width'] + 2)] 
+
+                        for point in list(zip( embody_answer_data['x'], embody_answer_data['y'] )):
+
+                            try:
+                                 coordinates_to_bitmap[point[0]][point[1]] += 0.1
+                            except IndexError:
+                                 continue
+
+                        answers_list.append(json.dumps(coordinates_to_bitmap))
+  
+                    except ValueError as err:
+                        app.logger.info(err)
 
                 # old way to save only visited points:
                 # answers_list = [ json.dumps(list(zip( json.loads(a.coordinates)['x'], json.loads(a.coordinates)['y']))) for a in embody_answers]    

@@ -27,6 +27,13 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://'+MYSQL_USER+':'+MYSQL_PASSWORD+'@'+MYSQL_SERVER+'/'+MYSQL_DB+'?charset=utf8mb4'
    
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    SQLALCHEMY_ENGINE_OPTIONS = {
+	"pool_pre_ping": True,
+	"pool_recycle": 300,
+	"max_overflow": 30,
+	"pool_size": 20
+    }
     
     TEMPLATES_AUTO_RELOAD = True
-    DEBUG = True
+    DEBUG = False
