@@ -1,6 +1,7 @@
 
 
-const baseURI = 'http://onni.utu.fi/';
+const baseURI = 'localhost/';
+//const baseURI = 'http://onni.utu.fi/';
 var getDrawingURI = baseURI + 'create_embody';
 
 $(document).ready(function()  {

@@ -360,14 +360,6 @@ def download_csv():
     # embody questions
     embody_questions = embody_question.query.filter_by(experiment_idexperiment=exp_id).all()
 
-    #started and finished ratings counters
-    started_ratings = answer_set.query.filter_by(
-        experiment_idexperiment=exp_id).count()
-    experiment_page_count = page.query.filter_by(
-        experiment_idexperiment=exp_id).count()
-    finished_ratings = answer_set.query.filter(and_(
-        answer_set.answer_counter == experiment_page_count, answer_set.experiment_idexperiment == exp_id)).count()
-
     csv = ''
 
     # create CSV-header
@@ -377,6 +369,7 @@ def download_csv():
     for idx in range(1,len(pages) + 1):
         if len(questions) > 0:
             header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) +'. slider_question: ' + question.question.strip() for count,question in enumerate(questions, 1)]) 
+
     for idx in range(1,len(pages) + 1):
         if len(embody_questions) > 0:
             header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) +'. embody_question: '+ question.picture.strip() for count,question in enumerate(embody_questions, 1)])
@@ -385,12 +378,9 @@ def download_csv():
     answer_row = ''
 
     for participant in participants:
-
         # list only finished answer sets
-        if experiment_page_count == participant.answer_counter:
-
+        if participant.answer_counter > 0:
             try:
-
                 # append user session id
                 answer_row += participant.session + ';'
 
@@ -408,6 +398,9 @@ def download_csv():
                 # save embody answers as bitmap images  
                 embody_answers = embody_answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
                 answers_list = []
+
+                # TODO: check randomization
+
                 for embody_answer_data in embody_answers:
 
                     try:

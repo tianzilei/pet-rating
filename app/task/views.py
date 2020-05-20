@@ -37,13 +37,10 @@ task_blueprint = Blueprint("task", __name__,
 def get_randomized_page(page_id):
     """if trial randomization is on we will still use the same functionality that is used otherwise
     but we will pass the randomized pair of the page_id from trial randomization table to the task.html"""
-
-    randomized_page = trial_randomization.query.filter(and_(
+    return trial_randomization.query.filter(and_(
             trial_randomization.answer_set_idanswer_set==session['answer_set'], 
             trial_randomization.page_idpage==page_id
         )).first()
-
-    return randomized_page
 
 
 def add_slider_answer(key, value, page_id=None):

@@ -19,6 +19,7 @@ from flask import (
 from wtforms import Form
 from sqlalchemy import and_, update
 from flask_login import login_required
+from werkzeug import secure_filename
 
 from app import app, db 
 from app.routes import APP_ROOT
@@ -35,7 +36,8 @@ from app.forms import (
     EditQuestionForm, EditExperimentForm, UploadResearchBulletinForm, 
     EditPageForm, RemoveExperimentForm, GenerateIdForm,CreateEmbodyForm
 )
-from werkzeug import secure_filename
+from app.utils import get_mean_from_slider_answers 
+
 
 #Stimuli upload folder setting
 #APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -916,19 +918,13 @@ def statistics():
         
     #List of answers per participant in format question Stimulus ID/Question ID
     #those are in answer table as page_idpage and question_idquestion respectively
-
     slider_answers = {}
     for participant in participants:
-
-        # list only finished answer sets
-        if experiment_page_count == participant.answer_counter:
+        if participant.answer_counter > 0:
             answers = answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
             slider_answers[participant.session] = [ a.answer for a in answers]     
 
-    # map slider_answers from str to int and calculate mean
-    a = [map(int,i) for i in list(slider_answers.values())]
-    slider_answers['mean'] = [round(float(sum(l))/len(l), 2) for l in zip(*a)]
-
+    slider_answers['mean'] = get_mean_from_slider_answers(slider_answers)
 
     #Background question answers
     bg_questions = background_question.query.filter_by(
@@ -936,9 +932,7 @@ def statistics():
     bg_answers_for_participants = {}
 
     for participant in participants:
-
-        # list only finished answer sets
-        if experiment_page_count == participant.answer_counter:
+        if participant.answer_counter > 0:
             bg_answers = background_question_answer.query.filter_by(
                 answer_set_idanswer_set=participant.idanswer_set).all()
             bg_answers_list = [(a.answer) for a in bg_answers]
@@ -982,6 +976,9 @@ def create_embody():
 
 @socketio.on('draw', namespace="/create_embody")
 def create_embody(page_id):
+
+    print("DRAW")
+
     page = page_id["page"]
     embody = page_id["embody"]
 
