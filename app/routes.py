@@ -1,30 +1,19 @@
-
-
-import csv
 import os
 import random
 import secrets
 from datetime import datetime, date
-import tempfile
 import json
 
-from flask import (
-    Flask,
-    render_template,
-    request,
-    session,
-    flash,
-    redirect,
-    url_for,
-    Blueprint,
-    send_file
-)
-
+from flask import (render_template,
+                   request,
+                   session,
+                   flash,
+                   redirect,
+                   url_for)
 from sqlalchemy import and_
 from flask_login import current_user, login_user, logout_user, login_required
-from flask_babel import Babel, _, lazy_gettext as _l
 
-from app import app, db, babel
+from app import app, db
 from app.models import background_question, experiment
 from app.models import background_question_answer
 from app.models import page, question, embody_question, embody_answer
@@ -32,6 +21,7 @@ from app.models import background_question_option
 from app.models import answer_set, answer, forced_id
 from app.models import user, trial_randomization
 from app.forms import LoginForm, RegisterForm, StartWithIdForm
+from app.utils import saved_data_as_file
 
 # Stimuli upload folder setting
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -407,8 +397,9 @@ def download_csv():
                 answer_row += ';'.join(bg_answers_list) + ';'
 
                 # append slider answers
-                slider_answers = answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set)\
-                    .order_by(answer.page_idpage)\
+                slider_answers = answer.query.filter_by(
+                    answer_set_idanswer_set=participant.idanswer_set) \
+                    .order_by(answer.page_idpage) \
                     .all()
 
                 answers_list = [str(a.answer).strip() for a in slider_answers]
@@ -418,8 +409,9 @@ def download_csv():
 
                 # append embody answers (coordinates)
                 # save embody answers as bitmap images
-                embody_answers = embody_answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set)\
-                    .order_by(embody_answer.page_idpage)\
+                embody_answers = embody_answer.query.filter_by(
+                    answer_set_idanswer_set=participant.idanswer_set) \
+                    .order_by(embody_answer.page_idpage) \
                     .all()
 
                 answers_list = []
@@ -465,22 +457,10 @@ def download_csv():
             csv += answer_row + '\r\n'
             answer_row = ''
 
-    try:
-        fd, path = tempfile.mkstemp()
+    filename = "experiment_{}_{}.csv".format(
+        exp_id, date.today().strftime("%Y-%m-%d"))
 
-        with os.fdopen(fd, 'w') as tmp:
-            tmp.write(csv)
-            tmp.flush()
-
-            cur_date = date.today().strftime("%Y-%m-%d")
-            filename = "experiment_{}_{}.csv".format(exp_id, cur_date)
-
-            return send_file(path,
-                             mimetype='text/csv',
-                             as_attachment=True,
-                             attachment_filename=filename)
-    finally:
-        os.remove(path)
+    return saved_data_as_file(filename, csv)
 
 
 @app.route('/researcher_info')
