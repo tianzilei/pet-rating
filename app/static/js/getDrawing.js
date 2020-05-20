@@ -48,6 +48,11 @@ $(document).ready(function()  {
         // 
         var pageId = this.dataset.value.split('-')[0]
         var embodyId = this.dataset.value.split('-')[1]
+
+        console.log(pageId)
+        console.log(embodyId)
+
+
         socket.emit('draw', {page:pageId, embody:embodyId})
         progressBarContainer.removeClass("hidden")
 
