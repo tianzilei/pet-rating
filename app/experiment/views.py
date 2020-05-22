@@ -921,7 +921,9 @@ def statistics():
     slider_answers = {}
     for participant in participants:
         if participant.answer_counter > 0:
-            answers = answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
+            answers = answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set)\
+                .order_by(answer.page_idpage)\
+                .all()     
             slider_answers[participant.session] = [ a.answer for a in answers]     
 
     slider_answers['mean'] = get_mean_from_slider_answers(slider_answers)
