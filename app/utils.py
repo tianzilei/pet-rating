@@ -5,11 +5,12 @@ from flask import send_file
 
 
 def map_values_to_int(values: dict):
-    values = [map(int, i) for i in list(values.values())]
-    return zip_longest(*values, fillvalue=None)
+    #values = [map(int, i) for i in list(values.values())]
+    return zip_longest(*values.values(), fillvalue=None)
 
 
 def calculate_mean(values: list) -> float:
+    print(values)
     n_answers = sum(x is not None for x in values)
     sum_of_answers = float(sum(filter(None, values)))
     mean = sum_of_answers / n_answers
@@ -34,3 +35,27 @@ def saved_data_as_file(filename, data):
                              attachment_filename=filename)
     finally:
         os.remove(path)
+
+
+def get_values_from_list_of_answers(page_question, answers):
+    page_id = page_question[0]
+    question_id = page_question[1]
+    for _answer in answers:
+        if _answer.question_idquestion == question_id and \
+                _answer.page_idpage == page_id:
+            return int(_answer.answer)
+
+    return None
+
+
+def map_answers_to_questions(answers, questions):
+    '''
+    questions = [(4, 1), (4, 2), (5, 1), (5, 2), (6, 1), (6, 2)]
+    +
+    answers = [{p:6, q:1, a:100}, {p:6, q:2, a:99}]
+    ->
+    partial_answer = [None, None, None, None, 100, 99]
+    '''
+    return list(map(
+        lambda x: get_values_from_list_of_answers(x, answers),
+        questions))

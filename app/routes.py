@@ -21,7 +21,7 @@ from app.models import background_question_option
 from app.models import answer_set, answer, forced_id
 from app.models import user, trial_randomization
 from app.forms import LoginForm, RegisterForm, StartWithIdForm
-from app.utils import saved_data_as_file
+from app.utils import saved_data_as_file, map_answers_to_questions
 
 # Stimuli upload folder setting
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -402,7 +402,20 @@ def download_csv():
                     .order_by(answer.page_idpage) \
                     .all()
 
-                answers_list = [str(a.answer).strip() for a in slider_answers]
+
+                pages_and_questions = {}
+                for p in pages:
+                    questions_list = [(p.idpage, a.idquestion) for a in questions]
+                    pages_and_questions[p.idpage] = questions_list
+
+                _questions = [
+                    item for sublist in pages_and_questions.values() for item in sublist]
+
+                answers_list = map_answers_to_questions(slider_answers, _questions)
+
+                # typecast elemnts to string
+                answers_list = [str(a).strip() for a in answers_list]
+
                 answer_row += ';'.join(answers_list) + \
                     ';' if slider_answers else len(
                         questions) * len(pages) * ';'
