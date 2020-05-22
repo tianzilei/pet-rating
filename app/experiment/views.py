@@ -978,7 +978,13 @@ def statistics():
             slider_answers[participant.session] = map_answers_to_questions(
                 answers, _questions)
 
-    slider_answers['mean'] = get_mean_from_slider_answers(slider_answers)
+
+    mean = get_mean_from_slider_answers(slider_answers)
+    # slider_answers['mean'] = get_mean_from_slider_answers(slider_answers)
+
+    slider_answers = {
+        'mean': mean 
+    }
 
     # Background question answers
     bg_questions = background_question.query.filter_by(
