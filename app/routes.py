@@ -427,9 +427,23 @@ def download_csv():
                     .order_by(embody_answer.page_idpage) \
                     .all()
 
+                pages_and_questions = {}
+                for p in pages:
+                    questions_list = [(p.idpage, a.idembody) for a in embody_questions]
+                    pages_and_questions[p.idpage] = questions_list
+
+                _questions = [
+                    item for sublist in pages_and_questions.values() for item in sublist]
+
+                _embody_answers = map_answers_to_questions(embody_answers, _questions)
+
                 answers_list = []
 
-                for answer_data in embody_answers:
+                for answer_data in _embody_answers:
+
+                    if not answer_data:
+                        answers_list.append('')
+                        continue
 
                     try:
                         coordinates = json.loads(answer_data.coordinates)

@@ -41,10 +41,14 @@ def get_values_from_list_of_answers(page_question, answers):
     page_id = page_question[0]
     question_id = page_question[1]
     for _answer in answers:
-        if _answer.question_idquestion == question_id and \
-                _answer.page_idpage == page_id:
-            return int(_answer.answer)
-
+        try:
+            if _answer.question_idquestion == question_id and \
+                    _answer.page_idpage == page_id:
+                return int(_answer.answer)
+        except AttributeError:
+            if _answer.embody_question_idembody == question_id and \
+                    _answer.page_idpage == page_id:
+                return _answer
     return None
 
 

@@ -106,6 +106,10 @@ if __name__ == '__main__':
             except NameError:
                 print(
                     "Column didn't contain image data. Try again with different column number.")
+            except SyntaxError:
+                continue
+            except IndexError:
+                continue
 
             np_array = np.transpose(np_array)
             images.append(np_array)
