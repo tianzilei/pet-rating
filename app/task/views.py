@@ -263,7 +263,6 @@ def task(page_num):
 
 @task_blueprint.route('/completed')
 def completed():
-    
     session.pop('user', None)
     session.pop('exp_id', None)    
     session.pop('agree', None)
