@@ -46,7 +46,12 @@ def show_images(images, cols=1, titles=None):
     """
 
     # default embody image for the background
-    default_img = plt.imread("./dummy_600.png")
+
+    try:
+        background = True
+        default_img = plt.imread("./dummy_600.png")
+    except FileNotFoundError:
+        background = False
 
     # get a copy of the gray color map
     my_cmap = copy.copy(plt.cm.get_cmap('gray'))
@@ -67,7 +72,8 @@ def show_images(images, cols=1, titles=None):
         plt.imshow(image, cmap=my_cmap)
 
         # draw default background image with transparency on top of the points
-        plt.imshow(default_img, extent=[0, 200, 600, 0], alpha=0.33)
+        if background:
+            plt.imshow(default_img, extent=[0, 200, 600, 0], alpha=0.33)
 
         a.set_title(title)
 
