@@ -965,19 +965,22 @@ def statistics():
     # those are in answer table as page_idpage and question_idquestion respectively
     slider_answers = {}
     for participant in participants:
-        if participant.answer_counter > 0:
-            answers = answer.query.filter_by(
-                answer_set_idanswer_set=participant.idanswer_set)\
-                .order_by(answer.page_idpage)\
-                .all()
 
-            # flatten pages and questions to list of tuples (page_id, question_id)
-            _questions = [
-                item for sublist in pages_and_questions.values() for item in sublist]
+        if int(participant.answer_counter) == 0:
+            continue
 
-            slider_answers[participant.session] = map_answers_to_questions(
-                answers, _questions)
+        answers = answer.query.filter_by(
+            answer_set_idanswer_set=participant.idanswer_set)\
+            .order_by(answer.page_idpage)\
+            .all()
 
+        # flatten pages and questions to list of tuples (page_id, question_id)
+        _questions = [
+            item for sublist in pages_and_questions.values() for item in sublist]
+
+
+        slider_answers[participant.session] = map_answers_to_questions(
+            answers, _questions)
 
     mean = get_mean_from_slider_answers(slider_answers)
     # slider_answers['mean'] = get_mean_from_slider_answers(slider_answers)
