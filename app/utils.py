@@ -5,6 +5,9 @@ from itertools import zip_longest
 from flask import send_file
 
 
+from app import app
+
+
 def timeit(method):
     def timed(*args, **kw):
         ts = time.time()
@@ -82,20 +85,21 @@ def map_answers_to_questions(answers, questions):
     partial_answer = [None, None, None, None, 100, 99]
     '''
 
+    # results = []
+    results = list(map(lambda x: None, questions))
 
     nth_answer = 0
 
-    results = []
+    for nth_question, question in enumerate(questions):
 
-    for question in questions:
-
-        current_answer = answers[nth_answer]
+        try:
+            current_answer = answers[nth_answer]
+        except IndexError:
+            break
 
         if question_matches_answer(question, current_answer):
-            results.append(int(current_answer.answer))
+            results[nth_question] = int(current_answer.answer)
             nth_answer += 1
-        else:
-            results.append(None)
 
     return results
 
