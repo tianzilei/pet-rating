@@ -950,6 +950,8 @@ def statistics():
     questions = question.query.filter_by(experiment_idexperiment=exp_id).all()
     pages_and_questions = {}
 
+    '''
+
     for p in pages:
         questions_list = [(p.idpage, a.idquestion) for a in questions]
         pages_and_questions[p.idpage] = questions_list
@@ -979,8 +981,12 @@ def statistics():
     # slider_answers['mean'] = get_mean_from_slider_answers(slider_answers)
 
     slider_answers = {
-        'mean': mean 
+        'mean': mean
     }
+
+    '''
+
+    slider_answers = {}
 
     # Background question answers
     bg_questions = background_question.query.filter_by(

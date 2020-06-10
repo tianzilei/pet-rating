@@ -183,6 +183,7 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
 
     # Total amount of points
     points_count = len(coordinates['coordinates']) 
+    step = 1
 
     # Load image to a plot
     image = mpimg.imread(image_path)
@@ -205,20 +206,27 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
         for idx, point in enumerate(coordinates["coordinates"]):
 
             try:
-            	frame[int(point[1]), int(point[0])] = 1
+                frame[int(point[1]), int(point[0])] = 1
             except IndexError as err:
-            	app.logger.info(err)
+                app.logger.info(err)
 
             point = ndimage.gaussian_filter(frame, sigma=5)
             ax2.imshow(point, cmap='hot', interpolation='none')
 
             # Try to send progress information to socket.io
-            try:
-                emit('progress', {'done':idx+1/points_count, 'from':points_count})
-                socketio.sleep(0)
-            except RuntimeError as err:
-                print(err)
+
+            if idx == 0:
                 continue
+
+            if round((idx / points_count) * 100) % (step * 5) == 0:
+                try:
+                    emit('progress', {'done':step * 5, 'from':100})
+                    socketio.sleep(0.05)
+                except RuntimeError as err:
+                    print(err)
+                    continue
+
+                step += 1
 
         image_mask = mpimg.imread(IMAGE_PATH_MASK)
         ax2.imshow(image_mask)
