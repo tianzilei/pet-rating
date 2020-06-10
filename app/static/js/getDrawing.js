@@ -19,6 +19,8 @@ $(document).ready(function()  {
         });
 
         socket.on('end', function(img) {
+            // kill connection
+            socket.emit('end')
             socket.disconnect()            
 
             // Draw image to statistic -page

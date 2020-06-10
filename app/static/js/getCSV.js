@@ -26,6 +26,7 @@ $(document).ready(function()  {
 
         socket.on('timeout', function(data) {
             // kill connection
+            socket.emit('end')
             socket.disconnect()            
 
             exportButton.text('Export results')

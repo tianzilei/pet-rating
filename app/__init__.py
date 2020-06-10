@@ -68,10 +68,6 @@ def get_locale():
 """
 
 
-# Run flask app with socketIO
-socketio = SocketIO(app, cors_allowed_origins="*")
-# socketio = SocketIO()
-socketio.init_app(app)
 
 #mariabd mysql portti 3306 tarkista?
 
@@ -81,6 +77,11 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
+
+# Run flask app with socketIO
+socketio = SocketIO(app, cors_allowed_origins="*")
+# socketio = SocketIO()
+socketio.init_app(app)
 
 # Register blueprints
 from .task.views import task_blueprint

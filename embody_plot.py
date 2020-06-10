@@ -124,6 +124,8 @@ def timeit(method):
 def get_coordinates(idpage, idembody=None, select_clause=SELECT_BY_PAGE_AND_PICTURE):
     """Select all drawn points from certain stimulus and plot them onto 
     the human body"""
+
+    # init db
     db = MyDB()
     db.query(select_clause, (idpage,idembody))
 
@@ -140,6 +142,9 @@ def get_coordinates(idpage, idembody=None, select_clause=SELECT_BY_PAGE_AND_PICT
         plt = plot_coordinates(coordinates, image_path)
     else:
         plt = plot_coordinates(coordinates, DEFAULT_IMAGE_PATH)
+
+    # close db connection
+    db.__del__()
 
     # Save image to ./app/static/ 
     img_filename = 'PAGE-' + str(idpage) + '-' + DATE_STRING + '.png'

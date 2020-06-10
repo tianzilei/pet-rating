@@ -2,6 +2,7 @@
 import os
 import secrets
 from datetime import date
+from tempfile import mkstemp
 
 from flask_socketio import emit
 from sqlalchemy import and_
@@ -13,7 +14,8 @@ from flask import (
     flash,
     redirect,
     url_for,
-    Blueprint
+    Blueprint,
+    send_file
 )
 
 from app import app, db, socketio
@@ -1045,7 +1047,7 @@ def remove_rows(rows):
 
 
 @socketio.on('connect', namespace="/create_embody")
-def create_embody():
+def start_create_embody():
     emit('success', {'connection': 'on'})
 
 
@@ -1059,47 +1061,39 @@ def create_embody(meta):
 
 
 @socketio.on('end', namespace="/create_embody")
-def create_embody():
-    emit('end', {'connection': 'off'})
-
-
+def end_create_embody():
+    db.session.close()
 
 
 @socketio.on('connect', namespace="/download_csv")
-def create_embody():
+def start_download_csv():
     emit('success', {'connection': 'Start generating CSV file'})
 
 
-
-from tempfile import mkstemp
-from flask import send_file
-
 @socketio.on('generate_csv', namespace="/download_csv")
-def create_embody(meta):
-
+def process_download_csv(meta):
     exp_id = meta["exp_id"]
 
     data = generate_csv(exp_id)
 
+    # error handling
     if isinstance(data, Exception):
         emit('timeout', {'exc': str(data)})
         return
 
-    filename = "experiment_{}_{}".format(
-        exp_id, date.today().strftime("%Y-%m-%d"))
-
+    # create temporary file 
     fd, path = mkstemp()
-
-    print(fd)
-    print(path)
-
     with os.fdopen(fd, 'w') as tmp:
         tmp.write(data)
         tmp.flush()
 
+    # return path and filename to front so user can start downloading
+    filename = "experiment_{}_{}".format(
+        exp_id, date.today().strftime("%Y-%m-%d"))
     path = path.split('/')[-1]    
-
     emit('file_ready', {'path': path, 'filename': filename})
 
-    # return saved_data_as_file(filename, csv)
 
+@socketio.on('end', namespace="/download_csv")
+def end_download_csv():
+    db.session.close()
