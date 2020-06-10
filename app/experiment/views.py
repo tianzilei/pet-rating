@@ -1060,18 +1060,13 @@ def create_embody(meta):
     emit('end', {'path': img_path})
 
 
-@socketio.on('end', namespace="/create_embody")
-def end_create_embody():
-    db.session.close()
-
-
 @socketio.on('connect', namespace="/download_csv")
 def start_download_csv():
     emit('success', {'connection': 'Start generating CSV file'})
 
 
 @socketio.on('generate_csv', namespace="/download_csv")
-def process_download_csv(meta):
+def download_csv(meta):
     exp_id = meta["exp_id"]
 
     data = generate_csv(exp_id)
@@ -1096,4 +1091,11 @@ def process_download_csv(meta):
 
 @socketio.on('end', namespace="/download_csv")
 def end_download_csv():
+    # TODO: not working solution... db session keeps hanging after socket session has ended
+    # mysqld timeout is set to 180s, so it kills hanging connections, but this is not a good solution 
+    db.session.close()
+
+
+@socketio.on('end', namespace="/create_embody")
+def end_create_embody():
     db.session.close()

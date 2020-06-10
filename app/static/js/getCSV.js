@@ -26,6 +26,7 @@ $(document).ready(function()  {
 
         socket.on('timeout', function(data) {
             // kill connection
+
             socket.emit('end')
             socket.disconnect()            
 
@@ -39,6 +40,8 @@ $(document).ready(function()  {
         });
 
         socket.on('file_ready', function(file) {
+
+            socket.emit('end')
             socket.disconnect()            
 
             exportButton.text('File is ready!')
