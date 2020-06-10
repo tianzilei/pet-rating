@@ -1,38 +1,29 @@
 
-
-from app import socketio
-from flask_socketio import emit
-import embody_plot
 import os
 import secrets
-import json
-from datetime import datetime, date
+from datetime import date
 
+from flask_socketio import emit
+from sqlalchemy import and_
+from flask_login import login_required
+from werkzeug import secure_filename
 from flask import (
-    Flask,
     render_template,
     request,
-    session,
     flash,
     redirect,
     url_for,
-    Blueprint,
-    jsonify
+    Blueprint
 )
 
-from wtforms import Form
-from sqlalchemy import and_, update
-from flask_login import login_required
-from werkzeug import secure_filename
-
-from app import app, db
+from app import app, db, socketio
 from app.routes import APP_ROOT
 from app.models import background_question, experiment
 from app.models import background_question_answer
 from app.models import page, question
 from app.models import background_question_option
 from app.models import answer_set, answer, forced_id
-from app.models import user, trial_randomization
+from app.models import trial_randomization
 from app.models import embody_answer, embody_question
 from app.forms import (
     CreateBackgroundQuestionForm,
@@ -41,7 +32,9 @@ from app.forms import (
     EditPageForm, RemoveExperimentForm, GenerateIdForm, CreateEmbodyForm
 )
 from app.utils import get_mean_from_slider_answers, map_answers_to_questions, \
-    saved_data_as_file, timeit, generate_csv 
+    generate_csv
+
+import embody_plot
 
 # Stimuli upload folder setting
 #APP_ROOT = os.path.dirname(os.path.abspath(__file__))

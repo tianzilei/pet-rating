@@ -40,37 +40,13 @@ $(document).ready(function()  {
         var socket = io.connect(getDrawingURI);
         initConnection(socket)
 
-        // 
         var pageId = this.dataset.value.split('-')[0]
         var embodyId = this.dataset.value.split('-')[1]
-
-        console.log(pageId)
-        console.log(embodyId)
-
 
         socket.emit('draw', {page:pageId, embody:embodyId})
         progressBarContainer.removeClass("hidden")
 
         scrollTo('plotted-image')
-
-        /*
-        With AJAX -calls
-        var spinner = $(event.target.firstElementChild)
-        spinner.removeClass("hidden")
-
-        $.ajax({
-            url: getDrawingURI,
-            method: 'POST',
-            data: {page:pageId}
-        }).done(function(data) {
-            var source = JSON.parse(data).path;
-            console.log(source)
-            d = new Date()
-            imageContainer.attr("src", "/static/" + source + "?" +d.getTime())
-            spinner.addClass("hidden")
-        })
-        */
-
     })
 
     function scrollTo(hash) {
@@ -78,5 +54,4 @@ $(document).ready(function()  {
             'scrollTop':   $('#'+hash).offset().top - 250
         }, 500);
     }
-
 })

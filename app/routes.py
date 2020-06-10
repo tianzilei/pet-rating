@@ -1,8 +1,7 @@
 import os
 import random
 import secrets
-from datetime import datetime, date
-import json
+from datetime import datetime
 
 from flask import (render_template,
                    request,
@@ -16,9 +15,9 @@ from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
 from app.models import background_question, experiment
 from app.models import background_question_answer
-from app.models import page, question, embody_question, embody_answer
+from app.models import page
 from app.models import background_question_option
-from app.models import answer_set, answer, forced_id
+from app.models import answer_set, forced_id
 from app.models import user, trial_randomization
 from app.forms import LoginForm, RegisterForm, StartWithIdForm
 

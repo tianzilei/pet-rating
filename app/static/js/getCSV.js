@@ -21,17 +21,18 @@ $(document).ready(function()  {
         });
 
         socket.on('progress', function(data) {
-            console.log(data)
             progressBar.width(100*(data.done/data.from) + '%')
         });
 
         socket.on('timeout', function(data) {
-            console.log("timeout error", data.exc)
+            // kill connection
             socket.disconnect()            
+
             exportButton.text('Export results')
             exportButton.removeClass('disabled')
             progressBarContainer.addClass("hidden")
 
+            // show error
             exportLinkContainer.removeClass("hidden")
             exportError.text('Error: ' + data.exc)
         });
@@ -41,18 +42,18 @@ $(document).ready(function()  {
 
             exportButton.text('File is ready!')
 
+            // show link
             exportLinkContainer.removeClass("hidden")
+            exportLink.text('Download: ' + file.filename + '.csv')
 
+            // set filename to exportlink
             var href = exportLink.attr('href');
-
             href += '&path=' + file.path
             $(exportLink).attr('href', href);
 
             // Remove progress bar
             progressBarContainer.addClass("hidden")
             progressBar.width('0%')
-
-            exportLink.text('Download: ' + file.filename + '.csv')
         });
     }
 
@@ -64,11 +65,9 @@ $(document).ready(function()  {
         var socket = io.connect(exportURL);
         initConnection(socket)
 
+        // start generating csv file...
         socket.emit('generate_csv', {exp_id: this.dataset.value})
 
         progressBarContainer.removeClass("hidden")
-
     })
-
-
 })
