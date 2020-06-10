@@ -45,7 +45,8 @@
         </button>
 
         <div id="export-link-container" class="hidden">
-          <a id="export-link" class="float-right" href="{{ url_for('experiment.download_csv', exp_id=exp.idexperiment) }}" role="button">Download</a>
+          <a id="export-link" class="float-right" href="{{ url_for('experiment.download_csv', exp_id=exp.idexperiment) }}" role="button"></a>
+          <p id="export-error"></p>
         </div>
 
 

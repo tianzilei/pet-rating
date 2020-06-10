@@ -82,3 +82,8 @@ body {
     margin-top: 20px;
     padding: 10px;
 }
+
+#export-error {
+    float:right;
+    color:red;
+}

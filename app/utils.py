@@ -1,9 +1,11 @@
 import os
 import tempfile
 import time
+import json
 from itertools import zip_longest
 import concurrent.futures
 from flask import send_file
+from flask_socketio import emit
 from app import app
 from app.models import background_question, background_question_answer, \
     page, question, answer_set, answer, embody_answer, embody_question
@@ -99,7 +101,7 @@ def map_answers_to_questions(answers, questions):
             break
 
         if question_matches_answer(question, current_answer):
-            results[nth_question] = current_answer.result
+            results[nth_question] = current_answer.result()
             nth_answer += 1
 
     return results
@@ -184,6 +186,8 @@ def generate_csv(exp_id):
     participants = list(filter(lambda participant: True if int(
         participant.answer_counter) > 0 else False, participants))
 
+    len_participants = len(participants)
+
     # We can use a with statement to ensure threads are cleaned up promptly
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         # Start the load operations and mark each future with its URL
@@ -191,16 +195,16 @@ def generate_csv(exp_id):
             executor.submit(generate_answer_row, participant, pages, questions, embody_questions): participant
             for participant in participants}
 
-        for future in concurrent.futures.as_completed(future_to_answer):
+        for nth, future in enumerate(concurrent.futures.as_completed(future_to_answer)):
             # for testing purpose
             # answer_row = future_to_answer[future]
             try:
+                emit('progress', {'done': nth, 'from': len_participants})
                 data = future.result()
                 csv += data + '\r\n'
-            except TimeoutError:
-                return None
             except Exception as exc:
                 print('generated an exception: {}'.format(exc))
+                return exc
 
     return csv
 

@@ -10,6 +10,7 @@ $(document).ready(function()  {
 
     var exportLinkContainer = $("#export-link-container");
     var exportLink = $("#export-link");
+    var exportError = $("#export-error");
 
     // With sockets 
     function initConnection(socket) {
@@ -20,12 +21,19 @@ $(document).ready(function()  {
         });
 
         socket.on('progress', function(data) {
+            console.log(data)
             progressBar.width(100*(data.done/data.from) + '%')
         });
 
         socket.on('timeout', function(data) {
-            console.log("timeout error", data)
+            console.log("timeout error", data.exc)
             socket.disconnect()            
+            exportButton.text('Export results')
+            exportButton.removeClass('disabled')
+            progressBarContainer.addClass("hidden")
+
+            exportLinkContainer.removeClass("hidden")
+            exportError.text('Error: ' + data.exc)
         });
 
         socket.on('file_ready', function(file) {

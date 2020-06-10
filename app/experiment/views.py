@@ -1015,8 +1015,27 @@ def statistics():
                            finished_ratings=finished_ratings,
                            question_headers=question_headers,
                            stimulus_headers=stimulus_headers,
-                           embody_questions=embody_questions
-                           )
+                           embody_questions=embody_questions)
+
+
+@experiment_blueprint.route('/download_csv')
+def download_csv():
+    exp_id = request.args.get('exp_id', None)
+    path = request.args.get('path', None)
+
+    filename = "experiment_{}_{}.csv".format(
+        exp_id, date.today().strftime("%Y-%m-%d"))
+
+    path = '/tmp/' + path
+
+    try:
+        return send_file(path,
+                         mimetype='text/csv',
+                         as_attachment=True,
+                         attachment_filename=filename)
+
+    finally:
+        os.remove(path)
 
 
 def remove_rows(rows):
@@ -1061,10 +1080,11 @@ def create_embody(meta):
 
     exp_id = meta["exp_id"]
 
-    csv = generate_csv(exp_id)
+    data = generate_csv(exp_id)
 
-    if not csv:
-        emit('timeout')
+    if isinstance(data, Exception):
+        emit('timeout', {'exc': str(data)})
+        return
 
     filename = "experiment_{}_{}".format(
         exp_id, date.today().strftime("%Y-%m-%d"))
@@ -1075,7 +1095,7 @@ def create_embody(meta):
     print(path)
 
     with os.fdopen(fd, 'w') as tmp:
-        tmp.write(csv)
+        tmp.write(data)
         tmp.flush()
 
     path = path.split('/')[-1]    
@@ -1084,22 +1104,3 @@ def create_embody(meta):
 
     # return saved_data_as_file(filename, csv)
 
-
-@experiment_blueprint.route('/download_csv')
-def download_csv():
-    exp_id = request.args.get('exp_id', None)
-    path = request.args.get('path', None)
-
-    filename = "experiment_{}_{}.csv".format(
-        exp_id, date.today().strftime("%Y-%m-%d"))
-
-    path = '/tmp/' + path
-
-    try:
-        return send_file(path,
-                         mimetype='text/csv',
-                         as_attachment=True,
-                         attachment_filename=filename)
-
-    finally:
-        os.remove(path)
