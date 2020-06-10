@@ -210,23 +210,21 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
             except IndexError as err:
                 app.logger.info(err)
 
-            point = ndimage.gaussian_filter(frame, sigma=5)
-            ax2.imshow(point, cmap='hot', interpolation='none')
-
             # Try to send progress information to socket.io
-
             if idx == 0:
                 continue
 
             if round((idx / points_count) * 100) % (step * 5) == 0:
                 try:
-                    emit('progress', {'done':step * 5, 'from':100})
+                    emit('progress', {'done': step * 5, 'from': 100})
                     socketio.sleep(0.05)
-                except RuntimeError as err:
-                    print(err)
+                except RuntimeError:
                     continue
 
                 step += 1
+
+        point = ndimage.gaussian_filter(frame, sigma=5)
+        ax2.imshow(point, cmap='hot', interpolation='none')
 
         image_mask = mpimg.imread(IMAGE_PATH_MASK)
         ax2.imshow(image_mask)
