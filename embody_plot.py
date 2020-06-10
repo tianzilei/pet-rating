@@ -234,7 +234,7 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
     ax1.plot(coordinates["x"],coordinates["y"], 'ro', alpha=0.2)
     ax1.imshow(image, alpha=0.6)
 
-    app.logger.info("iamge plotted")
+    app.logger.info("image plotted")
 
     # return figure for saving/etc...
     return fig

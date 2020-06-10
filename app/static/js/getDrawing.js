@@ -1,9 +1,5 @@
 
 
-const baseURI = 'localhost/';
-//const baseURI = 'http://onni.utu.fi/';
-var getDrawingURI = baseURI + 'create_embody';
-
 $(document).ready(function()  {
 
     var drawButtons = $(".embody-get-drawing");
@@ -23,7 +19,6 @@ $(document).ready(function()  {
         });
 
         socket.on('end', function(img) {
-
             socket.disconnect()            
 
             // Draw image to statistic -page

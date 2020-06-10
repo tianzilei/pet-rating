@@ -1,12 +1,12 @@
 
 
-from flask_cors import CORS, cross_origin
 from app import socketio
 from flask_socketio import emit
 import embody_plot
 import os
 import secrets
 import json
+from datetime import datetime, date
 
 from flask import (
     Flask,
@@ -40,8 +40,8 @@ from app.forms import (
     EditQuestionForm, EditExperimentForm, UploadResearchBulletinForm,
     EditPageForm, RemoveExperimentForm, GenerateIdForm, CreateEmbodyForm
 )
-from app.utils import get_mean_from_slider_answers, map_answers_to_questions
-
+from app.utils import get_mean_from_slider_answers, map_answers_to_questions, \
+    saved_data_as_file, timeit, generate_csv 
 
 # Stimuli upload folder setting
 #APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -1032,13 +1032,9 @@ def create_embody():
 
 
 @socketio.on('draw', namespace="/create_embody")
-def create_embody(page_id):
-
-    print("DRAW")
-
-    page = page_id["page"]
-    embody = page_id["embody"]
-
+def create_embody(meta):
+    page = meta["page"]
+    embody = meta["embody"]
     img_path = embody_plot.get_coordinates(page, embody)
     app.logger.info(img_path)
     emit('end', {'path': img_path})
@@ -1046,8 +1042,64 @@ def create_embody(page_id):
 
 @socketio.on('end', namespace="/create_embody")
 def create_embody():
-    print("connection end")
     emit('end', {'connection': 'off'})
 
 
-# EOF
+
+
+@socketio.on('connect', namespace="/download_csv")
+def create_embody():
+    emit('success', {'connection': 'Start generating CSV file'})
+
+
+
+from tempfile import mkstemp
+from flask import send_file
+
+@socketio.on('generate_csv', namespace="/download_csv")
+def create_embody(meta):
+
+    exp_id = meta["exp_id"]
+
+    csv = generate_csv(exp_id)
+
+    if not csv:
+        emit('timeout')
+
+    filename = "experiment_{}_{}".format(
+        exp_id, date.today().strftime("%Y-%m-%d"))
+
+    fd, path = mkstemp()
+
+    print(fd)
+    print(path)
+
+    with os.fdopen(fd, 'w') as tmp:
+        tmp.write(csv)
+        tmp.flush()
+
+    path = path.split('/')[-1]    
+
+    emit('file_ready', {'path': path, 'filename': filename})
+
+    # return saved_data_as_file(filename, csv)
+
+
+@experiment_blueprint.route('/download_csv')
+def download_csv():
+    exp_id = request.args.get('exp_id', None)
+    path = request.args.get('path', None)
+
+    filename = "experiment_{}_{}.csv".format(
+        exp_id, date.today().strftime("%Y-%m-%d"))
+
+    path = '/tmp/' + path
+
+    try:
+        return send_file(path,
+                         mimetype='text/csv',
+                         as_attachment=True,
+                         attachment_filename=filename)
+
+    finally:
+        os.remove(path)
