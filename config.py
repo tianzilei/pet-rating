@@ -32,7 +32,7 @@ class Config(object):
 
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
-        "pool_recycle": 300,
+        "pool_recycle": 60,
         "max_overflow": 30,
         "pool_size": 20
     }

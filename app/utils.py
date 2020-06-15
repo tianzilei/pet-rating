@@ -213,92 +213,94 @@ def generate_csv(exp_id):
 def generate_answer_row(participant, pages, questions, embody_questions):
     # TODO: refactor
 
-    answer_row = ''
+    with app.app_context():
 
-    # append user session id
-    answer_row += participant.session + ';'
+        answer_row = ''
 
-    # append background question answers
-    bg_answers = background_question_answer.query.filter_by(
-        answer_set_idanswer_set=participant.idanswer_set).all()
-    bg_answers_list = [str(a.answer).strip() for a in bg_answers]
-    answer_row += ';'.join(bg_answers_list) + ';'
+        # append user session id
+        answer_row += participant.session + ';'
 
-    # append slider answers
-    slider_answers = answer.query.filter_by(
-        answer_set_idanswer_set=participant.idanswer_set) \
-        .order_by(answer.page_idpage, answer.question_idquestion) \
-        .all()
+        # append background question answers
+        bg_answers = background_question_answer.query.filter_by(
+            answer_set_idanswer_set=participant.idanswer_set).all()
+        bg_answers_list = [str(a.answer).strip() for a in bg_answers]
+        answer_row += ';'.join(bg_answers_list) + ';'
 
-    pages_and_questions = {}
+        # append slider answers
+        slider_answers = answer.query.filter_by(
+            answer_set_idanswer_set=participant.idanswer_set) \
+            .order_by(answer.page_idpage, answer.question_idquestion) \
+            .all()
 
-    for p in pages:
-        questions_list = [(p.idpage, a.idquestion) for a in questions]
-        pages_and_questions[p.idpage] = questions_list
+        pages_and_questions = {}
 
-    _questions = [
-        item for sublist in pages_and_questions.values() for item in sublist]
+        for p in pages:
+            questions_list = [(p.idpage, a.idquestion) for a in questions]
+            pages_and_questions[p.idpage] = questions_list
 
-    answers_list = map_answers_to_questions(slider_answers, _questions)
+        _questions = [
+            item for sublist in pages_and_questions.values() for item in sublist]
 
-    # typecast elemnts to string
-    answers_list = [str(a).strip() for a in answers_list]
+        answers_list = map_answers_to_questions(slider_answers, _questions)
 
-    answer_row += ';'.join(answers_list) + \
-        ';' if slider_answers else len(
-            questions) * len(pages) * ';'
+        # typecast elemnts to string
+        answers_list = [str(a).strip() for a in answers_list]
 
-    # append embody answers (coordinates)
-    # save embody answers as bitmap images
-    embody_answers = embody_answer.query.filter_by(
-        answer_set_idanswer_set=participant.idanswer_set) \
-        .order_by(embody_answer.page_idpage) \
-        .all()
+        answer_row += ';'.join(answers_list) + \
+            ';' if slider_answers else len(
+                questions) * len(pages) * ';'
 
-    pages_and_questions = {}
+        # append embody answers (coordinates)
+        # save embody answers as bitmap images
+        embody_answers = embody_answer.query.filter_by(
+            answer_set_idanswer_set=participant.idanswer_set) \
+            .order_by(embody_answer.page_idpage) \
+            .all()
 
-    for p in pages:
-        questions_list = [(p.idpage, a.idembody) for a in embody_questions]
-        pages_and_questions[p.idpage] = questions_list
+        pages_and_questions = {}
 
-    _questions = [
-        item for sublist in pages_and_questions.values() for item in sublist]
+        for p in pages:
+            questions_list = [(p.idpage, a.idembody) for a in embody_questions]
+            pages_and_questions[p.idpage] = questions_list
 
-    _embody_answers = map_answers_to_questions(embody_answers, _questions)
+        _questions = [
+            item for sublist in pages_and_questions.values() for item in sublist]
 
-    answers_list = []
+        _embody_answers = map_answers_to_questions(embody_answers, _questions)
 
-    for answer_data in _embody_answers:
-        if not answer_data:
-            answers_list.append('')
-            continue
+        answers_list = []
 
-        try:
-            coordinates = json.loads(answer_data)
-            em_height = coordinates.get('height', 600) + 2
-            em_width = coordinates.get('width', 200) + 2
+        for answer_data in _embody_answers:
+            if not answer_data:
+                answers_list.append('')
+                continue
 
-            coordinates_to_bitmap = [
-                [0 for x in range(em_height)] for y in range(em_width)]
+            try:
+                coordinates = json.loads(answer_data)
+                em_height = coordinates.get('height', 600) + 2
+                em_width = coordinates.get('width', 200) + 2
 
-            coordinates = list(
-                zip(coordinates.get('x'), coordinates.get('y')))
+                coordinates_to_bitmap = [
+                    [0 for x in range(em_height)] for y in range(em_width)]
 
-            for point in coordinates:
+                coordinates = list(
+                    zip(coordinates.get('x'), coordinates.get('y')))
 
-                try:
-                    # for every brush stroke, increment the pixel 
-                    # value for every brush stroke
-                    coordinates_to_bitmap[point[0]][point[1]] += 0.1
-                except IndexError:
-                    continue
+                for point in coordinates:
 
-            answers_list.append(json.dumps(coordinates_to_bitmap))
+                    try:
+                        # for every brush stroke, increment the pixel 
+                        # value for every brush stroke
+                        coordinates_to_bitmap[point[0]][point[1]] += 0.1
+                    except IndexError:
+                        continue
 
-        except ValueError as err:
-            app.logger(err)
+                answers_list.append(json.dumps(coordinates_to_bitmap))
 
-    answer_row += ';'.join(answers_list) if embody_answers else \
-        len(embody_questions) * len(pages) * ';'
+            except ValueError as err:
+                app.logger(err)
 
-    return answer_row
+        answer_row += ';'.join(answers_list) if embody_answers else \
+            len(embody_questions) * len(pages) * ';'
+
+        return answer_row
