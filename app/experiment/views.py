@@ -566,23 +566,20 @@ def add_embody():
     if exp_info.status != 'Hidden':
         flash("Experiment is public. Cannot modify structure.")
         return redirect(url_for('experiment.view', exp_id=exp_id))
-    elif default:
-
-        # TODO: check if default image already added
-
-        default_embody = embody_question(
-            experiment_idexperiment=exp_id, picture=DEFAULT_EMBODY_PICTURE, question=DEFAULT_EMBODY_QUESTION)
-        db.session.add(default_embody)
-        exp_info.embody_enabled = 1
-        db.session.commit()
-        return redirect(url_for('experiment.view', exp_id=exp_id))
-
     else:
         form = CreateEmbodyForm(request.form)
 
         if request.method == 'POST' and form.validate():
             picture = request.files.get("picture")
             question = request.form.get("question")
+
+            if not picture:
+                default_embody = embody_question(
+                    experiment_idexperiment=exp_id, picture=DEFAULT_EMBODY_PICTURE, question=question)
+                db.session.add(default_embody)
+                exp_info.embody_enabled = 1
+                db.session.commit()
+                return redirect(url_for('experiment.view', exp_id=exp_id))
 
             # get filename
             filename = secure_filename(picture.filename)

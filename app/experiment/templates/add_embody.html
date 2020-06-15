@@ -3,8 +3,7 @@
   
 <h1 class="container mt-5 display-4 text-center"><br>Add new embody picture:</h1>
 <br>
-<p class="lead">
-Upload new embody image... instructions here for admins..
+<p class="lead"> Upload new embody image. Submit without choosing file if you want to use default embody picture.
 </p>
 
 {% from "_formhelpers.html" import render_field %}
@@ -12,8 +11,8 @@ Upload new embody image... instructions here for admins..
 <form method="post" enctype="multipart/form-data">
 
     <div class="form-group">
-        <label for="Background questions">image question/explanation:</label>
-        <textarea class="form-control" rows="5" id="embody_picture_text" name="question"></textarea>
+        <label for="Background questions">Image question/explanation:</label>
+        <textarea class="form-control" rows="5" id="embody_picture_text" name="question">Color the regions whose activity you feel increasing or getting stronger</textarea>
     </div>
 
     <div class="custom-file">
@@ -23,7 +22,7 @@ Upload new embody image... instructions here for admins..
 
     <hr>
 
-    <button type="submit" class="btn btn-primary submit-file" disabled>Submit</button>
+    <button type="submit" class="btn btn-primary">Submit</button>
     <a class="btn btn-primary" href="{{ request.referrer }}" role="button">Cancel</a>
 </form>
 
