@@ -1,38 +1,31 @@
 
-
-from flask_cors import CORS, cross_origin
-from app import socketio
-from flask_socketio import emit
-import embody_plot
 import os
 import secrets
-import json
+from datetime import date
+from tempfile import mkstemp
 
+from flask_socketio import emit
+from sqlalchemy import and_
+from flask_login import login_required
+from werkzeug import secure_filename
 from flask import (
-    Flask,
     render_template,
     request,
-    session,
     flash,
     redirect,
     url_for,
     Blueprint,
-    jsonify
+    send_file
 )
 
-from wtforms import Form
-from sqlalchemy import and_, update
-from flask_login import login_required
-from werkzeug import secure_filename
-
-from app import app, db
+from app import app, db, socketio
 from app.routes import APP_ROOT
 from app.models import background_question, experiment
 from app.models import background_question_answer
 from app.models import page, question
 from app.models import background_question_option
 from app.models import answer_set, answer, forced_id
-from app.models import user, trial_randomization
+from app.models import trial_randomization
 from app.models import embody_answer, embody_question
 from app.forms import (
     CreateBackgroundQuestionForm,
@@ -40,8 +33,10 @@ from app.forms import (
     EditQuestionForm, EditExperimentForm, UploadResearchBulletinForm,
     EditPageForm, RemoveExperimentForm, GenerateIdForm, CreateEmbodyForm
 )
-from app.utils import get_mean_from_slider_answers, map_answers_to_questions
+from app.utils import get_mean_from_slider_answers, map_answers_to_questions, \
+    generate_csv
 
+import embody_plot
 
 # Stimuli upload folder setting
 #APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -957,6 +952,8 @@ def statistics():
     questions = question.query.filter_by(experiment_idexperiment=exp_id).all()
     pages_and_questions = {}
 
+    '''
+
     for p in pages:
         questions_list = [(p.idpage, a.idquestion) for a in questions]
         pages_and_questions[p.idpage] = questions_list
@@ -965,26 +962,33 @@ def statistics():
     # those are in answer table as page_idpage and question_idquestion respectively
     slider_answers = {}
     for participant in participants:
-        if participant.answer_counter > 0:
-            answers = answer.query.filter_by(
-                answer_set_idanswer_set=participant.idanswer_set)\
-                .order_by(answer.page_idpage)\
-                .all()
 
-            # flatten pages and questions to list of tuples (page_id, question_id)
-            _questions = [
-                item for sublist in pages_and_questions.values() for item in sublist]
+        if int(participant.answer_counter) == 0:
+            continue
 
-            slider_answers[participant.session] = map_answers_to_questions(
-                answers, _questions)
+        answers = answer.query.filter_by(
+            answer_set_idanswer_set=participant.idanswer_set)\
+            .order_by(answer.page_idpage)\
+            .all()
 
+        # flatten pages and questions to list of tuples (page_id, question_id)
+        _questions = [
+            item for sublist in pages_and_questions.values() for item in sublist]
+
+
+        slider_answers[participant.session] = map_answers_to_questions(
+            answers, _questions)
 
     mean = get_mean_from_slider_answers(slider_answers)
     # slider_answers['mean'] = get_mean_from_slider_answers(slider_answers)
 
     slider_answers = {
-        'mean': mean 
+        'mean': mean
     }
+
+    '''
+
+    slider_answers = {}
 
     # Background question answers
     bg_questions = background_question.query.filter_by(
@@ -1012,8 +1016,27 @@ def statistics():
                            finished_ratings=finished_ratings,
                            question_headers=question_headers,
                            stimulus_headers=stimulus_headers,
-                           embody_questions=embody_questions
-                           )
+                           embody_questions=embody_questions)
+
+
+@experiment_blueprint.route('/download_csv')
+def download_csv():
+    exp_id = request.args.get('exp_id', None)
+    path = request.args.get('path', None)
+
+    filename = "experiment_{}_{}.csv".format(
+        exp_id, date.today().strftime("%Y-%m-%d"))
+
+    path = '/tmp/' + path
+
+    try:
+        return send_file(path,
+                         mimetype='text/csv',
+                         as_attachment=True,
+                         attachment_filename=filename)
+
+    finally:
+        os.remove(path)
 
 
 def remove_rows(rows):
@@ -1024,27 +1047,55 @@ def remove_rows(rows):
 
 
 @socketio.on('connect', namespace="/create_embody")
-def create_embody():
+def start_create_embody():
     emit('success', {'connection': 'on'})
 
 
 @socketio.on('draw', namespace="/create_embody")
-def create_embody(page_id):
-
-    print("DRAW")
-
-    page = page_id["page"]
-    embody = page_id["embody"]
-
+def create_embody(meta):
+    page = meta["page"]
+    embody = meta["embody"]
     img_path = embody_plot.get_coordinates(page, embody)
     app.logger.info(img_path)
     emit('end', {'path': img_path})
 
 
+@socketio.on('connect', namespace="/download_csv")
+def start_download_csv():
+    emit('success', {'connection': 'Start generating CSV file'})
+
+
+@socketio.on('generate_csv', namespace="/download_csv")
+def download_csv(meta):
+    exp_id = meta["exp_id"]
+
+    data = generate_csv(exp_id)
+
+    # error handling
+    if isinstance(data, Exception):
+        emit('timeout', {'exc': str(data)})
+        return
+
+    # create temporary file 
+    fd, path = mkstemp()
+    with os.fdopen(fd, 'w') as tmp:
+        tmp.write(data)
+        tmp.flush()
+
+    # return path and filename to front so user can start downloading
+    filename = "experiment_{}_{}".format(
+        exp_id, date.today().strftime("%Y-%m-%d"))
+    path = path.split('/')[-1]    
+    emit('file_ready', {'path': path, 'filename': filename})
+
+
+@socketio.on('end', namespace="/download_csv")
+def end_download_csv():
+    # TODO: not working solution... db session keeps hanging after socket session has ended
+    # mysqld timeout is set to 180s, so it kills hanging connections, but this is not a good solution 
+    db.session.close()
+
+
 @socketio.on('end', namespace="/create_embody")
-def create_embody():
-    print("connection end")
-    emit('end', {'connection': 'off'})
-
-
-# EOF
+def end_create_embody():
+    db.session.close()

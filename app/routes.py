@@ -1,8 +1,7 @@
 import os
 import random
 import secrets
-from datetime import datetime, date
-import json
+from datetime import datetime
 
 from flask import (render_template,
                    request,
@@ -16,12 +15,11 @@ from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
 from app.models import background_question, experiment
 from app.models import background_question_answer
-from app.models import page, question, embody_question, embody_answer
+from app.models import page
 from app.models import background_question_option
-from app.models import answer_set, answer, forced_id
+from app.models import answer_set, forced_id
 from app.models import user, trial_randomization
 from app.forms import LoginForm, RegisterForm, StartWithIdForm
-from app.utils import saved_data_as_file, map_answers_to_questions
 
 # Stimuli upload folder setting
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -336,164 +334,7 @@ def view_research_notification():
     return render_template('view_research_notification.html', research_notification_filename=research_notification_filename)
 
 
-@app.route('/download_csv')
-@login_required
-def download_csv():
-
-    exp_id = request.args.get('exp_id', None)
-    experiment_info = experiment.query.filter_by(idexperiment=exp_id).all()
-
-    print(experiment_info)
-
-    # answer sets with participant ids
-    participants = answer_set.query.filter_by(
-        experiment_idexperiment=exp_id).all()
-
-    # pages aka stimulants
-    pages = page.query.filter_by(experiment_idexperiment=exp_id).all()
-
-    # background questions
-    bg_questions = background_question.query.filter_by(
-        experiment_idexperiment=exp_id).all()
-
-    # question
-    questions = question.query.filter_by(experiment_idexperiment=exp_id).all()
-
-    # embody questions
-    embody_questions = embody_question.query.filter_by(
-        experiment_idexperiment=exp_id).all()
-
-    csv = ''
-
-    # create CSV-header
-    header = 'participant id;'
-    header += ';'.join([str(count) + '. bg_question: ' + question.background_question.strip()
-                        for count, question in enumerate(bg_questions, 1)])
-
-    for idx in range(1, len(pages) + 1):
-        if len(questions) > 0:
-            header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) + '. slider_question: ' +
-                                      question.question.strip() for count, question in enumerate(questions, 1)])
-
-    for idx in range(1, len(pages) + 1):
-        if len(embody_questions) > 0:
-            header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) + '. embody_question: ' +
-                                      question.picture.strip() for count, question in enumerate(embody_questions, 1)])
-
-    csv += header + '\r\n'
-    answer_row = ''
-
-    for participant in participants:
-        # list only finished answer sets
-        if participant.answer_counter > 0:
-            try:
-                # append user session id
-                answer_row += participant.session + ';'
-
-                # append background question answers
-                bg_answers = background_question_answer.query.filter_by(
-                    answer_set_idanswer_set=participant.idanswer_set).all()
-                bg_answers_list = [str(a.answer).strip() for a in bg_answers]
-                answer_row += ';'.join(bg_answers_list) + ';'
-
-                # append slider answers
-                slider_answers = answer.query.filter_by(
-                    answer_set_idanswer_set=participant.idanswer_set) \
-                    .order_by(answer.page_idpage) \
-                    .all()
-
-
-                pages_and_questions = {}
-                for p in pages:
-                    questions_list = [(p.idpage, a.idquestion) for a in questions]
-                    pages_and_questions[p.idpage] = questions_list
-
-                _questions = [
-                    item for sublist in pages_and_questions.values() for item in sublist]
-
-                answers_list = map_answers_to_questions(slider_answers, _questions)
-
-                # typecast elemnts to string
-                answers_list = [str(a).strip() for a in answers_list]
-
-                answer_row += ';'.join(answers_list) + \
-                    ';' if slider_answers else len(
-                        questions) * len(pages) * ';'
-
-                # append embody answers (coordinates)
-                # save embody answers as bitmap images
-                embody_answers = embody_answer.query.filter_by(
-                    answer_set_idanswer_set=participant.idanswer_set) \
-                    .order_by(embody_answer.page_idpage) \
-                    .all()
-
-                pages_and_questions = {}
-                for p in pages:
-                    questions_list = [(p.idpage, a.idembody) for a in embody_questions]
-                    pages_and_questions[p.idpage] = questions_list
-
-                _questions = [
-                    item for sublist in pages_and_questions.values() for item in sublist]
-
-                _embody_answers = map_answers_to_questions(embody_answers, _questions)
-
-                answers_list = []
-
-                for answer_data in _embody_answers:
-
-                    if not answer_data:
-                        answers_list.append('')
-                        continue
-
-                    try:
-                        coordinates = json.loads(answer_data.coordinates)
-                        em_height = coordinates.get('height', 600) + 2
-                        em_width = coordinates.get('width', 200) + 2
-
-                        coordinates_to_bitmap = [
-                            [0 for x in range(em_height)] for y in range(em_width)]
-
-                        coordinates = list(
-                            zip(coordinates.get('x'), coordinates.get('y')))
-
-                        for point in coordinates:
-
-                            try:
-                                # for every brush stroke, increment the pixel 
-                                # value for every brush stroke
-                                coordinates_to_bitmap[point[0]][point[1]] += 0.1
-                            except IndexError:
-                                continue
-
-                        answers_list.append(json.dumps(coordinates_to_bitmap))
-
-                    except ValueError as err:
-                        app.logger(err)
-
-                answer_row += ';'.join(answers_list) if embody_answers else \
-                    len(embody_questions) * len(pages) * ';'
-
-                # old way to save only visited points:
-                # answers_list = [json.dumps(
-                #   list(zip( json.loads(a.coordinates)['x'],
-                #   json.loads(a.coordinates)['y']))) for a in embody_answers]
-
-            except TypeError as err:
-                print(err)
-
-            csv += answer_row + '\r\n'
-            answer_row = ''
-
-    filename = "experiment_{}_{}.csv".format(
-        exp_id, date.today().strftime("%Y-%m-%d"))
-
-    return saved_data_as_file(filename, csv)
-
-
 @app.route('/researcher_info')
 @login_required
 def researcher_info():
     return render_template('researcher_info.html')
-
-
-# EOF

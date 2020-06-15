@@ -153,6 +153,12 @@ class answer (db.Model):
     answer = db.Column(db.String(120))
     page_idpage = db.Column(db.Integer, db.ForeignKey('page.idpage'))
 
+    def question(self):
+        return int(self.question_idquestion)
+
+    def result(self):
+        return int(self.answer)
+
     def __repr__(self):
         return "<idanswer = '%s', question_idquestion = '%s', answer_set_idanswer_set = '%s', answer = '%s', page_idpage = '%s'>" % (self.idanswer, self.question_idquestion, self.answer_set_idanswer_set, self.answer, self.page_idpage)
 
@@ -166,6 +172,12 @@ class embody_answer (db.Model):
     embody_question_idembody = db.Column(
         db.Integer, db.ForeignKey('embody_question.idembody'))
     coordinates = db.Column(db.Text)
+
+    def question(self):
+        return self.embody_question_idembody
+
+    def result(self):
+        return self.coordinates
 
     def __repr__(self):
         return "<idanswer = '%s', answer_set_idanswer_set = '%s', coordinates = '%s', page_idpage = '%s', embody_question_idembody='%s' >" % (self.idanswer, self.answer_set_idanswer_set, self.coordinates, self.page_idpage, self.embody_question_idembody)
