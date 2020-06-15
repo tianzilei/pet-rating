@@ -291,7 +291,7 @@ def generate_answer_row(participant, pages, questions, embody_questions):
                     try:
                         # for every brush stroke, increment the pixel 
                         # value for every brush stroke
-                        coordinates_to_bitmap[point[0]][point[1]] += 0.1
+                        coordinates_to_bitmap[int(point[0])][int(point[1])] += 0.1
                     except IndexError:
                         continue
 
