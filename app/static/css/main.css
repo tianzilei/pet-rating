@@ -77,6 +77,11 @@ body {
   
 }
 
+.stimulus img {
+    height: 100%;
+    object-fit: contain;
+}
+
 
 #export-link-container {
     margin-top: 20px;

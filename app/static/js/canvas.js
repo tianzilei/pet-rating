@@ -59,8 +59,14 @@ $(document).ready(function() {
 
     // Click handlers
     canvas.mousedown(function(e){
-        var mouseX = e.pageX - this.offsetLeft;
-        var mouseY = e.pageY - this.offsetTop;
+
+        //var mouseX = e.pageX - this.offsetLeft;
+        //var mouseY = e.pageY - this.offsetTop;
+
+        var parentOffset = $(this).offset(); 
+        var mouseX = e.pageX - parentOffset.left;
+        var mouseY = e.pageY - parentOffset.top;
+
         paint = true;
 
         if (pointInsideBaseImage([mouseX, mouseY])) {
@@ -70,8 +76,10 @@ $(document).ready(function() {
     });
 
     canvas.mousemove(function(e){
-        var mouseX = e.pageX - this.offsetLeft;
-        var mouseY = e.pageY - this.offsetTop;
+
+        var parentOffset = $(this).offset(); 
+        var mouseX = e.pageX - parentOffset.left;
+        var mouseY = e.pageY - parentOffset.top;
 
         if (paint && pointInsideBaseImage([mouseX, mouseY])){
             addClick(mouseX, mouseY, true);
@@ -81,8 +89,13 @@ $(document).ready(function() {
 
     canvas.bind('touchmove', function(e){
         e.preventDefault()
-        var mouseX = e.touches[0].pageX - this.offsetLeft;
-        var mouseY = e.touches[0].pageY - this.offsetTop;
+
+        //var mouseX = e.touches[0].pageX - this.offsetLeft;
+        //var mouseY = e.touches[0].pageY - this.offsetTop;
+
+        var parentOffset = $(this).offset(); 
+        var mouseX = e.touches[0].pageX - parentOffset.left;
+        var mouseY = e.touches[0].pageY - parentOffset.top;
 
         [mouseX, mouseY] = scaleClickCoordinates($(this)[0], mouseX, mouseY)
 
@@ -94,8 +107,11 @@ $(document).ready(function() {
 
     canvas.bind('touchstart', function(e){
         e.preventDefault()
-        var mouseX = e.touches[0].pageX - this.offsetLeft;
-        var mouseY = e.touches[0].pageY - this.offsetTop;
+
+        var parentOffset = $(this).offset(); 
+        var mouseX = e.touches[0].pageX - parentOffset.left;
+        var mouseY = e.touches[0].pageY - parentOffset.top;
+
         paint = true;
 
         [mouseX, mouseY] = scaleClickCoordinates($(this)[0], mouseX, mouseY)

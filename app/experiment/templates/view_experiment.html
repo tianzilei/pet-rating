@@ -211,7 +211,6 @@
     </table>
 
 
-
 <h1 class="container mt-5 display-4 text-left"><br>Add embody tool:</h1>
 
 <table class="table">
@@ -231,15 +230,13 @@
     {% endif %}
     </td>
     <td>
-      <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('experiment.add_embody', exp_id=exp_id, default=true) }}" role="button">Add default</a>
       <a class="btn btn-primary btn-block btn-sm btn-info" href="{{ url_for('experiment.add_embody', exp_id=exp_id) }}" role="button">Add new picture</a>
     </td>
   </tr>
 
   {% for embody_picture in embody_pictures %}
-
   <tr>
-    <td>ID: {{ embody_picture.idembody }} <br> {{ embody_picture.question }}</td>
+    <td>ID: {{ embody_picture.idembody }} <br> {{ embody_picture.question }}</td> 
     <td><img src="{{ embody_picture.picture }}" class="thumbnail" /></td>
     <td><a class="btn btn-primary btn-block btn-sm btn-dark" href="{{ url_for('experiment.remove_embody', exp_id=exp_id, idembody=embody_picture.idembody) }}" role="button">Remove</a></td>
   </tr>
