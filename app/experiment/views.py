@@ -35,11 +35,8 @@ from app.forms import (
 )
 from app.utils import get_mean_from_slider_answers, map_answers_to_questions, \
     generate_csv
+from app.embody_plot import get_coordinates
 
-import embody_plot
-
-# Stimuli upload folder setting
-#APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 experiment_blueprint = Blueprint("experiment", __name__,
                                  template_folder='templates',
@@ -1051,7 +1048,7 @@ def start_create_embody():
 def create_embody(meta):
     page = meta["page"]
     embody = meta["embody"]
-    img_path = embody_plot.get_coordinates(page, embody)
+    img_path = get_coordinates(page, embody)
     app.logger.info(img_path)
     emit('end', {'path': img_path})
 
