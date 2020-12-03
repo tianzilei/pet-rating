@@ -1045,11 +1045,13 @@ def remove_rows(rows):
 
 @socketio.on('connect', namespace="/create_embody")
 def start_create_embody():
+    print('io connected')
     emit('success', {'connection': 'on'})
 
 
 @socketio.on('draw', namespace="/create_embody")
 def create_embody(meta):
+    print("draw initialized")
     page = meta["page"]
     embody = meta["embody"]
     img_path = embody_plot.get_coordinates(page, embody)
@@ -1059,6 +1061,7 @@ def create_embody(meta):
 
 @socketio.on('connect', namespace="/download_csv")
 def start_download_csv():
+    print('io connected')
     emit('success', {'connection': 'Start generating CSV file'})
 
 
@@ -1073,7 +1076,7 @@ def download_csv(meta):
         emit('timeout', {'exc': str(data)})
         return
 
-    # create temporary file 
+    # create temporary file
     fd, path = mkstemp()
     with os.fdopen(fd, 'w') as tmp:
         tmp.write(data)
@@ -1082,14 +1085,14 @@ def download_csv(meta):
     # return path and filename to front so user can start downloading
     filename = "experiment_{}_{}".format(
         exp_id, date.today().strftime("%Y-%m-%d"))
-    path = path.split('/')[-1]    
+    path = path.split('/')[-1]
     emit('file_ready', {'path': path, 'filename': filename})
 
 
 @socketio.on('end', namespace="/download_csv")
 def end_download_csv():
     # TODO: not working solution... db session keeps hanging after socket session has ended
-    # mysqld timeout is set to 180s, so it kills hanging connections, but this is not a good solution 
+    # mysqld timeout is set to 180s, so it kills hanging connections, but this is not a good solution
     db.session.close()
 
 
