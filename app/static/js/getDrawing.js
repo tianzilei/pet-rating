@@ -36,8 +36,6 @@ $(document).ready(function () {
   drawButtons.click(function (event) {
     event.preventDefault();
 
-    console.log("SADATDS");
-
     // Init socket
     var socket = io.connect(getDrawingURI);
     initConnection(socket);

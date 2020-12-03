@@ -198,14 +198,10 @@ def register():
 
         data = request.form.to_dict()
         for key, value in data.items():
-
-            # tähän db insertit
-
-            # flash(key)
-            # flash(value)
             # Input registration page answers to database
             participant_background_question_answers = background_question_answer(
-                answer_set_idanswer_set=session['answer_set'], answer=value, background_question_idbackground_question=key)
+                answer_set_idanswer_set=session['answer_set'],
+                answer=value, background_question_idbackground_question=key)
             db.session.add(participant_background_question_answers)
             db.session.commit()
 
@@ -253,7 +249,8 @@ def begin_with_id():
             else:
                 # save the participant ID in session list for now, this is deleted after the session has been started in participant_session-view
                 session['begin_with_id'] = form.participant_id.data
-                return render_template('consent.html', exp_id=exp_id, experiment_info=experiment_info, instruction_paragraphs=instruction_paragraphs, consent_paragraphs=consent_paragraphs)
+                return render_template('consent.html', exp_id=exp_id, experiment_info=experiment_info,
+                                       instruction_paragraphs=instruction_paragraphs, consent_paragraphs=consent_paragraphs)
 
     return render_template('begin_with_id.html', exp_id=exp_id, form=form)
 
@@ -294,7 +291,9 @@ def instructions():
     instruction_paragraphs = str(instructions.instruction)
     instruction_paragraphs = instruction_paragraphs.split('<br>')
 
-    return render_template('instructions.html', instruction_paragraphs=instruction_paragraphs, participant_id=participant_id)
+    return render_template('instructions.html',
+                           instruction_paragraphs=instruction_paragraphs,
+                           participant_id=participant_id)
 
 
 @app.route('/researcher_login', methods=['GET', 'POST'])
@@ -312,9 +311,6 @@ def login():
         login_user(user_details, remember=form.remember_me.data)
         return redirect(url_for('index'))
 
-#        flash('Login requested for user {}, remember_me={}'.format(
-#            form.username.data, form.remember_me.data))
-#        return redirect('/index')
     return render_template('researcher_login.html', title='Sign In', form=form)
 
 
@@ -326,12 +322,12 @@ def logout():
 
 @app.route('/view_research_notification')
 def view_research_notification():
-
     exp_id = request.args.get('exp_id', None)
     image = experiment.query.filter_by(idexperiment=exp_id).first()
     research_notification_filename = image.research_notification_filename
 
-    return render_template('view_research_notification.html', research_notification_filename=research_notification_filename)
+    return render_template('view_research_notification.html',
+                           research_notification_filename=research_notification_filename)
 
 
 @app.route('/researcher_info')

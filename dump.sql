@@ -29,7 +29,6 @@ CREATE TABLE user (
 	password_hash VARCHAR(128), 
 	PRIMARY KEY (id)
 );
-INSERT INTO user VALUES(1,'timo',NULL,'pbkdf2:sha256:50000$sctKb5R4$688ff9fd63df4a0883b9eb003b6738c6b7baa2010e1cd503c678b43c881c07bf');
 CREATE TABLE answer_set (
 	idanswer_set INTEGER NOT NULL, 
 	experiment_idexperiment INTEGER, 

@@ -731,7 +731,6 @@ def remove_embody():
 
 
 # Stimuli:
-
 @experiment_blueprint.route('/add_stimuli', methods=['GET', 'POST'])
 @login_required
 def add_stimuli():
@@ -1045,13 +1044,11 @@ def remove_rows(rows):
 
 @socketio.on('connect', namespace="/create_embody")
 def start_create_embody():
-    print('io connected')
     emit('success', {'connection': 'on'})
 
 
 @socketio.on('draw', namespace="/create_embody")
 def create_embody(meta):
-    print("draw initialized")
     page = meta["page"]
     embody = meta["embody"]
     img_path = embody_plot.get_coordinates(page, embody)
@@ -1061,7 +1058,6 @@ def create_embody(meta):
 
 @socketio.on('connect', namespace="/download_csv")
 def start_download_csv():
-    print('io connected')
     emit('success', {'connection': 'Start generating CSV file'})
 
 

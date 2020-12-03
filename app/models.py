@@ -3,14 +3,11 @@ from flask import session
 from app import db
 from sqlalchemy import Column, Integer, String, Text, Boolean
 from flask_wtf import FlaskForm
-from wtforms_sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
+from wtforms_sqlalchemy.fields import QuerySelectField
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from app import login
 from datetime import datetime
-
-
-"""DATABASE CLASSES"""
 
 
 class background_question(db.Model):

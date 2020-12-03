@@ -1,7 +1,5 @@
+import os
 from app import app
-
-
-# Setup logging
 import logging
 from logging.handlers import RotatingFileHandler
 from logging import Formatter
@@ -14,7 +12,7 @@ logging.basicConfig(
     filename=app.config.get('LOG_FILENAME', 'logs/flask.log'),
     level=logging.DEBUG,
     datefmt="%Y-%m-%d %H:%M:%S",
-    format = format
+    format=format
 )
 
 logging.info(
@@ -31,7 +29,6 @@ handler.setFormatter(
 app.logger.addHandler(handler)
 
 # Logging for production (nginx + gunicorn)
-import os
 is_gunicorn = "gunicorn" in os.environ.get("SERVER_SOFTWARE", "")
 if is_gunicorn:
     app.logger.info("Application run through gunicorn")
@@ -44,6 +41,3 @@ else:
     log = logging.getLogger('werkzeug')
     log.setLevel(logging.ERROR)
     '''
-
-# EOF
-

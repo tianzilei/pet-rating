@@ -5,27 +5,17 @@ Visualize emBODY data
 
 This python script is based on matlab code found from:
 https://version.aalto.fi/gitlab/eglerean/embody/tree/master/matlab
-
-
-Requirements:
-    - python 3+
-    - matplotlib
-    - numpy
-    - scipy
-
-Run:
-python embody_plot.py
-
 """
 
-import sys
+from config import Config
+from app import socketio, app
+from flask_socketio import emit
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
 import time
 import datetime
 import json
-import resource
 import mysql.connector as mariadb
-import io
-import urllib, base64
 import argparse
 
 import numpy as np
@@ -33,15 +23,6 @@ import scipy.ndimage as ndimage
 
 import matplotlib
 matplotlib.use('agg')
-
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-
-from flask_socketio import emit
-from app import socketio, app
-from config import Config
 
 
 # Hard coded image size for default embody image
@@ -54,7 +35,7 @@ IMAGE_PATH_MASK = './app/static/img/dummy_600_mask.png'
 STATIC_PATH = './app/static/embody_drawings/'
 
 # Interpolation methods
-METHODS = ['none','bilinear', 'bicubic', 'gaussian']
+METHODS = ['none', 'bilinear', 'bicubic', 'gaussian']
 
 # SELECT methods
 SELECT_ALL = ("SELECT coordinates from embody_answer")
@@ -72,10 +53,10 @@ class MyDB(object):
 
     def __init__(self):
         self._db_connection = mariadb.connect(
-		user = Config.MYSQL_USER, 
-		password = Config.MYSQL_PASSWORD, 
-		database = Config.MYSQL_DB
-	)
+            user=Config.MYSQL_USER,
+            password=Config.MYSQL_PASSWORD,
+            database=Config.MYSQL_DB
+        )
         self._db_cur = self._db_connection.cursor()
 
     def query(self, query, params):
@@ -85,22 +66,22 @@ class MyDB(object):
         self._db_connection.close()
 
 
-def matlab_style_gauss2D(shape=(1,1),sigma=5):
+def matlab_style_gauss2D(shape=(1, 1), sigma=5):
     """2D gaussian mask - should give the same result as MATLAB's
     fspecial('gaussian',[shape],[sigma])"""
 
-    m,n = [(ss-1.)/2. for ss in shape]
-    y,x = np.ogrid[-m:m+1,-n:n+1]
-    h = np.exp( -(x*x + y*y) / (2.*sigma*sigma) )
-    h[ h < np.finfo(h.dtype).eps*h.max() ] = 0
+    m, n = [(ss-1.)/2. for ss in shape]
+    y, x = np.ogrid[-m:m+1, -n:n+1]
+    h = np.exp(-(x*x + y*y) / (2.*sigma*sigma))
+    h[h < np.finfo(h.dtype).eps*h.max()] = 0
     sumh = h.sum()
     if sumh != 0:
         h /= sumh
     return h
 
 
-def map_coordinates(a,b,c=None):
-    return [a,b,c]
+def map_coordinates(a, b, c=None):
+    return [a, b, c]
 
 
 def timeit(method):
@@ -113,7 +94,7 @@ def timeit(method):
             name = kw.get('log_name', method.__name__.upper())
             kw['log_time'][name] = int((te - ts) * 1000)
         else:
-            print('%r  %2.2f ms' % \
+            print('%r  %2.2f ms' %
                   (method.__name__, (te - ts) * 1000))
         return result
 
@@ -127,14 +108,15 @@ def get_coordinates(idpage, idembody=None, select_clause=SELECT_BY_PAGE_AND_PICT
 
     # init db
     db = MyDB()
-    db.query(select_clause, (idpage,idembody))
+    db.query(select_clause, (idpage, idembody))
 
     # Get coordinates
     coordinates = format_coordinates(db._db_cur)
 
     if idembody:
         # Get image path
-        image_query = db.query('SELECT picture from embody_question where idembody=%s', (idembody,))
+        image_query = db.query(
+            'SELECT picture from embody_question where idembody=%s', (idembody,))
         image_path = db._db_cur.fetchone()[0]
         image_path = './app' + image_path
 
@@ -146,7 +128,7 @@ def get_coordinates(idpage, idembody=None, select_clause=SELECT_BY_PAGE_AND_PICT
     # close db connection
     db.__del__()
 
-    # Save image to ./app/static/ 
+    # Save image to ./app/static/
     img_filename = 'PAGE-' + str(idpage) + '-' + DATE_STRING + '.png'
     plt.savefig(STATIC_PATH + img_filename)
 
@@ -156,10 +138,10 @@ def get_coordinates(idpage, idembody=None, select_clause=SELECT_BY_PAGE_AND_PICT
 
 def format_coordinates(cursor):
     # Init coordinate arrays and radius of point
-    x=[]
-    y=[]
-    r=[]
-    standard_radius=13
+    x = []
+    y = []
+    r = []
+    standard_radius = 13
 
     # Loop through all of the saved coordinates and push them to coordinates arrays
     for coordinate in cursor:
@@ -170,7 +152,8 @@ def format_coordinates(cursor):
             y.extend(coordinates['y'])
             r.extend(coordinates['r'])
         except KeyError:
-            standard_radiuses = np.full((1, len(coordinates['x'])), standard_radius).tolist()[0]
+            standard_radiuses = np.full(
+                (1, len(coordinates['x'])), standard_radius).tolist()[0]
             r.extend(standard_radiuses)
             continue
         except ValueError as err:
@@ -178,16 +161,16 @@ def format_coordinates(cursor):
             continue
 
     return {
-        "x":x,
-        "y":y,
-        "coordinates":list(map(map_coordinates, x,y,r))
+        "x": x,
+        "y": y,
+        "coordinates": list(map(map_coordinates, x, y, r))
     }
 
 
 def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
 
     # Total amount of points
-    points_count = len(coordinates['coordinates']) 
+    points_count = len(coordinates['coordinates'])
     step = 1
 
     # Load image to a plot
@@ -197,16 +180,15 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
     # Init plots
     fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2)
 
-
     # Draw circles from coordinates (imshow don't need interpolation)
     # TODO: set sigma according to brush size!
     ax2.set_title("gaussian disk around points / raw image")
 
     # set height/width from image
-    frame = np.zeros((image_data[0] + 10,image_data[1] + 10))
+    frame = np.zeros((image_data[0] + 10, image_data[1] + 10))
 
     if image_path == DEFAULT_IMAGE_PATH:
-        #app.logger.info(coordinates)
+        # app.logger.info(coordinates)
 
         for idx, point in enumerate(coordinates["coordinates"]):
 
@@ -242,7 +224,7 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
 
     # Plot coordinates as points
     ax1.set_title("raw points")
-    ax1.plot(coordinates["x"],coordinates["y"], 'ro', alpha=0.2)
+    ax1.plot(coordinates["x"], coordinates["y"], 'ro', alpha=0.2)
     ax1.imshow(image, alpha=0.6)
 
     app.logger.info("image plotted")
@@ -250,27 +232,19 @@ def plot_coordinates(coordinates, image_path=DEFAULT_IMAGE_PATH):
     # return figure for saving/etc...
     return fig
 
-    '''
-    # Return image as bytes 
-    fig = plt.gcf()
-    imgdata = io.BytesIO()
-    fig.savefig(imgdata, format='png')
-    imgdata.seek(0)  # rewind the data
-    return imgdata.read()
 
-    #Show image
-    mng = plt.get_current_fig_manager()
-    mng.resize(*mng.window.maxsize())
-    plt.show()
-    '''
+if __name__ == '__main__':
 
-if __name__=='__main__':
-    
-    arg_parser = argparse.ArgumentParser(description='Draw bodily maps of emotions')
-    arg_parser.add_argument('-s','--stimulus', help='Select drawn points from certain stimulus', required=False, action='store_true')
-    arg_parser.add_argument('-e','--experiment', help='Select drawn points from certain experiment', required=False, action='store_true')
-    arg_parser.add_argument('-a','--answer-set', help='Select drawn points from certain answer_set', required=False, action='store_true')
-    arg_parser.add_argument('integers', metavar='N', type=int, nargs='+', help='an integer for the accumulator')
+    arg_parser = argparse.ArgumentParser(
+        description='Draw bodily maps of emotions')
+    arg_parser.add_argument(
+        '-s', '--stimulus', help='Select drawn points from certain stimulus', required=False, action='store_true')
+    arg_parser.add_argument(
+        '-e', '--experiment', help='Select drawn points from certain experiment', required=False, action='store_true')
+    arg_parser.add_argument(
+        '-a', '--answer-set', help='Select drawn points from certain answer_set', required=False, action='store_true')
+    arg_parser.add_argument('integers', metavar='N', type=int,
+                            nargs='+', help='an integer for the accumulator')
     args = vars(arg_parser.parse_args())
     value = args['integers'][0]
 
@@ -282,7 +256,3 @@ if __name__=='__main__':
         get_coordinates(value, None, SELECT_BY_EXP_ID)
     else:
         print("No arguments given. Exit.")
-        sys.exit(0)
-
-
-

@@ -22,12 +22,10 @@ in onni.utu.fu) to the same path as the script.
 '''
 
 import copy
-
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
 import sys
-import json
 
 csv.field_size_limit(sys.maxsize)
 
@@ -56,8 +54,7 @@ def show_images(images, cols=1, titles=None):
     # get a copy of the gray color map
     my_cmap = copy.copy(plt.cm.get_cmap('gray'))
     # set how the colormap handles 'bad' values
-    my_cmap.set_bad(alpha=0)  
-
+    my_cmap.set_bad(alpha=0)
 
     assert((titles is None) or (len(images) == len(titles)))
     n_images = len(images)

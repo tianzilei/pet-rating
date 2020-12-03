@@ -20,7 +20,8 @@ def timeit(method):
             name = kw.get('log_name', method.__name__.upper())
             kw['log_time'][name] = int((te - ts) * 1000)
         else:
-            app.logger.info('{} {:2.2f} ms'.format(method.__name__, (te - ts) * 1000))
+            app.logger.info('{} {:2.2f} ms'.format(
+                method.__name__, (te - ts) * 1000))
         return result
 
     return timed
@@ -105,42 +106,6 @@ def map_answers_to_questions(answers, questions):
             nth_answer += 1
 
     return results
-
-    '''
-    return list(map(
-        lambda x: get_values_from_list_of_answers(x, answers),
-        questions))
-    '''
-
-
-'''
-select sub.answer_set_idanswer_set, group_concat(concat(
-    COALESCE(sub.aa, ''), 
-    COALESCE(sub.ab, ''), 
-    COALESCE(sub.ba, ''), 
-    COALESCE(sub.bb, ''), 
-    COALESCE(sub.ca, ''), 
-    COALESCE(sub.cb, '')
-)) 
-FROM (     
-    select  *, 
-        case when page_idpage = 4 and question_idquestion = 1 then answer end as aa,
-        case when page_idpage = 4 and question_idquestion = 2 then answer end as ab,
-        case when page_idpage = 5 and question_idquestion = 1 then answer end as ba,
-        case when page_idpage = 5 and question_idquestion = 2 then answer end as bb,
-        case when page_idpage = 6 and question_idquestion = 1 then answer end as ca,
-        case when page_idpage = 6 and question_idquestion = 2 then answer end as cb
-    from answer where answer_set_idanswer_set in ( select idanswer_set from answer_set where experiment_idexperiment = 2 and answer_counter != 0 )  
-) as sub 
-group by sub.answer_set_idanswer_set;
-
-
-
-
-# all possible page/question comobs
-select distinct p.idpage, q.idquestion from question q join page p on p.experiment_idexperiment=q.experiment_idexperiment where p.experiment_idexperiment = 2 order by p.idpage,q.idquestion;
-'''
-
 
 
 @timeit
@@ -289,9 +254,10 @@ def generate_answer_row(participant, pages, questions, embody_questions):
                 for point in coordinates:
 
                     try:
-                        # for every brush stroke, increment the pixel 
+                        # for every brush stroke, increment the pixel
                         # value for every brush stroke
-                        coordinates_to_bitmap[int(point[0])][int(point[1])] += 0.1
+                        coordinates_to_bitmap[int(
+                            point[0])][int(point[1])] += 0.1
                     except IndexError:
                         continue
 
