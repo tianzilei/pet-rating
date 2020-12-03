@@ -1,52 +1,41 @@
-
-
-import csv
 import os
 import random
 import secrets
 from datetime import datetime
-import tempfile
-import json
 
-from flask import (
-    Flask, 
-    render_template, 
-    request, 
-    session, 
-    flash, 
-    redirect, 
-    url_for, 
-    Blueprint,
-    send_file
-)
-
+from flask import (render_template,
+                   request,
+                   session,
+                   flash,
+                   redirect,
+                   url_for)
 from sqlalchemy import and_
 from flask_login import current_user, login_user, logout_user, login_required
-from flask_babel import Babel, _, lazy_gettext as _l
 
-from app import app, db, babel
+from app import app, db
 from app.models import background_question, experiment
 from app.models import background_question_answer
-from app.models import page, question, embody_question, embody_answer
+from app.models import page
 from app.models import background_question_option
-from app.models import answer_set, answer, forced_id
+from app.models import answer_set, forced_id
 from app.models import user, trial_randomization
 from app.forms import LoginForm, RegisterForm, StartWithIdForm
 
-#Stimuli upload folder setting
+# Stimuli upload folder setting
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+
 
 @app.route('/')
 @app.route('/index')
 def index():
     experiments = experiment.query.all()
-    
+
     if session:
         flash("")
     else:
         #flash("sessio ei voimassa")
         session['language'] = "English"
-    
+
     return render_template('index.html', title='Home', experiments=experiments)
 
 
@@ -54,21 +43,21 @@ def index():
 def consent():
     exp_id = request.args.get('exp_id', None)
     experiment_info = experiment.query.filter_by(idexperiment=exp_id).first()
-    
+
     instruction_paragraphs = str(experiment_info.short_instruction)
     instruction_paragraphs = instruction_paragraphs.split('<br>')
-    
+
     consent_paragraphs = str(experiment_info.consent_text)
     consent_paragraphs = consent_paragraphs.split('<br>')
 
     if experiment_info.use_forced_id == 'On':
         return redirect(url_for('begin_with_id', exp_id=exp_id))
 
-    return render_template('consent.html', 
-                            exp_id=exp_id, 
-                            experiment_info=experiment_info, 
-                            instruction_paragraphs=instruction_paragraphs, 
-                            consent_paragraphs=consent_paragraphs)
+    return render_template('consent.html',
+                           exp_id=exp_id,
+                           experiment_info=experiment_info,
+                           instruction_paragraphs=instruction_paragraphs,
+                           consent_paragraphs=consent_paragraphs)
 
 
 @app.route('/set_language')
@@ -88,28 +77,28 @@ def remove_language():
 def participant_session():
     '''Set up session variables and create answer_set (database level sessions)'''
 
-    #start session
+    # start session
     session['exp_id'] = request.args.get('exp_id', None)
     session['agree'] = request.args.get('agree', None)
-  
-    #If user came via the route for "I have already a participant ID that I wish to use, Use that ID, otherwise generate a random ID
+
+    # If user came via the route for "I have already a participant ID that I wish to use, Use that ID, otherwise generate a random ID
     if 'begin_with_id' in session:
         session['user'] = session['begin_with_id']
         session.pop('begin_with_id', None)
     else:
-        #lets generate a random id. If the same id is allready in db, lets generate a new one and finally use that in session['user']
+        # lets generate a random id. If the same id is allready in db, lets generate a new one and finally use that in session['user']
         random_id = secrets.token_hex(3)
         check_id = answer_set.query.filter_by(session=random_id).first()
 
         while check_id is not None:
             random_id = secrets.token_hex(3)
             check_id = answer_set.query.filter_by(session=random_id).first()
-        
+
         session['user'] = random_id
 
     # Set session status variables
-    exp_status = experiment.query.filter_by(idexperiment=session['exp_id']).first()
-
+    exp_status = experiment.query.filter_by(
+        idexperiment=session['exp_id']).first()
 
     # Create answer set for the participant in the database
     the_time = datetime.now()
@@ -121,55 +110,57 @@ def participant_session():
         answer_set_type = 'embody'
 
     participant_answer_set = answer_set(experiment_idexperiment=session['exp_id'],
-                                        session=session['user'], 
-                                        agreement = session['agree'], 
-                                        answer_counter = '0', 
-                                        answer_type = answer_set_type, 
-                                        registration_time=the_time, 
+                                        session=session['user'],
+                                        agreement=session['agree'],
+                                        answer_counter='0',
+                                        answer_type=answer_set_type,
+                                        registration_time=the_time,
                                         last_answer_time=the_time)
     db.session.add(participant_answer_set)
     db.session.commit()
 
-    
-    #If trial randomization is set to 'On' for the experiment, create a randomized trial order for this participant
-    #identification is based on the uniquie answer set id
+    # If trial randomization is set to 'On' for the experiment, create a randomized trial order for this participant
+    # identification is based on the uniquie answer set id
     if exp_status.randomization == 'On':
-    
+
         session['randomization'] = 'On'
-        
-        #create a list of page id:s for the experiment
-        experiment_pages = page.query.filter_by(experiment_idexperiment=session['exp_id']).all()
+
+        # create a list of page id:s for the experiment
+        experiment_pages = page.query.filter_by(
+            experiment_idexperiment=session['exp_id']).all()
         original_id_order_list = [(int(o.idpage)) for o in experiment_pages]
-        
-        #create a randomized page id list    
-        helper_list = original_id_order_list 
+
+        # create a randomized page id list
+        helper_list = original_id_order_list
         randomized_order_list = []
-    
+
         for i in range(len(helper_list)):
             element = random.choice(helper_list)
             helper_list.remove(element)
             randomized_order_list.append(element)
-        
-        #Input values into trial_randomization table where the original page_ids have a corresponding randomized counterpart
-        experiment_pages = page.query.filter_by(experiment_idexperiment=session['exp_id']).all()
+
+        # Input values into trial_randomization table where the original page_ids have a corresponding randomized counterpart
+        experiment_pages = page.query.filter_by(
+            experiment_idexperiment=session['exp_id']).all()
         original_id_order_list = [(int(o.idpage)) for o in experiment_pages]
-        
+
         for c in range(len(original_id_order_list)):
-            random_page = trial_randomization(page_idpage=original_id_order_list[c], randomized_idpage=randomized_order_list[c], answer_set_idanswer_set = participant_answer_set.idanswer_set, experiment_idexperiment = session['exp_id'])
+            random_page = trial_randomization(page_idpage=original_id_order_list[c], randomized_idpage=randomized_order_list[
+                                              c], answer_set_idanswer_set=participant_answer_set.idanswer_set, experiment_idexperiment=session['exp_id'])
             db.session.add(random_page)
             db.session.commit()
-    
+
     if exp_status.randomization == "Off":
         session['randomization'] = "Off"
 
-    #store participants session id in session list as answer_set, based on experiment id and session id
-    session_id_for_participant = answer_set.query.filter(and_(answer_set.session==session['user'], answer_set.experiment_idexperiment==session['exp_id'])).first()
+    # store participants session id in session list as answer_set, based on experiment id and session id
+    session_id_for_participant = answer_set.query.filter(and_(
+        answer_set.session == session['user'], answer_set.experiment_idexperiment == session['exp_id'])).first()
     session['answer_set'] = session_id_for_participant.idanswer_set
-
-
-    #collect experiments mediatype from db to session['type']. 
-    #This is later used in task.html to determine page layout based on stimulus type
-    mediatype = page.query.filter_by(experiment_idexperiment=session['exp_id']).first()
+    # collect experiments mediatype from db to session['type'].
+    # This is later used in task.html to determine page layout based on stimulus type
+    mediatype = page.query.filter_by(
+        experiment_idexperiment=session['exp_id']).first()
     if mediatype:
         session['type'] = mediatype.type
     else:
@@ -180,124 +171,129 @@ def participant_session():
     if 'user' in session:
         user = session['user']
         return redirect('/register')
-      
+
     return "Session start failed return <a href = '/login'></b>" + "Home</b></a>"
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    
+
     form = RegisterForm(request.form)
     questions_and_options = {}
-    questions = background_question.query.filter_by(experiment_idexperiment=session['exp_id']).all()
+    questions = background_question.query.filter_by(
+        experiment_idexperiment=session['exp_id']).all()
 
-    for q in questions:    
-    
-        options = background_question_option.query.filter_by(background_question_idbackground_question=q.idbackground_question).all()
-        options_list = [(o.option, o.idbackground_question_option) for o in options]
-        questions_and_options[q.idbackground_question, q.background_question]  = options_list
-    
- 
+    for q in questions:
+
+        options = background_question_option.query.filter_by(
+            background_question_idbackground_question=q.idbackground_question).all()
+        options_list = [(o.option, o.idbackground_question_option)
+                        for o in options]
+        questions_and_options[q.idbackground_question,
+                              q.background_question] = options_list
+
     form.questions1 = questions_and_options
-    
-    if request.method == 'POST'and form.validate():
-    
+
+    if request.method == 'POST' and form.validate():
+
         data = request.form.to_dict()
         for key, value in data.items():
 
-            
-            #tähän db insertit
+            # tähän db insertit
 
-            #flash(key)
-            #flash(value)
-            #Input registration page answers to database
-            participant_background_question_answers = background_question_answer(answer_set_idanswer_set=session['answer_set'], answer=value, background_question_idbackground_question=key)
+            # flash(key)
+            # flash(value)
+            # Input registration page answers to database
+            participant_background_question_answers = background_question_answer(
+                answer_set_idanswer_set=session['answer_set'], answer=value, background_question_idbackground_question=key)
             db.session.add(participant_background_question_answers)
             db.session.commit()
 
         return redirect('/instructions')
-   
-    
-    return render_template('register.html', form=form)
 
+    return render_template('register.html', form=form)
 
 
 @app.route('/begin_with_id', methods=['GET', 'POST'])
 def begin_with_id():
     '''Begin experiment with experiment ID. GET -method returns login page for starting the 
     experiment and POST -method verifys users ID before starting new experiment'''
-    
+
     exp_id = request.args.get('exp_id', None)
     form = StartWithIdForm()
     experiment_info = experiment.query.filter_by(idexperiment=exp_id).first()
-    
+
     instruction_paragraphs = str(experiment_info.short_instruction)
     instruction_paragraphs = instruction_paragraphs.split('<br>')
-    
+
     consent_paragraphs = str(experiment_info.consent_text)
     consent_paragraphs = consent_paragraphs.split('<br>')
 
     if form.validate_on_submit():
-        
+
         variable = form.participant_id.data
-        
-        #check if participant ID is found from db with this particular ID. If a match is found inform about error
-        participant = answer_set.query.filter(and_(answer_set.session==variable, answer_set.experiment_idexperiment==exp_id)).first()
-        is_id_valid = forced_id.query.filter(and_(forced_id.pregenerated_id==variable, forced_id.experiment_idexperiment==exp_id)).first()
-        
+
+        # check if participant ID is found from db with this particular ID. If a match is found inform about error
+        participant = answer_set.query.filter(and_(
+            answer_set.session == variable, answer_set.experiment_idexperiment == exp_id)).first()
+        is_id_valid = forced_id.query.filter(and_(
+            forced_id.pregenerated_id == variable, forced_id.experiment_idexperiment == exp_id)).first()
+
         if participant is not None:
             flash(_('ID already in use'))
-            return redirect(url_for('begin_with_id', exp_id=exp_id))        
-        
-        #if there was not a participant already in DB:
+            return redirect(url_for('begin_with_id', exp_id=exp_id))
+
+        # if there was not a participant already in DB:
         if participant is None:
-    
+
             if is_id_valid is None:
                 flash(_('No such ID set for this experiment'))
-                return redirect(url_for('begin_with_id', exp_id=exp_id))        
+                return redirect(url_for('begin_with_id', exp_id=exp_id))
 
             else:
-                #save the participant ID in session list for now, this is deleted after the session has been started in participant_session-view
+                # save the participant ID in session list for now, this is deleted after the session has been started in participant_session-view
                 session['begin_with_id'] = form.participant_id.data
                 return render_template('consent.html', exp_id=exp_id, experiment_info=experiment_info, instruction_paragraphs=instruction_paragraphs, consent_paragraphs=consent_paragraphs)
-        
+
     return render_template('begin_with_id.html', exp_id=exp_id, form=form)
 
 
 @app.route('/admin_dryrun', methods=['GET', 'POST'])
 @login_required
 def admin_dryrun():
-    
+
     exp_id = request.args.get('exp_id', None)
     form = StartWithIdForm()
     experiment_info = experiment.query.filter_by(idexperiment=exp_id).first()
 
     if form.validate_on_submit():
-        
-        #check if participant ID is found from db with this particular ID. If a match is found inform about error
-        participant = answer_set.query.filter(and_(answer_set.session==form.participant_id.data, answer_set.experiment_idexperiment==exp_id)).first()
+
+        # check if participant ID is found from db with this particular ID. If a match is found inform about error
+        participant = answer_set.query.filter(and_(
+            answer_set.session == form.participant_id.data, answer_set.experiment_idexperiment == exp_id)).first()
         if participant is not None:
             flash('ID already in use')
-            return redirect(url_for('admin_dryrun', exp_id=exp_id))        
-        
-        #if there was not a participant already in DB:
+            return redirect(url_for('admin_dryrun', exp_id=exp_id))
+
+        # if there was not a participant already in DB:
         if participant is None:
-            #save the participant ID in session list for now, this is deleted after the session has been started in participant_session-view
+            # save the participant ID in session list for now, this is deleted after the session has been started in participant_session-view
             session['begin_with_id'] = form.participant_id.data
             return render_template('consent.html', exp_id=exp_id, experiment_info=experiment_info)
-        
+
     return render_template('admin_dryrun.html', exp_id=exp_id, form=form)
 
 
 @app.route('/instructions')
 def instructions():
-    
+
     participant_id = session['user']
-    instructions = experiment.query.filter_by(idexperiment = session['exp_id']).first()
-    
+    instructions = experiment.query.filter_by(
+        idexperiment=session['exp_id']).first()
+
     instruction_paragraphs = str(instructions.instruction)
     instruction_paragraphs = instruction_paragraphs.split('<br>')
-    
+
     return render_template('instructions.html', instruction_paragraphs=instruction_paragraphs, participant_id=participant_id)
 
 
@@ -308,13 +304,14 @@ def login():
         return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
-        user_details = user.query.filter_by(username=form.username.data).first()
+        user_details = user.query.filter_by(
+            username=form.username.data).first()
         if user_details is None or not user_details.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
-        login_user(user_details, remember=form.remember_me.data)    
+        login_user(user_details, remember=form.remember_me.data)
         return redirect(url_for('index'))
-    
+
 #        flash('Login requested for user {}, remember_me={}'.format(
 #            form.username.data, form.remember_me.data))
 #        return redirect('/index')
@@ -329,129 +326,15 @@ def logout():
 
 @app.route('/view_research_notification')
 def view_research_notification():
-    
+
     exp_id = request.args.get('exp_id', None)
     image = experiment.query.filter_by(idexperiment=exp_id).first()
     research_notification_filename = image.research_notification_filename
-    
+
     return render_template('view_research_notification.html', research_notification_filename=research_notification_filename)
 
-
-@app.route('/download_csv')
-@login_required
-def download_csv():
-
-    exp_id = request.args.get('exp_id', None)
-    experiment_info = experiment.query.filter_by(idexperiment = exp_id).all()
-
-    # answer sets with participant ids
-    participants = answer_set.query.filter_by(experiment_idexperiment= exp_id).all()
-
-    # pages aka stimulants
-    pages = page.query.filter_by(experiment_idexperiment=exp_id).all()
-
-    # background questions
-    bg_questions = background_question.query.filter_by(
-        experiment_idexperiment=exp_id).all()
-
-    # question
-    questions = question.query.filter_by(experiment_idexperiment=exp_id).all()
-
-    # embody questions
-    embody_questions = embody_question.query.filter_by(experiment_idexperiment=exp_id).all()
-
-    #started and finished ratings counters
-    started_ratings = answer_set.query.filter_by(
-        experiment_idexperiment=exp_id).count()
-    experiment_page_count = page.query.filter_by(
-        experiment_idexperiment=exp_id).count()
-    finished_ratings = answer_set.query.filter(and_(
-        answer_set.answer_counter == experiment_page_count, answer_set.experiment_idexperiment == exp_id)).count()
-
-    csv = ''
-
-    # create CSV-header
-    header = 'participant id;'
-    header += ';'.join([str(count) +'. bg_question: '+ question.background_question.strip() for count,question in enumerate(bg_questions, 1)])
-
-    for idx in range(1,len(pages) + 1):
-        if len(questions) > 0:
-            header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) +'. slider_question: ' + question.question.strip() for count,question in enumerate(questions, 1)]) 
-    for idx in range(1,len(pages) + 1):
-        if len(embody_questions) > 0:
-            header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) +'. embody_question: '+ question.picture.strip() for count,question in enumerate(embody_questions, 1)])
-
-    csv += header + '\r\n'
-    answer_row = ''
-
-    for participant in participants:
-
-        # list only finished answer sets
-        if experiment_page_count == participant.answer_counter:
-
-            try:
-
-                # append user session id
-                answer_row += participant.session + ';'
-
-                # append background question answers
-                bg_answers = background_question_answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()
-                bg_answers_list = [ str(a.answer).strip() for a in bg_answers]
-                answer_row += ';'.join(bg_answers_list) + ';'
-
-                # append slider answers 
-                slider_answers = answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
-                answers_list = [ str(a.answer).strip() for a in slider_answers]    
-                answer_row += ';'.join(answers_list) + ';' if slider_answers else len(questions) * len(pages) * ';'
-
-                # append embody answers (coordinates)
-                # save embody answers as bitmap images  
-                embody_answers = embody_answer.query.filter_by(answer_set_idanswer_set=participant.idanswer_set).all()     
-                answers_list = []
-                for embody_answer_data in embody_answers:
-
-                    try:
-                        embody_answer_data = json.loads(embody_answer_data.coordinates)
-                        coordinates_to_bitmap = [[0 for x in range(embody_answer_data['height'] + 2)] for y in range(embody_answer_data['width'] + 2)] 
-
-                        for point in list(zip( embody_answer_data['x'], embody_answer_data['y'] )):
-
-                            try:
-                                 coordinates_to_bitmap[point[0]][point[1]] += 0.1
-                            except IndexError:
-                                 continue
-
-                        answers_list.append(json.dumps(coordinates_to_bitmap))
-  
-                    except ValueError as err:
-                        app.logger.info(err)
-
-                # old way to save only visited points:
-                # answers_list = [ json.dumps(list(zip( json.loads(a.coordinates)['x'], json.loads(a.coordinates)['y']))) for a in embody_answers]    
-                answer_row += ';'.join(answers_list) if embody_answers else len(embody_questions) * len(pages) * ';'
-
-            except TypeError as err:
-                print(err)
-
-            csv += answer_row + '\r\n'
-            answer_row = ''
-
-    try:
-        fd, path = tempfile.mkstemp()
-        with os.fdopen(fd, 'w') as tmp:
-            tmp.write(csv)
-            tmp.flush()
-
-            return send_file(path, mimetype='text/csv')
-
-    finally:
-        os.remove(path)
-    
 
 @app.route('/researcher_info')
 @login_required
 def researcher_info():
     return render_template('researcher_info.html')
-
-
-# EOF
