@@ -109,7 +109,7 @@ def map_answers_to_questions(answers, questions):
 
 
 @timeit
-def generate_csv(exp_id):
+def generate_csv(exp_id, file_handle):
 
     # answer sets with participant ids
     participants = answer_set.query.filter_by(
@@ -129,8 +129,6 @@ def generate_csv(exp_id):
     embody_questions = embody_question.query.filter_by(
         experiment_idexperiment=exp_id).all()
 
-    csv = ''
-
     # create CSV-header
     header = 'participant id;'
     header += ';'.join([str(count) + '. bg_question: ' + q.background_question.strip()
@@ -146,7 +144,7 @@ def generate_csv(exp_id):
             header += ';' + ';'.join(['page' + str(idx) + '_' + str(count) + '. embody_question: ' +
                                       question.picture.strip() for count, question in enumerate(embody_questions, 1)])
 
-    csv += header + '\r\n'
+    file_handle.write(header + '\r\n')
 
     # filter empty answer_sets
     participants = list(filter(lambda participant: True if int(
@@ -167,16 +165,17 @@ def generate_csv(exp_id):
             try:
                 emit('progress', {'done': nth, 'from': len_participants})
                 data = future.result()
-                csv += data + '\r\n'
+                file_handle.write(data + '\n')
             except Exception as exc:
                 print('generated an exception: {}'.format(exc))
-                return exc
-
-    return csv
+                emit('timeout', {'exc': str(data)})
+                return False
+    
+    # file_handle.flush()
+    return True
 
 
 def generate_answer_row(participant, pages, questions, embody_questions):
-    # TODO: refactor
 
     with app.app_context():
 

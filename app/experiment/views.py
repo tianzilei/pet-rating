@@ -1062,24 +1062,25 @@ def start_download_csv():
 def download_csv(meta):
     exp_id = meta["exp_id"]
 
-    data = generate_csv(exp_id)
 
     # error handling
+    '''
     if isinstance(data, Exception):
         emit('timeout', {'exc': str(data)})
         return
+    '''
 
     # create temporary file
     fd, path = mkstemp()
     with os.fdopen(fd, 'w') as tmp:
-        tmp.write(data)
-        tmp.flush()
 
-    # return path and filename to front so user can start downloading
-    filename = "experiment_{}_{}".format(
-        exp_id, date.today().strftime("%Y-%m-%d"))
-    path = path.split('/')[-1]
-    emit('file_ready', {'path': path, 'filename': filename})
+        if generate_csv(exp_id, tmp):
+
+            # return path and filename to front so user can start downloading
+            filename = "experiment_{}_{}".format(
+                exp_id, date.today().strftime("%Y-%m-%d"))
+            path = path.split('/')[-1]
+            emit('file_ready', {'path': path, 'filename': filename})
 
 
 @socketio.on('end', namespace="/download_csv")
