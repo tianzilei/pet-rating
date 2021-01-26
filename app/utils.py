@@ -166,12 +166,12 @@ def generate_csv(exp_id, file_handle):
                 emit('progress', {'done': nth, 'from': len_participants})
                 data = future.result()
                 file_handle.write(data + '\n')
+                # to ensure that all internal buffers associated with fd are written to disk
+                file_handle.flush()
             except Exception as exc:
                 print('generated an exception: {}'.format(exc))
-                emit('timeout', {'exc': str(data)})
-                return False
+                # return False
     
-    # file_handle.flush()
     return True
 
 
@@ -263,7 +263,8 @@ def generate_answer_row(participant, pages, questions, embody_questions):
                 answers_list.append(json.dumps(coordinates_to_bitmap))
 
             except ValueError as err:
-                app.logger(err)
+                print(err)
+                #app.logger(err)
 
         answer_row += ';'.join(answers_list) if embody_answers else \
             len(embody_questions) * len(pages) * ';'
