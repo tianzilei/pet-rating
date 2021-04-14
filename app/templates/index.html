@@ -15,7 +15,7 @@
       a previously started task, click on the "Continue task" button.') }}</p>
 
       <p class="lead text-center">{{ _('You can choose the language suitable for you from the language menu in the upper right corner.') }}</p>
-      
+
       </p>
         <div class="row">
             <div class="col mt-5">
@@ -23,7 +23,7 @@
                 <p class="lead text-left mt-3 font-weight-bold">{{ _('List of experiments:') }}</p>
                     {% block attributes %}
                     {% for exp in experiments %}
-                        
+
                     {% if exp.status == 'Public' and session['language'] == exp.language %}
                     
                      <ul class="list-group mb-3">
@@ -74,9 +74,6 @@
                          {% autoescape false %}
                          {{ exp.short_instruction }}</li>
                          {% endautoescape %}
-                        
-                         
-                         
                          
                         {% if current_user.is_authenticated %}
                         <li class="list-group-item"><span class="font-weight-bold">ID number:</span> {{ exp.idexperiment }} </li>
@@ -91,7 +88,7 @@
                         <li class="list-group-item">
 
                         <a class="btn btn-outline-primary" href="{{ url_for('consent', exp_id=exp.idexperiment) }}" role="button">{{ _('Begin task') }}</a>
-                        <a class="btn btn-outline-primary" href="{{ url_for('task.continue_task', exp_id=exp.idexperiment) }}" role="button">{{ _('Continue task') }}</a
+                        <a class="btn btn-outline-primary" href="{{ url_for('task.continue_task', exp_id=exp.idexperiment) }}" role="button">{{ _('Continue task') }}</a>
                         
                             {% if current_user.is_authenticated %}
                             <span class="text-right">    
@@ -106,14 +103,6 @@
                     <br>
                     <br>
                     {% endif %}
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
                     
                     
                     {% if (exp.status == 'Private') and (current_user.is_authenticated) and session['language'] == exp.language  %}
@@ -194,11 +183,6 @@
                      </ul>
                     
                     {% endif %}
-                    
-                    
-                    
-
-                    
                     
                     
                     {% if (exp.status == 'Hidden') and (current_user.is_authenticated) and session['language'] == exp.language  %}

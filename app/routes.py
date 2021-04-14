@@ -23,8 +23,8 @@ def index():
 
     session['group'] = None
 
-    if not session:
-        session['language'] = "English"
+    if 'language' not in session:
+        session['language'] = "All"
 
     return render_template('home.html', title='Home', groups=groups)
 
@@ -42,8 +42,8 @@ def group_page(group_tag):
         experiments = experiment.query.filter_by(group_id=group.id).all()
         session['group'] = group_tag
 
-    if not session:
-        session['language'] = "English"
+    if 'language' not in session:
+        session['language'] = "All"
 
     return render_template('index.html', title='Home', experiments=experiments, group=group)
 
