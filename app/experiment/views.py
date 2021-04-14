@@ -20,13 +20,7 @@ from flask import (
 
 from app import app, db, socketio
 from app.routes import APP_ROOT
-from app.models import background_question, experiment
-from app.models import background_question_answer
-from app.models import page, question
-from app.models import background_question_option
-from app.models import answer_set, answer, forced_id
-from app.models import trial_randomization
-from app.models import embody_answer, embody_question
+from app.models import background_question, experiment, background_question_answer, page, question, background_question_option, answer_set, answer, forced_id, trial_randomization, embody_answer, embody_question, research_group
 from app.forms import (
     CreateBackgroundQuestionForm,
     CreateQuestionForm, UploadStimuliForm, EditBackgroundQuestionForm,
@@ -62,6 +56,9 @@ def view():
     # experiment info
     experiment_info = experiment.query.filter_by(idexperiment=exp_id).all()
 
+    group_info = research_group.query.filter_by(
+        id=experiment_info[0].group_id).first()
+
     # background questions
     questions_and_options = {}
     questions = background_question.query.filter_by(
@@ -93,7 +90,7 @@ def view():
     embody_pictures = embody_question.query.filter_by(
         experiment_idexperiment=exp_id).all()
 
-    return render_template('view_experiment.html', exp_id=exp_id, media=media, mtype=mtype, experiment_info=experiment_info, categories1=categories1, questions1=questions1, embody_pictures=embody_pictures)
+    return render_template('view_experiment.html', exp_id=exp_id, media=media, mtype=mtype, experiment_info=experiment_info, categories1=categories1, questions1=questions1, embody_pictures=embody_pictures, group_info=group_info)
 
 
 # Experiment info:

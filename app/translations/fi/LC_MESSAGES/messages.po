@@ -91,10 +91,7 @@ msgid "Please insert your participant ID:"
 msgstr "Syötä ID-tunnuksesi:"
 
 #: app/templates/index.html:18
-msgid ""
-"Welcome to the Human Emotion Systems -laboratory`s Onni-net laboratory! "
-"The experiments that are currently underway are listed below -\n"
-"       you can participate for as many experiments you want."
+msgid "Welcome to the Human Emotion Systems -laboratory`s Onni-net laboratory! The experiments that are currently underway are listed below - you can participate for as many experiments you want."
 msgstr ""
 "Tervetuloa Human Emotion Systems –laboratorion Onni-nettilaboratorioon! "
 "Alla on listattuna tällä hetkellä käynnissä olevat kokeet – voit "
@@ -264,21 +261,6 @@ msgstr ""
 
 #~ msgid "List of experiments in database:"
 #~ msgstr "Tietokannassa olevat kokeet:"
-
-#~ msgid "Name:"
-#~ msgstr "Nimi:"
-
-#~ msgid "Instruction:"
-#~ msgstr "Ohjeet:"
-
-#~ msgid "Participation ID is required for this task."
-#~ msgstr "Tähän kokeeseen osallistumiseen tarvitaan koehenkilötunnus"
-
-#~ msgid "Begin task"
-#~ msgstr "Aloita"
-
-#~ msgid "Continue task"
-#~ msgstr "Jatka"
 
 #~ msgid "Research bulletin can be read"
 #~ msgstr "Tutkimustiedote on luettavissa"

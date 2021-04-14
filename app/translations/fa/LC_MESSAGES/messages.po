@@ -91,10 +91,7 @@ msgid "Please insert your participant ID:"
 msgstr "لطفا شناسه خود را اینجا وارد کنید:"
 
 #: app/templates/index.html:18
-msgid ""
-"Welcome to the Human Emotion Systems -laboratory`s Onni-net laboratory! "
-"The experiments that are currently underway are listed below -\n"
-"       you can participate for as many experiments you want."
+msgid "Welcome to the Human Emotion Systems -laboratory`s Onni-net laboratory! The experiments that are currently underway are listed below - you can participate for as many experiments you want."
 msgstr "به تحقیق ...از گروه تحقیقاتی احساسات انسانها خوش آمدید. تحقیقاتی که در حال حاضرقابل انجام هستند در زیر ذکر شده است. شما می توانید درهر تعداد ازاین تحقیقات که مایل هستید شرکت کنید."
 
 #: app/templates/index.html:20
@@ -270,21 +267,6 @@ msgstr ""
 
 #~ msgid "List of experiments in database:"
 #~ msgstr "لیست تحقیقات موجود در بانک اطلاعاتی::"
-
-#~ msgid "Name:"
-#~ msgstr ""
-
-#~ msgid "Instruction:"
-#~ msgstr ""
-
-#~ msgid "Participation ID is required for this task."
-#~ msgstr ""
-
-#~ msgid "Begin task"
-#~ msgstr ""
-
-#~ msgid "Continue task"
-#~ msgstr ""
 
 #~ msgid "Research bulletin can be read"
 #~ msgstr "تحریریه تحقیقاتی را می توان در اینجا مطالعه کرد."
