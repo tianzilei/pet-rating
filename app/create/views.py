@@ -16,12 +16,7 @@ from flask_login import login_required
 
 from app.routes import APP_ROOT
 from app import app, db
-from app.models import background_question, experiment
-from app.models import background_question_answer
-from app.models import page, question
-from app.models import background_question_option
-from app.models import answer_set, answer, forced_id
-from app.models import user, trial_randomization
+from app.models import background_question, experiment, background_question_answer, page, question, background_question_option, answer_set, answer, forced_id, user, trial_randomization, research_group, user_in_group
 from app.forms import (
     CreateExperimentForm, CreateBackgroundQuestionForm,
     CreateQuestionForm, UploadStimuliForm
@@ -39,20 +34,32 @@ def create_experiment():
 
     form = CreateExperimentForm(request.form)
 
+    user_groups = user_in_group.query.filter_by(
+        iduser=session['user_id']).all()
+
+    if user_groups:
+        user_groups = [ug.idgroup for ug in user_groups]
+
+        valid_groups = research_group.query.filter(
+            research_group.id.in_(user_groups)).all()
+
+    else:
+        valid_groups = []
+
     if request.method == 'POST' and form.validate():
 
         the_time = datetime.now()
         the_time = the_time.replace(microsecond=0)
 
         new_exp = experiment(name=request.form['name'], instruction=request.form['instruction'], language=request.form['language'], status='Hidden', randomization='Off', single_sentence_instruction=request.form['single_sentence_instruction'],
-                             short_instruction=request.form['short_instruction'], creator_name=request.form['creator_name'], is_archived='False', creation_time=the_time, stimulus_size='7', consent_text=request.form['consent_text'], use_forced_id='Off')
+                             short_instruction=request.form['short_instruction'], creator_name=request.form['creator_name'], is_archived='False', creation_time=the_time, stimulus_size='7', consent_text=request.form['consent_text'], use_forced_id='Off', group_id=request.form['group'])
         db.session.add(new_exp)
         db.session.commit()
         exp_id = new_exp.idexperiment
 
         return redirect(url_for('create.experiment_bgquestions', exp_id=exp_id))
 
-    return render_template('create_experiment.html', form=form)
+    return render_template('create_experiment.html', form=form, valid_groups=valid_groups)
 
 
 @create_blueprint.route('/experiment_bgquestions', methods=['GET', 'POST'])

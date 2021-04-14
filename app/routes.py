@@ -3,22 +3,13 @@ import random
 import secrets
 from datetime import datetime
 
-from flask import (render_template,
-                   request,
-                   session,
-                   flash,
-                   redirect,
-                   url_for)
+from flask import render_template, request, session, flash, redirect, url_for
 from sqlalchemy import and_
 from flask_login import current_user, login_user, logout_user, login_required
 
 from app import app, db
-from app.models import background_question, experiment
-from app.models import background_question_answer
-from app.models import page
-from app.models import background_question_option
-from app.models import answer_set, forced_id
-from app.models import user, trial_randomization
+from app.models import (background_question, experiment, background_question_answer, page,
+                        background_question_option, answer_set, forced_id, user, trial_randomization, research_group)
 from app.forms import LoginForm, RegisterForm, StartWithIdForm
 
 # Stimuli upload folder setting
@@ -28,15 +19,33 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 @app.route('/')
 @app.route('/index')
 def index():
-    experiments = experiment.query.all()
+    groups = research_group.query.all()
 
-    if session:
-        flash("")
-    else:
-        #flash("sessio ei voimassa")
+    session['group'] = None
+
+    if not session:
         session['language'] = "English"
 
-    return render_template('index.html', title='Home', experiments=experiments)
+    return render_template('home.html', title='Home', groups=groups)
+
+
+@app.route('/<group_tag>')
+def group_page(group_tag):
+    #experiments = experiment.query.all()
+
+    group = research_group.query.filter_by(tag=group_tag).first()
+
+    if not group:
+        flash("Group not found")
+        experiments = []
+    else:
+        experiments = experiment.query.filter_by(group_id=group.id).all()
+        session['group'] = group_tag
+
+    if not session:
+        session['language'] = "English"
+
+    return render_template('index.html', title='Home', experiments=experiments, group=group)
 
 
 @app.route('/consent')
@@ -62,9 +71,14 @@ def consent():
 
 @app.route('/set_language')
 def set_language():
+
     session['language'] = request.args.get('language', None)
     lang = request.args.get('lang', None)
-    return redirect(url_for('index', lang=lang))
+
+    if session['group']:
+        return redirect(url_for('group_page', lang=lang, group_tag=session['group']))
+    else:
+        return redirect(url_for('index', lang=lang))
 
 
 @app.route('/remove_language')

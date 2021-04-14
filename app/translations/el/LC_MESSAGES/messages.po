@@ -91,10 +91,7 @@ msgid "Please insert your participant ID:"
 msgstr "Παρακαλώ εισάγετε τον  κωδικό αναγνώρισης σας"
 
 #: app/templates/index.html:18
-msgid ""
-"Welcome to the Human Emotion Systems -laboratory`s Onni-net laboratory! "
-"The experiments that are currently underway are listed below -\n"
-"       you can participate for as many experiments you want."
+msgid "Welcome to the Human Emotion Systems -laboratory`s Onni-net laboratory! The experiments that are currently underway are listed below - you can participate for as many experiments you want."
 msgstr "Καλώς ήρθατε στο εργαστήριο συστημάτων των ανθρώπινων συναισθημάτων! Τα πειράματα που βρίσκονται σε εξέλιξη αναφέρονται παρακάτω - μπορείτε να συμμετάσχετε σε όσα πειράματα θέλετε."
 
 #: app/templates/index.html:20
@@ -275,21 +272,6 @@ msgstr ""
 
 #~ msgid "List of experiments in database:"
 #~ msgstr "Λίστα των πειραμάτων"
-
-#~ msgid "Name:"
-#~ msgstr ""
-
-#~ msgid "Instruction:"
-#~ msgstr ""
-
-#~ msgid "Participation ID is required for this task."
-#~ msgstr ""
-
-#~ msgid "Begin task"
-#~ msgstr ""
-
-#~ msgid "Continue task"
-#~ msgstr ""
 
 #~ msgid "Research bulletin can be read"
 #~ msgstr ""
