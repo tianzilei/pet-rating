@@ -1,0 +1,43 @@
+version: "3.3"
+
+services:
+  nginx:
+    #image: nginx:latest
+    build: ./nginx
+    restart: always
+    ports:
+      - "80:80"
+      #- "443:443"
+    volumes:
+      #- ./tls:/etc/nginx/tls
+      #- ./config/nginx/rating.conf:/etc/nginx/conf.d/rating.conf
+      - ./log/nginx:/var/log/nginx
+    depends_on:
+      - gunicorn
+
+  gunicorn:
+    image: rating_app:latest
+    restart: always
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+    command: sh -c "gunicorn run:app -b 0.0.0.0:8000 -k gevent --worker-connections=1000 --workers=1 --log-level debug -t 180"
+    #volumes: FOR DEV
+    #- ./application:/srv/app
+
+  db:
+    image: mysql
+    ports:
+      - "3200:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: rating_db
+      MYSQL_USER: rating
+      MYSQL_PASSWORD: rating_passwd
+    volumes:
+      - ./config/mysql/rating.cnf:/etc/mysql/conf.d/rating.cnf
+      - ./config/mysql/schema.sql:/docker-entrypoint-initdb.d/1.sql
+      - ./dbdata:/var/lib/mysql
