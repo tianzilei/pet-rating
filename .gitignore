@@ -19,7 +19,6 @@ config.py
 .vscode/
 documentation
 
-/deploy/.env.dev
 /deploy/dbdata/*
 /deploy/log/nginx/access.log
 /deploy/log/nginx/error.log
