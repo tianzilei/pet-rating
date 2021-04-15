@@ -12,7 +12,6 @@ config.py
 *.pyc
 *.db
 /embody
-/app/static/lib
 .env
 /app/static/*.png
 /app/static/embody_images

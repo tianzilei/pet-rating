@@ -64,4 +64,3 @@ journalctl -u gunicorn.service
 ```
 service gunicorn restart
 ```
-
