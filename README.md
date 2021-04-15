@@ -16,7 +16,7 @@ Working directory: /srv/rating
 #### Installing prequisites
 
 Install python packages with pip and preferably in virtual environment:
-yy```
+```
 virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
