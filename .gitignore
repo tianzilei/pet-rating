@@ -12,10 +12,12 @@ config.py
 *.pyc
 *.db
 /embody
-/app/static/lib
 .env
 /app/static/*.png
 /app/static/embody_images
 .vscode/
 documentation
 
+/deploy/dbdata/*
+/deploy/log/nginx/access.log
+/deploy/log/nginx/error.log
