@@ -16,7 +16,8 @@ services:
       - gunicorn
 
   gunicorn:
-    image: rating_app:latest
+      #image: rating_app:latest
+    build: ../.
     restart: always
     ports:
       - 8000:8000
