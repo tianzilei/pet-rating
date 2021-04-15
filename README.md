@@ -73,6 +73,10 @@ service gunicorn restart
 
 Install docker and docker-compose
 
+Generate users and groups in deploy/config/mysql/data.sql
+
+Password can be generated with generate_password.py -script
+
 Go to deploy folder. Build containers and run them with:
 ```
 docker-compose -f docker-compose.yml up -d --build

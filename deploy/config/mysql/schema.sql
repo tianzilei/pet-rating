@@ -197,10 +197,7 @@ ALTER TABLE experiment ADD COLUMN (embody_enabled BOOLEAN DEFAULT 0);
 /* Set current answer type (embody/slider/etc..) so returning users are routed to correct question */ 
 ALTER TABLE answer_set ADD COLUMN (answer_type VARCHAR(120));
 
-INSERT INTO user VALUES(1,'admin',NULL,'pbkdf2:sha256:50000$6Cc6Mjmo$3fe413a88db1bacfc4d617f7c1547bd1ea4cbd6c5d675a58e78332201f6befc6');
-
-/* eyelabs */
-INSERT INTO user VALUES(2,'eyelabs',NULL,'pbkdf2:sha256:50000$sdBu3Rjm$7ab97c6d2686460b85a2a20517b7012c15ffb341ba3fef5b0f17ed8354fc38d9');
+ALTER TABLE experiment ADD COLUMN (group_id INTEGER), ADD FOREIGN KEY(group_id) REFERENCES research_group(id);
 
 
 CREATE TABLE research_group (
@@ -211,9 +208,6 @@ CREATE TABLE research_group (
 	PRIMARY KEY (id)
 );
 
-INSERT INTO research_group(id, name, tag, description) VALUES(1, 'Human Emotion Systems', 'emotion', 'Welcome to the Human Emotion Systems -laboratory`s Onni-net laboratory! The experiments that are currently underway are listed below - you can participate for as many experiments you want.');
-INSERT INTO research_group(id, name, tag, description) VALUES(2, 'Turku Eye-tracking', 'eyelabs', 'Welcome to the Turku Eyelabs -laboratory`s Onni-net laboratory! The experiments that are currently underway are listed below - you can participate for as many experiments you want.');
-
 CREATE TABLE user_in_group (
 	idgroup INTEGER,
 	iduser INTEGER,
@@ -221,9 +215,4 @@ CREATE TABLE user_in_group (
 	FOREIGN KEY(idgroup) REFERENCES research_group (id), 
 	FOREIGN KEY(iduser) REFERENCES user (id)
 );
-
-INSERT INTO user_in_group VALUES (1,1, 'admin');
-INSERT INTO user_in_group VALUES (2,1, 'admin');
-
-ALTER TABLE experiment ADD COLUMN (group_id INTEGER), ADD FOREIGN KEY(group_id) REFERENCES research_group(id);
 
