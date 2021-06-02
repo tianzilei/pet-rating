@@ -197,8 +197,6 @@ ALTER TABLE experiment ADD COLUMN (embody_enabled BOOLEAN DEFAULT 0);
 /* Set current answer type (embody/slider/etc..) so returning users are routed to correct question */ 
 ALTER TABLE answer_set ADD COLUMN (answer_type VARCHAR(120));
 
-ALTER TABLE experiment ADD COLUMN (group_id INTEGER), ADD FOREIGN KEY(group_id) REFERENCES research_group(id);
-
 
 CREATE TABLE research_group (
 	id INTEGER NOT NULL AUTO_INCREMENT,
@@ -216,3 +214,5 @@ CREATE TABLE user_in_group (
 	FOREIGN KEY(iduser) REFERENCES user (id)
 );
 
+
+ALTER TABLE experiment ADD COLUMN (group_id INTEGER), ADD FOREIGN KEY(group_id) REFERENCES research_group(id);

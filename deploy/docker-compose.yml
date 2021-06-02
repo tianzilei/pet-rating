@@ -16,7 +16,7 @@ services:
       - gunicorn
 
   gunicorn:
-      #image: rating_app:latest
+    #image: rating_app:latest
     build: ../.
     restart: always
     ports:
@@ -41,4 +41,5 @@ services:
     volumes:
       - ./config/mysql/rating.cnf:/etc/mysql/conf.d/rating.cnf
       - ./config/mysql/schema.sql:/docker-entrypoint-initdb.d/1.sql
+      - ./config/mysql/data.sql:/docker-entrypoint-initdb.d/2.sql
       - ./dbdata:/var/lib/mysql
