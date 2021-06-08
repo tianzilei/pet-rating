@@ -55,7 +55,9 @@ class MyDB(object):
         self._db_connection = mariadb.connect(
             user=Config.MYSQL_USER,
             password=Config.MYSQL_PASSWORD,
-            database=Config.MYSQL_DB
+            database=Config.MYSQL_DB,
+            host=Config.MYSQL_SERVER,
+            auth_plugin='mysql_native_password'
         )
         self._db_cur = self._db_connection.cursor()
 

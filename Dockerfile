@@ -23,3 +23,7 @@ COPY messages.pot /srv/app
 
 RUN mkdir logs
 
+RUN mkdir app/static/embody_drawings  
+RUN mkdir app/static/embody_images  
+RUN mkdir app/static/experiment_stimuli  
+

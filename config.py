@@ -11,8 +11,7 @@ class Config(object):
     MYSQL_SERVER = config('MYSQL_SERVER')
     MYSQL_DB = config('MYSQL_DB')
 
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://'+MYSQL_USER+':' + \
-        MYSQL_PASSWORD+'@'+MYSQL_SERVER+'/'+MYSQL_DB+'?charset=utf8mb4'
+    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_SERVER}/{MYSQL_DB}?charset=utf8mb4"
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
