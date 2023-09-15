@@ -16,7 +16,7 @@ Anaconda + MySQL
 - Config MySQL:
   1. `sudo mysql -u user -p`
   2. `CREATE DATABASE rating_db;`
-  3. `CREATE USER 'rating'@'localhost';`
+  3. `CREATE USER 'rating'@'localhost' IDENTIFIED BY 'rating';`
   4. `GRANT ALL PRIVILEGES ON rating_db.* TO 'rating'@'localhost';`
 - execute **new** create_rating_db.sql:
   `mysql -u rating -p -D rating_db < db/create_rating_db.sql;`
@@ -24,3 +24,7 @@ Anaconda + MySQL
   `flask run --host=0.0.0.0`
 - allow local network access:
   `sudo ufw allow 5000/tcp`
+
+# Change MySQL setting
+- user pwd: change syntax `CREATE USER 'username'@'host' IDENTIFIED BY 'password';`
+- modify config.py Line 10 `MYSQL_PASSWORD = config('MYSQL_PASSWORD', default='password')`
